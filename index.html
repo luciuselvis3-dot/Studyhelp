@@ -1,0 +1,2969 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fafafa">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Exam Forge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafafa;
+    --bg-2: #f5f5f7;
+    --surface: #ffffff;
+    --surface-2: #f5f5f7;
+    --surface-3: #ebebef;
+    --ink: #1d1d1f;
+    --ink-2: #424245;
+    --ink-3: #86868b;
+    --ink-4: #c7c7cc;
+    --line: rgba(0, 0, 0, 0.06);
+    --line-2: rgba(0, 0, 0, 0.12);
+    --blue: #0071e3;
+    --blue-hi: #0077ed;
+    --green: #30b457;
+    --red: #ff3b30;
+    --orange: #ff9500;
+    --purple: #af52de;
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06), 0 16px 48px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.06), 0 16px 40px rgba(0, 0, 0, 0.08), 0 32px 80px rgba(0, 0, 0, 0.06);
+    --r-xl: 26px;
+    --r-lg: 18px;
+    --r-md: 12px;
+    --r-sm: 9px;
+    --pill: 980px;
+    --ease: cubic-bezier(0.32, 0.72, 0, 1);
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+  [data-theme="dark"] {
+    --bg: #000000;
+    --bg-2: #0a0a0b;
+    --surface: #1c1c1e;
+    --surface-2: #2c2c2e;
+    --surface-3: #3a3a3c;
+    --ink: #f5f5f7;
+    --ink-2: #d1d1d6;
+    --ink-3: #8e8e93;
+    --ink-4: #48484a;
+    --line: rgba(255, 255, 255, 0.08);
+    --line-2: rgba(255, 255, 255, 0.16);
+    --blue: #0a84ff;
+    --blue-hi: #409cff;
+    --green: #30d158;
+    --red: #ff453a;
+    --orange: #ff9f0a;
+    --purple: #bf5af2;
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.4), 0 16px 48px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.5), 0 16px 40px rgba(0, 0, 0, 0.5), 0 32px 80px rgba(0, 0, 0, 0.4);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-feature-settings: "ss01", "cv01", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior-y: none;
+    transition: background 0.4s var(--ease), color 0.4s var(--ease);
+  }
+  input, button, textarea, select { font: inherit; color: inherit; }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  ::selection { background: color-mix(in srgb, var(--blue) 25%, transparent); }
+  :focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--blue) 50%, transparent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* ============ INTRO ============ */
+  .intro {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  }
+  .intro.hiding {
+    opacity: 0;
+    transform: scale(1.06);
+    pointer-events: none;
+  }
+  .intro-inner {
+    max-width: 560px;
+    width: 100%;
+  }
+  .intro .hello {
+    font-family: "Snell Roundhand", "Apple Chancery", "Great Vibes", "Brush Script MT", cursive;
+    font-size: clamp(84px, 22vw, 148px);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    margin: 0 0 24px;
+    background: linear-gradient(180deg, var(--ink) 20%, var(--ink-3) 110%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    clip-path: inset(0 100% 0 0);
+    animation: writeIn 1.8s var(--ease-out) 0.3s forwards;
+  }
+  @keyframes writeIn {
+    from { clip-path: inset(0 100% 0 0); filter: blur(6px); }
+    to { clip-path: inset(0 0 0 0); filter: blur(0); }
+  }
+  .intro .ready {
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    color: var(--ink-2);
+    margin: 0 0 44px;
+    opacity: 0;
+    animation: fadeUp 1s var(--ease-out) 1.7s forwards;
+  }
+  .intro .start-btn {
+    opacity: 0;
+    animation: fadeUp 0.9s var(--ease-out) 2.3s forwards;
+    padding: 16px 40px;
+    font-size: 16px;
+    width: auto;
+    min-width: 180px;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .intro .skip {
+    position: absolute;
+    bottom: calc(30px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 13px;
+    color: var(--ink-3);
+    cursor: pointer;
+    background: none;
+    border: 0;
+    padding: 10px 20px;
+    opacity: 0;
+    animation: fadeUp 0.6s var(--ease-out) 2.8s forwards;
+    transition: color 0.2s var(--ease);
+    letter-spacing: -0.005em;
+  }
+  .intro .skip:hover { color: var(--ink); }
+
+  /* ============ SHELL ============ */
+  .app { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 24px;
+    padding-top: calc(12px + env(safe-area-inset-top));
+    background: color-mix(in srgb, var(--bg) 76%, transparent);
+    backdrop-filter: saturate(180%) blur(30px);
+    -webkit-backdrop-filter: saturate(180%) blur(30px);
+    border-bottom: 0.5px solid var(--line);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: -0.022em;
+  }
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(140deg, #0071e3 0%, #6b4ae3 50%, #af52de 100%);
+    color: white;
+    box-shadow:
+      0 1px 1px rgba(255, 255, 255, 0.3) inset,
+      0 -1px 2px rgba(0, 0, 0, 0.15) inset,
+      0 2px 10px rgba(0, 113, 227, 0.3);
+  }
+  .brand-mark svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .brand-name { font-size: 17px; }
+
+  nav.tabs {
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    background: var(--surface-2);
+    border-radius: var(--pill);
+    margin: 0 auto;
+    border: 0.5px solid var(--line);
+  }
+  nav.tabs button {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    color: var(--ink-3);
+    padding: 7px 16px;
+    border-radius: var(--pill);
+    font-size: 13.5px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: -0.005em;
+    transition: all 0.28s var(--ease);
+    white-space: nowrap;
+  }
+  nav.tabs button:hover { color: var(--ink); }
+  nav.tabs button.active {
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.06),
+      0 0 0 0.5px rgba(0, 0, 0, 0.03),
+      0 1px 0 rgba(255, 255, 255, 0.5) inset;
+  }
+  .header-actions { display: flex; gap: 8px; margin-left: auto; }
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--pill);
+    border: 0.5px solid var(--line);
+    background: var(--surface);
+    color: var(--ink-2);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    font-size: 15px;
+    transition: all 0.2s var(--ease);
+  }
+  .icon-btn:hover { background: var(--surface-2); color: var(--ink); transform: scale(1.05); }
+  .icon-btn:active { transform: scale(0.94); }
+
+  main {
+    flex: 1;
+    width: 100%;
+    max-width: 840px;
+    margin: 0 auto;
+    padding: 36px 24px 120px;
+    padding-bottom: calc(120px + env(safe-area-inset-bottom));
+  }
+
+  .view { display: none; }
+  .view.active { display: block; animation: enter 0.5s var(--ease-out); }
+  @keyframes enter {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero { text-align: center; padding: 24px 0 44px; }
+  .hero h1 {
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.08;
+    margin: 0 0 14px;
+    background: linear-gradient(180deg, var(--ink) 30%, var(--ink-2) 110%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p {
+    font-size: 17px;
+    color: var(--ink-3);
+    margin: 0 auto;
+    max-width: 500px;
+    line-height: 1.5;
+    letter-spacing: -0.012em;
+  }
+
+  .card {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    padding: 28px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+    border: 0.5px solid var(--line);
+    transition: box-shadow 0.3s var(--ease);
+  }
+  .card-head { margin-bottom: 22px; }
+  .card-title {
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-title .step {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--ink-3);
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .card-sub {
+    font-size: 14px;
+    color: var(--ink-3);
+    margin: 0;
+    letter-spacing: -0.008em;
+  }
+
+  .field { margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--ink-2);
+    margin-bottom: 8px;
+    letter-spacing: -0.008em;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  textarea,
+  select {
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid transparent;
+    border-radius: var(--r-md);
+    padding: 13px 15px;
+    outline: none;
+    color: var(--ink);
+    font-size: 15px;
+    letter-spacing: -0.008em;
+    transition: all 0.22s var(--ease);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  textarea {
+    resize: vertical;
+    min-height: 140px;
+    line-height: 1.55;
+    font-family: inherit;
+  }
+  input:focus,
+  textarea:focus,
+  select:focus {
+    background: var(--surface);
+    border-color: var(--blue);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--blue) 15%, transparent);
+  }
+  select {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1L5 5L9 1' stroke='%2386868b' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+    cursor: pointer;
+  }
+
+  .grid { display: grid; gap: 12px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 22px;
+    border: 0;
+    border-radius: var(--pill);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.012em;
+    cursor: pointer;
+    transition: all 0.22s var(--ease);
+    white-space: nowrap;
+    background: var(--surface-2);
+    color: var(--ink);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .btn:hover { background: var(--surface-3); }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-primary {
+    background: var(--blue);
+    color: white;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.2) inset,
+      0 1px 3px rgba(0, 113, 227, 0.3),
+      0 4px 14px rgba(0, 113, 227, 0.2);
+  }
+  .btn-primary:hover { background: var(--blue-hi); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0) scale(0.98); }
+  .btn-large {
+    padding: 18px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    width: 100%;
+    letter-spacing: -0.018em;
+  }
+  .btn-sm { padding: 9px 16px; font-size: 13.5px; }
+  .btn-xs { padding: 7px 13px; font-size: 12.5px; border-radius: var(--r-sm); }
+
+  .drop {
+    border: 1.5px dashed var(--line-2);
+    border-radius: var(--r-lg);
+    padding: 34px 20px;
+    text-align: center;
+    color: var(--ink-3);
+    cursor: pointer;
+    background: var(--surface-2);
+    transition: all 0.28s var(--ease);
+    font-size: 14px;
+  }
+  .drop:hover, .drop.over {
+    border-color: var(--blue);
+    background: color-mix(in srgb, var(--blue) 5%, var(--surface-2));
+    color: var(--ink);
+    transform: translateY(-1px);
+  }
+  .drop-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    opacity: 0.8;
+    transition: transform 0.35s var(--ease);
+  }
+  .drop:hover .drop-icon { transform: translateY(-4px); }
+  .drop b { color: var(--blue); font-weight: 600; }
+  .drop small { display: block; margin-top: 8px; font-size: 12px; color: var(--ink-3); }
+
+  .thumbs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+  .thumb {
+    position: relative;
+    width: 78px;
+    height: 78px;
+    border-radius: var(--r-md);
+    overflow: hidden;
+    background: var(--surface-2);
+    box-shadow: var(--shadow-xs);
+    animation: pop 0.35s var(--ease-spring);
+  }
+  @keyframes pop {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(0, 0, 0, 0.75);
+    color: white;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    backdrop-filter: blur(6px);
+    transition: transform 0.15s var(--ease);
+  }
+  .thumb button:hover { transform: scale(1.12); }
+
+  .status {
+    font-size: 14px;
+    color: var(--ink-3);
+    margin-top: 18px;
+    min-height: 22px;
+    text-align: center;
+    line-height: 1.5;
+    letter-spacing: -0.008em;
+  }
+  .status.error { color: var(--red); }
+  .status.success { color: var(--green); }
+
+  .progress {
+    margin-top: 26px;
+    padding: 32px;
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow-sm);
+    border: 0.5px solid var(--line);
+    text-align: center;
+    animation: enter 0.5s var(--ease-out);
+  }
+  .progress-ring {
+    width: 68px;
+    height: 68px;
+    margin: 0 auto 22px;
+    position: relative;
+  }
+  .progress-ring svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+    animation: rotate 1.4s linear infinite;
+  }
+  .progress-ring circle {
+    fill: none;
+    stroke-width: 4;
+    stroke-linecap: round;
+  }
+  .progress-ring .bg { stroke: var(--surface-3); }
+  .progress-ring .arc {
+    stroke: var(--blue);
+    stroke-dasharray: 90 150;
+    animation: dash 1.4s ease-in-out infinite;
+  }
+  @keyframes rotate { to { transform: rotate(270deg); } }
+  @keyframes dash {
+    0% { stroke-dasharray: 1 150; stroke-dashoffset: 0; }
+    50% { stroke-dasharray: 90 150; stroke-dashoffset: -35; }
+    100% { stroke-dasharray: 90 150; stroke-dashoffset: -124; }
+  }
+  .progress-title {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.018em;
+    margin: 0 0 6px;
+  }
+  .progress-message {
+    font-size: 14px;
+    color: var(--ink-3);
+    margin: 0;
+    min-height: 20px;
+    transition: opacity 0.3s var(--ease);
+    letter-spacing: -0.008em;
+  }
+
+  .empty {
+    text-align: center;
+    padding: 88px 24px;
+    color: var(--ink-3);
+  }
+  .empty-icon {
+    font-size: 54px;
+    margin-bottom: 20px;
+    opacity: 0.35;
+  }
+  .empty-title {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    color: var(--ink);
+    margin: 0 0 8px;
+  }
+  .empty-text {
+    font-size: 15px;
+    margin: 0 auto;
+    max-width: 360px;
+    line-height: 1.5;
+    letter-spacing: -0.008em;
+  }
+
+  /* ============ EXAM ============ */
+  .exam-head { margin-bottom: 30px; text-align: center; }
+  .exam-head h2 {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.038em;
+    line-height: 1.14;
+    margin: 0 0 10px;
+  }
+  .exam-head .desc {
+    font-size: 16px;
+    color: var(--ink-3);
+    margin: 0 auto 18px;
+    max-width: 520px;
+    line-height: 1.5;
+    letter-spacing: -0.008em;
+  }
+  .exam-meta {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: var(--pill);
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: -0.008em;
+  }
+  .exam-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 30px;
+  }
+
+  .question {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    padding: 28px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
+    border: 1.5px solid transparent;
+    transition: all 0.4s var(--ease);
+  }
+  .question.correct {
+    border-color: var(--green);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--green) 12%, transparent), var(--shadow-sm);
+  }
+  .question.wrong {
+    border-color: var(--red);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--red) 10%, transparent), var(--shadow-sm);
+  }
+  .question.partial {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--orange) 12%, transparent), var(--shadow-sm);
+  }
+
+  .q-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 20px; }
+  .q-num {
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--ink-2);
+    display: grid;
+    place-items: center;
+    font-size: 13.5px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .question.correct .q-num {
+    background: color-mix(in srgb, var(--green) 18%, transparent);
+    color: var(--green);
+  }
+  .question.wrong .q-num {
+    background: color-mix(in srgb, var(--red) 15%, transparent);
+    color: var(--red);
+  }
+  .q-content { flex: 1; min-width: 0; }
+  .q-prompt {
+    font-size: 16.5px;
+    line-height: 1.55;
+    font-weight: 500;
+    letter-spacing: -0.014em;
+  }
+  .q-prompt p { margin: 0; }
+  .q-tools {
+    display: flex;
+    gap: 2px;
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+  .q-tools button {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    color: var(--ink-3);
+    display: grid;
+    place-items: center;
+    font-size: 15px;
+    transition: all 0.15s var(--ease);
+  }
+  .q-tools button:hover { background: var(--surface-2); color: var(--ink); }
+  .q-tools button.on {
+    color: var(--orange);
+    background: color-mix(in srgb, var(--orange) 15%, transparent);
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-left: 46px;
+  }
+  .option {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 15px 18px;
+    background: var(--surface-2);
+    border-radius: var(--r-md);
+    cursor: pointer;
+    transition: all 0.2s var(--ease);
+    border: 1.5px solid transparent;
+    position: relative;
+  }
+  .option:hover:not(.disabled) { background: var(--surface-3); transform: translateX(3px); }
+  .option input {
+    margin: 3px 0 0;
+    accent-color: var(--blue);
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    flex: 0 0 auto;
+  }
+  .option .letter {
+    font-weight: 600;
+    color: var(--ink-3);
+    flex: 0 0 auto;
+    min-width: 18px;
+    font-size: 14px;
+    padding-top: 1px;
+  }
+  .option .text {
+    flex: 1;
+    font-size: 15px;
+    line-height: 1.5;
+    letter-spacing: -0.008em;
+  }
+  .option.correct-option {
+    background: color-mix(in srgb, var(--green) 12%, var(--surface-2));
+    border-color: color-mix(in srgb, var(--green) 50%, transparent);
+  }
+  .option.correct-option .letter { color: var(--green); }
+  .option.wrong-option {
+    background: color-mix(in srgb, var(--red) 10%, var(--surface-2));
+    border-color: color-mix(in srgb, var(--red) 40%, transparent);
+  }
+  .option.wrong-option .letter { color: var(--red); }
+  .option.disabled { cursor: default; }
+
+  .tf-row {
+    display: flex;
+    gap: 10px;
+    margin-left: 46px;
+    flex-wrap: wrap;
+  }
+  .tf-row .option { flex: 1; min-width: 150px; justify-content: center; }
+
+  .fib-wrap {
+    margin-left: 46px;
+    font-size: 16px;
+    line-height: 2.2;
+    letter-spacing: -0.008em;
+  }
+  .fib-blank {
+    display: inline-block;
+    width: auto;
+    min-width: 130px;
+    max-width: 240px;
+    padding: 2px 4px 4px;
+    margin: 0 6px;
+    border: 0;
+    border-bottom: 2px solid var(--blue);
+    background: transparent;
+    color: var(--blue);
+    font-weight: 600;
+    font-size: inherit;
+    font-family: inherit;
+    text-align: center;
+    outline: none;
+    transition: all 0.15s var(--ease);
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .fib-blank:focus {
+    background: color-mix(in srgb, var(--blue) 8%, transparent);
+    border-radius: 6px 6px 0 0;
+  }
+  .fib-blank.right { color: var(--green); border-color: var(--green); }
+  .fib-blank.wrong { color: var(--red); border-color: var(--red); }
+
+  textarea.written {
+    width: 100%;
+    min-height: 140px;
+    background: var(--surface-2);
+    border: 1.5px solid transparent;
+    border-radius: var(--r-md);
+    padding: 16px 18px;
+    font-size: 15px;
+    line-height: 1.55;
+    resize: vertical;
+    outline: none;
+    font-family: inherit;
+    letter-spacing: -0.008em;
+    transition: all 0.22s var(--ease);
+  }
+  textarea.written:focus {
+    background: var(--surface);
+    border-color: var(--blue);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--blue) 15%, transparent);
+  }
+  .written-wrap { margin-left: 46px; }
+
+  .feedback {
+    margin-top: 20px;
+    margin-left: 46px;
+    padding: 18px 20px;
+    background: var(--surface-2);
+    border-radius: var(--r-md);
+    font-size: 14px;
+    line-height: 1.6;
+    border-left: 3px solid var(--ink-4);
+    animation: enter 0.35s var(--ease-out);
+    letter-spacing: -0.008em;
+  }
+  .feedback.good { border-left-color: var(--green); }
+  .feedback.bad { border-left-color: var(--red); }
+  .feedback .label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    display: block;
+    margin-bottom: 5px;
+  }
+  .feedback .row { margin-bottom: 12px; }
+  .feedback .row:last-child { margin-bottom: 0; }
+  .feedback .row-good { color: var(--green); font-weight: 600; }
+  .feedback .row-bad { color: var(--red); font-weight: 600; }
+  .feedback ul { margin: 6px 0 0; padding-left: 20px; }
+
+  .hint {
+    margin-top: 16px;
+    margin-left: 46px;
+    padding: 14px 18px;
+    background: color-mix(in srgb, var(--orange) 10%, transparent);
+    border-radius: var(--r-md);
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    animation: enter 0.35s var(--ease-out);
+  }
+  .hint::before { content: "💡"; flex: 0 0 auto; font-size: 16px; }
+
+  .result-bar {
+    position: sticky;
+    bottom: 20px;
+    z-index: 20;
+    margin-top: 30px;
+    padding: 20px 26px;
+    background: color-mix(in srgb, var(--surface) 86%, transparent);
+    backdrop-filter: saturate(180%) blur(30px);
+    -webkit-backdrop-filter: saturate(180%) blur(30px);
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow-lg);
+    border: 0.5px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    flex-wrap: wrap;
+    animation: enter 0.45s var(--ease-out);
+  }
+  .score-display { display: flex; flex-direction: column; gap: 2px; }
+  .score-main {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.042em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .score-main .of { font-size: 18px; color: var(--ink-3); font-weight: 500; }
+  .score-main.pass { color: var(--green); }
+  .score-main.fail { color: var(--red); }
+  .score-label {
+    font-size: 13px;
+    color: var(--ink-3);
+    font-weight: 500;
+    letter-spacing: -0.008em;
+  }
+  .result-actions { margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .result-hero {
+    text-align: center;
+    padding: 44px 20px 34px;
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow-sm);
+    border: 0.5px solid var(--line);
+    margin-bottom: 20px;
+    animation: enter 0.55s var(--ease-out);
+  }
+  .score-ring-wrap {
+    position: relative;
+    width: 168px;
+    height: 168px;
+    margin: 0 auto 26px;
+  }
+  .score-ring { transform: rotate(-90deg); }
+  .score-ring circle { fill: none; stroke-width: 10; stroke-linecap: round; }
+  .score-ring .bg { stroke: var(--surface-3); }
+  .score-ring .arc {
+    stroke: var(--blue);
+    transition: stroke-dashoffset 1.4s var(--ease-out);
+  }
+  .score-ring.pass .arc { stroke: var(--green); }
+  .score-ring.fail .arc { stroke: var(--red); }
+  .score-ring-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .score-ring-pct {
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: -0.055em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .score-ring-pct .of { font-size: 22px; color: var(--ink-3); font-weight: 500; }
+  .score-ring-label {
+    font-size: 12px;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    font-weight: 600;
+    margin-top: 8px;
+  }
+  .result-hero h2 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.034em;
+    margin: 0 0 8px;
+  }
+  .result-hero p {
+    font-size: 15px;
+    color: var(--ink-3);
+    margin: 0 auto;
+    max-width: 400px;
+    line-height: 1.5;
+    letter-spacing: -0.008em;
+  }
+  .result-stats {
+    display: flex;
+    justify-content: center;
+    gap: 36px;
+    margin-top: 26px;
+    padding-top: 26px;
+    border-top: 0.5px solid var(--line);
+    flex-wrap: wrap;
+  }
+  .result-stat { text-align: center; }
+  .result-stat .val {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    font-variant-numeric: tabular-nums;
+  }
+  .result-stat .lbl {
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-top: 3px;
+    letter-spacing: -0.008em;
+  }
+
+  /* ============ FLASHCARDS ============ */
+  .flash-wrap {
+    max-width: 660px;
+    margin: 0 auto;
+  }
+  .flash-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 12px;
+  }
+  .flash-counter {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-2);
+    letter-spacing: -0.012em;
+    font-variant-numeric: tabular-nums;
+  }
+  .flash-counter .sep {
+    color: var(--ink-3);
+    margin: 0 4px;
+  }
+  .flash-dots {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    flex: 1;
+  }
+  .flash-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--ink-4);
+    transition: all 0.35s var(--ease);
+  }
+  .flash-dot.done { background: var(--green); }
+  .flash-dot.now { background: var(--blue); transform: scale(1.7); }
+  .flash-dot.review { background: var(--orange); }
+
+  .flash-card {
+    perspective: 1800px;
+    height: 440px;
+    cursor: pointer;
+    margin-bottom: 24px;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: pan-y;
+  }
+  .flash-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.75s var(--ease);
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+  .flash-card.flipped .flash-inner { transform: rotateY(180deg); }
+  .flash-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: var(--r-xl);
+    padding: 40px 40px 32px;
+    background: var(--surface);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    border: 0.5px solid var(--line);
+    overflow: hidden;
+  }
+  .flash-face.back {
+    transform: rotateY(180deg);
+    background:
+      linear-gradient(160deg, color-mix(in srgb, var(--blue) 4%, var(--surface)) 0%, var(--surface) 60%);
+  }
+  .flash-side {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 28px;
+  }
+  .flash-side::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--blue);
+  }
+  .flash-face.back .flash-side::before { background: var(--green); }
+  .flash-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 24px;
+    line-height: 1.42;
+    font-weight: 500;
+    letter-spacing: -0.024em;
+    overflow-y: auto;
+    padding: 4px 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .flash-face.back .flash-content {
+    font-size: 17px;
+    text-align: left;
+    align-items: flex-start;
+    font-weight: 400;
+    line-height: 1.65;
+    letter-spacing: -0.008em;
+    white-space: pre-wrap;
+  }
+  .flash-content .answer-text {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.028em;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+  .flash-content .answer-note {
+    font-size: 14px;
+    color: var(--ink-3);
+    line-height: 1.6;
+    letter-spacing: -0.008em;
+  }
+  .flash-foot {
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--ink-3);
+    margin-top: 20px;
+    letter-spacing: -0.008em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .flash-foot .hint-key {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 7px;
+    background: var(--surface-2);
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-2);
+    border: 0.5px solid var(--line);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  .flash-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .flash-controls .btn-nav {
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 20px;
+    display: grid;
+    place-items: center;
+    background: var(--surface);
+    border: 0.5px solid var(--line);
+    box-shadow: var(--shadow-xs);
+    color: var(--ink-2);
+  }
+  .flash-controls .btn-nav:hover:not(:disabled) {
+    background: var(--surface-2);
+    transform: scale(1.06);
+    color: var(--ink);
+  }
+  .flash-controls .btn-nav:active:not(:disabled) { transform: scale(0.96); }
+  .flash-controls .btn-flip {
+    padding: 14px 32px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: var(--pill);
+  }
+  .flash-empty {
+    text-align: center;
+    padding: 80px 24px;
+    color: var(--ink-3);
+  }
+
+  /* ============ LIBRARY / STATS ============ */
+  .library-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+  }
+  .lib-card {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    padding: 22px;
+    box-shadow: var(--shadow-sm);
+    border: 0.5px solid var(--line);
+    transition: all 0.3s var(--ease);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    min-height: 152px;
+  }
+  .lib-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: color-mix(in srgb, var(--blue) 30%, var(--line));
+  }
+  .lib-card h3 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.018em;
+    line-height: 1.3;
+  }
+  .lib-card .sub {
+    font-size: 12.5px;
+    color: var(--ink-3);
+    margin-bottom: 16px;
+    letter-spacing: -0.008em;
+  }
+  .lib-card .row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    padding: 22px;
+    box-shadow: var(--shadow-sm);
+    border: 0.5px solid var(--line);
+  }
+  .stat-val {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-lbl {
+    font-size: 12.5px;
+    color: var(--ink-3);
+    margin-top: 8px;
+    font-weight: 500;
+    letter-spacing: -0.008em;
+  }
+  .bar-list { display: flex; flex-direction: column; gap: 14px; }
+  .bar-row { display: flex; align-items: center; gap: 14px; font-size: 13.5px; }
+  .bar-name {
+    width: 130px;
+    flex: 0 0 auto;
+    color: var(--ink-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.008em;
+  }
+  .bar-track {
+    flex: 1;
+    height: 8px;
+    background: var(--surface-2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: var(--blue);
+    transition: width 1s var(--ease-out);
+  }
+  .bar-fill.good { background: var(--green); }
+  .bar-fill.bad { background: var(--red); }
+  .bar-pct {
+    width: 48px;
+    text-align: right;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+    letter-spacing: -0.008em;
+  }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 30px;
+    transform: translate(-50%, 30px);
+    opacity: 0;
+    pointer-events: none;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 13px 22px;
+    border-radius: var(--pill);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.42s var(--ease-out);
+    z-index: 200;
+    box-shadow: var(--shadow-lg);
+    max-width: calc(100vw - 40px);
+    text-align: center;
+    letter-spacing: -0.008em;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (max-width: 640px) {
+    header { padding: 10px 16px; padding-top: calc(10px + env(safe-area-inset-top)); gap: 10px; }
+    nav.tabs button .tab-label { display: none; }
+    nav.tabs button { padding: 8px 12px; }
+    main { padding: 22px 16px 100px; padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+    .hero h1 { font-size: 34px; }
+    .card { padding: 22px; border-radius: var(--r-lg); }
+    .card-title { font-size: 17px; }
+    .exam-head h2 { font-size: 26px; }
+    .q-prompt { font-size: 15.5px; }
+    .option { padding: 13px 15px; }
+    .options, .tf-row, .fib-wrap, .written-wrap, .feedback, .hint { margin-left: 0; }
+    .flash-card { height: 380px; }
+    .flash-face { padding: 28px 26px 24px; }
+    .flash-content { font-size: 20px; }
+    .flash-content .answer-text { font-size: 21px; }
+    .bar-name { width: 90px; font-size: 12.5px; }
+    .result-stats { gap: 24px; }
+    .result-bar { padding: 16px 20px; gap: 14px; }
+    .score-main { font-size: 28px; }
+    .result-actions { width: 100%; margin-left: 0; }
+    .result-actions .btn { flex: 1; }
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .flash-controls .btn-flip { padding: 13px 26px; }
+  }
+
+  @media print {
+    body { background: white; color: black; }
+    header, nav.tabs, .icon-btn, .result-actions, .toast, .exam-actions,
+    .q-tools, .result-bar, .intro, .flash-controls, .flash-topbar {
+      display: none !important;
+    }
+    main { padding: 0; max-width: none; }
+    .card, .question { box-shadow: none; border: 1px solid #ddd; }
+    .question { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="intro" id="intro">
+  <div class="intro-inner">
+    <h1 class="hello">Hello</h1>
+    <p class="ready">Ready for better grades?</p>
+    <button class="btn btn-primary start-btn" id="startBtn">Let's go</button>
+  </div>
+  <button class="skip" id="skipBtn">Skip</button>
+</div>
+
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24">
+          <path d="M2 9l10-5 10 5-10 5z"/>
+          <path d="M6 11v5c0 1 2.5 3 6 3s6-2 6-3v-5"/>
+          <path d="M22 9v6"/>
+        </svg>
+      </div>
+      <span class="brand-name">Exam Forge</span>
+    </div>
+
+    <nav class="tabs" id="nav">
+      <button data-view="create" class="active">
+        <span>✨</span><span class="tab-label">Create</span>
+      </button>
+      <button data-view="exam">
+        <span>📝</span><span class="tab-label">Exam</span>
+      </button>
+      <button data-view="library">
+        <span>📚</span><span class="tab-label">Library</span>
+      </button>
+      <button data-view="stats">
+        <span>📊</span><span class="tab-label">Stats</span>
+      </button>
+    </nav>
+
+    <div class="header-actions">
+      <button class="icon-btn" id="themeBtn" title="Appearance">☾</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="view active" id="view-create">
+      <div class="hero">
+        <h1>Turn anything into an exam.</h1>
+        <p>Paste your notes or drop in photos of a page. DeepSeek reads it and writes the questions.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title"><span class="step">1</span> Source material</h2>
+          <p class="card-sub">Text, images, or both — anything you want to be tested on.</p>
+        </div>
+
+        <div class="field">
+          <textarea id="sourceText" placeholder="Paste a chapter, an article, lecture notes, a Wikipedia page…"></textarea>
+        </div>
+
+        <div class="field">
+          <div class="drop" id="drop">
+            <div class="drop-icon">🖼️</div>
+            Drop photos of pages or slides here
+            <small>or click to browse · PNG · JPG · WEBP · up to 10</small>
+          </div>
+          <input type="file" id="fileInput" accept="image/*" multiple hidden>
+          <div class="thumbs" id="thumbs"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title"><span class="step">2</span> Question mix</h2>
+          <p class="card-sub">How many of each type do you want?</p>
+        </div>
+
+        <div class="grid grid-4">
+          <div class="field">
+            <label>Multiple choice</label>
+            <input type="number" id="countMcq" value="4" min="0" max="30">
+          </div>
+          <div class="field">
+            <label>True / False</label>
+            <input type="number" id="countTf" value="3" min="0" max="30">
+          </div>
+          <div class="field">
+            <label>Fill in blank</label>
+            <input type="number" id="countFib" value="3" min="0" max="30">
+          </div>
+          <div class="field">
+            <label>Short answer</label>
+            <input type="number" id="countShort" value="2" min="0" max="20">
+          </div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="field">
+            <label>Difficulty</label>
+            <select id="difficulty">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+              <option value="mixed">Mixed</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Passing score</label>
+            <select id="passingScore">
+              <option value="60">60%</option>
+              <option value="70" selected>70%</option>
+              <option value="80">80%</option>
+              <option value="90">90%</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Focus on <span style="color: var(--ink-3); font-weight: 400;">(optional)</span></label>
+          <input type="text" id="focus" placeholder="e.g. chapter 3, definitions, dates">
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-large" id="generateBtn">✨ Generate exam</button>
+      <div class="status" id="status"></div>
+      <div id="progressArea"></div>
+    </section>
+
+    <section class="view" id="view-exam">
+      <div id="examArea">
+        <div class="empty">
+          <div class="empty-icon">📝</div>
+          <p class="empty-title">No exam yet</p>
+          <p class="empty-text">Head to Create, add some material, and generate your first exam.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-library">
+      <div class="hero" style="padding-bottom: 26px;">
+        <h1 style="font-size: 34px;">Your library</h1>
+        <p>Every exam you generate is saved here.</p>
+      </div>
+      <div id="libraryArea"></div>
+    </section>
+
+    <section class="view" id="view-stats">
+      <div class="hero" style="padding-bottom: 26px;">
+        <h1 style="font-size: 34px;">Your progress</h1>
+        <p>See how you're doing across all your exams.</p>
+      </div>
+      <div id="statsArea"></div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+}[c]));
+
+const uid = () => Math.random().toString(36).slice(2, 10);
+
+const store = {
+  read(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch { return fallback; }
+  },
+  write(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); }
+    catch { toast('Storage full'); }
+  }
+};
+
+const API = {
+  baseUrl: 'https://green-math-c5df.luciuselvis3.workers.dev',
+  model: 'deepseek-v4.1-flash:free'
+};
+
+const THEME_STORAGE = 'examforge.theme';
+const LIBRARY_STORAGE = 'examforge.library';
+const HISTORY_STORAGE = 'examforge.history';
+const INTRO_STORAGE = 'examforge.introSeen';
+
+let toastTimer;
+function toast(message) {
+  const el = $('#toast');
+  el.textContent = message;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  $('#themeBtn').textContent = theme === 'dark' ? '☀' : '☾';
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', theme === 'dark' ? '#000000' : '#fafafa');
+  store.write(THEME_STORAGE, theme);
+}
+applyTheme(store.read(THEME_STORAGE, 'light'));
+$('#themeBtn').addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme');
+  applyTheme(cur === 'dark' ? 'light' : 'dark');
+});
+
+(function handleIntro() {
+  const intro = $('#intro');
+  const seen = sessionStorage.getItem(INTRO_STORAGE);
+
+  function dismiss() {
+    intro.classList.add('hiding');
+    sessionStorage.setItem(INTRO_STORAGE, '1');
+    setTimeout(() => intro.remove(), 800);
+  }
+
+  if (seen) {
+    intro.remove();
+    return;
+  }
+
+  $('#startBtn').addEventListener('click', dismiss);
+  $('#skipBtn').addEventListener('click', dismiss);
+  intro.addEventListener('click', e => {
+    if (e.target === intro) dismiss();
+  });
+})();
+
+function navigate(view) {
+  $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
+  $$('#nav button').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  if (view === 'library') renderLibrary();
+  if (view === 'stats') renderStats();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+$$('#nav button').forEach(btn => btn.addEventListener('click', () => navigate(btn.dataset.view)));
+
+const state = {
+  images: [],
+  exam: null,
+  session: null,
+  library: store.read(LIBRARY_STORAGE, []),
+  history: store.read(HISTORY_STORAGE, [])
+};
+
+const dropZone = $('#drop');
+const fileInput = $('#fileInput');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropZone.classList.add('over');
+});
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('over');
+  handleFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+const MAX_IMAGE_DIMENSION = 1600;
+const JPEG_QUALITY = 0.75;
+
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height && width > MAX_IMAGE_DIMENSION) {
+          height = Math.round((height * MAX_IMAGE_DIMENSION) / width);
+          width = MAX_IMAGE_DIMENSION;
+        } else if (height > MAX_IMAGE_DIMENSION) {
+          width = Math.round((width * MAX_IMAGE_DIMENSION) / height);
+          height = MAX_IMAGE_DIMENSION;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        resolve({
+          name: file.name,
+          dataUrl: canvas.toDataURL('image/jpeg', JPEG_QUALITY),
+          mediaType: 'image/jpeg'
+        });
+      };
+      img.onerror = () => reject(new Error('Could not read image'));
+      img.src = reader.result;
+    };
+    reader.onerror = () => reject(new Error('Could not read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function handleFiles(files) {
+  const room = 10 - state.images.length;
+  const list = [...files].filter(f => f.type.startsWith('image/')).slice(0, room);
+  if (!list.length) return;
+  list.forEach(async file => {
+    try {
+      const compressed = await compressImage(file);
+      state.images.push(compressed);
+      renderThumbs();
+    } catch (err) {
+      console.error('Image compress failed', err);
+      toast('Could not load that image');
+    }
+  });
+  if (files.length > room) toast(`Only ${room} more image${room === 1 ? '' : 's'} fit`);
+}
+
+function renderThumbs() {
+  $('#thumbs').innerHTML = state.images.map((img, i) => `
+    <div class="thumb">
+      <img src="${img.dataUrl}" alt="">
+      <button data-index="${i}" title="Remove">×</button>
+    </div>
+  `).join('');
+  $$('#thumbs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.images.splice(Number(btn.dataset.index), 1);
+      renderThumbs();
+    });
+  });
+}
+
+function setStatus(html, kind = '') {
+  const el = $('#status');
+  el.innerHTML = html;
+  el.className = 'status' + (kind ? ' ' + kind : '');
+}
+
+const PROGRESS_MESSAGES = [
+  'Reading your material…',
+  'Picking out the key ideas…',
+  'Drafting questions…',
+  'Writing plausible distractors…',
+  'Checking the answers…',
+  'Polishing the wording…'
+];
+
+function showProgress() {
+  $('#progressArea').innerHTML = `
+    <div class="progress" id="progress">
+      <div class="progress-ring">
+        <svg viewBox="0 0 50 50">
+          <circle class="bg" cx="25" cy="25" r="20"></circle>
+          <circle class="arc" cx="25" cy="25" r="20"></circle>
+        </svg>
+      </div>
+      <p class="progress-title">Building your exam</p>
+      <p class="progress-message" id="progressMessage">${PROGRESS_MESSAGES[0]}</p>
+    </div>
+  `;
+  let i = 0;
+  const el = $('#progressMessage');
+  return setInterval(() => {
+    i = (i + 1) % PROGRESS_MESSAGES.length;
+    if (el) {
+      el.style.opacity = '0';
+      setTimeout(() => {
+        el.textContent = PROGRESS_MESSAGES[i];
+        el.style.opacity = '1';
+      }, 250);
+    }
+  }, 2200);
+}
+
+function hideProgress() {
+  const el = $('#progress');
+  if (el) el.remove();
+}
+
+$('#generateBtn').addEventListener('click', generateExam);
+
+async function generateExam() {
+  const text = $('#sourceText').value.trim();
+  const hasImages = state.images.length > 0;
+
+  if (!text && !hasImages) {
+    setStatus('Add some text or an image first.', 'error');
+    return;
+  }
+
+  const counts = {
+    mcq: Math.max(0, Number($('#countMcq').value) || 0),
+    tf: Math.max(0, Number($('#countTf').value) || 0),
+    fib: Math.max(0, Number($('#countFib').value) || 0),
+    short: Math.max(0, Number($('#countShort').value) || 0)
+  };
+  const total = counts.mcq + counts.tf + counts.fib + counts.short;
+  if (total === 0) {
+    setStatus('Request at least one question.', 'error');
+    return;
+  }
+
+  const difficulty = $('#difficulty').value;
+  const focus = $('#focus').value.trim();
+  const passingScore = Number($('#passingScore').value) || 70;
+
+  const btn = $('#generateBtn');
+  btn.disabled = true;
+  setStatus('');
+  const progressTicker = showProgress();
+
+  try {
+    const prompt = buildExamPrompt({ text, counts, difficulty, focus, hasImages });
+
+    let userContent;
+    if (hasImages) {
+      userContent = [{ type: 'text', text: prompt }];
+      state.images.forEach(img => {
+        userContent.push({
+          type: 'image_url',
+          image_url: { url: img.dataUrl }
+        });
+      });
+    } else {
+      userContent = prompt;
+    }
+
+    const messages = [
+      { role: 'system', content: 'You are an expert exam author. Respond with valid JSON only — no prose, no markdown fences.' },
+      { role: 'user', content: userContent }
+    ];
+
+    const raw = await askAI(messages);
+    const data = parseJsonResponse(raw);
+    const exam = normalizeExam(data, { difficulty, passingScore });
+
+    if (!exam.questions.length) {
+      throw new Error('No questions came back. Try again, or add more source material.');
+    }
+
+    state.exam = exam;
+    state.session = createSession(exam, { mode: 'test' });
+
+    saveToLibrary(exam);
+    renderExam();
+    navigate('exam');
+    toast('Exam ready');
+  } catch (err) {
+    console.error(err);
+    setStatus('Something went wrong: ' + err.message, 'error');
+  } finally {
+    clearInterval(progressTicker);
+    hideProgress();
+    btn.disabled = false;
+  }
+}
+
+function buildExamPrompt({ text, counts, difficulty, focus, hasImages }) {
+  const schema = {
+    title: 'A short descriptive title',
+    description: 'One sentence about what this exam covers',
+    instructions: 'A short line of guidance for the student',
+    topic: 'A broad subject area',
+    questions: [
+      {
+        type: 'mcq',
+        prompt: 'The question text',
+        points: 1,
+        topic: 'A subtopic',
+        hint: 'A short nudge (optional)',
+        explanation: 'Why the correct answer is correct',
+        options: [
+          { text: 'First option', correct: false },
+          { text: 'Second option', correct: true },
+          { text: 'Third option', correct: false },
+          { text: 'Fourth option', correct: false }
+        ]
+      },
+      {
+        type: 'tf',
+        prompt: 'A statement that is either true or false.',
+        points: 1,
+        topic: 'A subtopic',
+        answer: true,
+        explanation: 'A brief rationale'
+      },
+      {
+        type: 'fib',
+        prompt: 'The capital of France is ___ and the river is ___.',
+        points: 1,
+        topic: 'A subtopic',
+        blanks: [
+          { answer: 'Paris', alternatives: ['paris'] },
+          { answer: 'Seine', alternatives: ['the seine'] }
+        ],
+        explanation: 'A brief rationale'
+      },
+      {
+        type: 'short',
+        prompt: 'Explain how X affects Y.',
+        points: 2,
+        topic: 'A subtopic',
+        sampleAnswer: 'A model response in two or three sentences.',
+        rubric: ['Mentions X', 'Mentions Y', 'Gives a concrete example']
+      }
+    ]
+  };
+
+  const lines = [
+    'Create a study exam based on the source material below.',
+    '',
+    'Required question counts:',
+    `- multiple choice: ${counts.mcq}`,
+    `- true/false: ${counts.tf}`,
+    `- fill in the blank: ${counts.fib}`,
+    `- short answer: ${counts.short}`,
+    '',
+    `Difficulty: ${difficulty}.`
+  ];
+  if (focus) lines.push(`Extra focus on: ${focus}.`);
+  if (hasImages) lines.push('The attached images are part of the source material — read them carefully.');
+  lines.push(
+    '',
+    'Return ONLY a JSON object matching this exact shape:',
+    JSON.stringify(schema, null, 2),
+    '',
+    'Rules:',
+    '- Use "___" for each blank in a fill-in-the-blank question. Provide one entry in "blanks" per blank, in order.',
+    '- For multiple choice, provide exactly four options and mark exactly one as correct.',
+    '- Ground every question in the source material. Do not invent facts.',
+    '- Keep prompts clear and specific. No trick questions.',
+    '- Include a hint on at least half of the questions.',
+    '',
+    'Source material:',
+    text ? text.slice(0, 24000) : '(no text — use the attached images)'
+  );
+  return lines.join('\n');
+}
+
+async function askAI(messages) {
+  const url = API.baseUrl + '/chat/completions';
+  const headers = { 'Content-Type': 'application/json' };
+
+  const payload = {
+    model: API.model,
+    messages,
+    temperature: 0.5,
+    max_tokens: 8192
+  };
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(payload)
+  });
+  const raw = await res.text();
+
+  if (!res.ok) {
+    let detail = raw;
+    try {
+      const parsed = JSON.parse(raw);
+      detail = parsed.error?.message || parsed.message || raw;
+    } catch {}
+    throw new Error(`API ${res.status}: ${detail.slice(0, 260)}`);
+  }
+
+  let data;
+  try { data = JSON.parse(raw); }
+  catch { throw new Error('The server returned something unreadable.'); }
+
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) throw new Error('The model returned an empty response.');
+  return content;
+}
+
+function parseJsonResponse(text) {
+  if (!text) throw new Error('Empty response');
+  let clean = String(text).trim();
+  clean = clean.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
+  const start = clean.indexOf('{');
+  const end = clean.lastIndexOf('}');
+  if (start === -1 || end === -1) throw new Error('The model did not return JSON.');
+  const slice = clean.slice(start, end + 1);
+  try {
+    return JSON.parse(slice);
+  } catch {
+    const repaired = slice.replace(/,\s*([}\]])/g, '$1');
+    return JSON.parse(repaired);
+  }
+}
+
+function normalizeExam(data, { difficulty, passingScore }) {
+  const questions = (data.questions || []).map(normalizeQuestion).filter(Boolean);
+  return {
+    id: uid(),
+    title: data.title || 'Untitled exam',
+    description: data.description || '',
+    instructions: data.instructions || 'Answer every question. You can flag anything uncertain and come back to it.',
+    topic: data.topic || 'General',
+    difficulty,
+    passingScore,
+    createdAt: Date.now(),
+    questions
+  };
+}
+
+function normalizeQuestion(raw) {
+  if (!raw || !raw.prompt) return null;
+
+  const base = {
+    id: uid(),
+    type: raw.type || 'mcq',
+    prompt: String(raw.prompt),
+    points: Math.max(1, Number(raw.points) || 1),
+    topic: raw.topic || '',
+    hint: raw.hint || '',
+    explanation: raw.explanation || ''
+  };
+
+  if (base.type === 'mcq') {
+    const options = (raw.options || []).map(o => ({
+      text: String(o.text ?? o.option ?? ''),
+      correct: !!(o.correct ?? o.isCorrect)
+    })).filter(o => o.text);
+    if (options.length < 2) return null;
+    if (!options.some(o => o.correct)) options[0].correct = true;
+    return { ...base, options };
+  }
+
+  if (base.type === 'tf') {
+    return { ...base, answer: !!(raw.answer ?? raw.correct) };
+  }
+
+  if (base.type === 'fib') {
+    const blanks = (raw.blanks || []).map(b => ({
+      answer: String(b.answer ?? b.text ?? ''),
+      alternatives: (b.alternatives || []).map(String)
+    })).filter(b => b.answer);
+    if (!blanks.length) return null;
+    return { ...base, blanks };
+  }
+
+  if (base.type === 'short') {
+    return {
+      ...base,
+      sampleAnswer: raw.sampleAnswer || raw.answer || '',
+      rubric: Array.isArray(raw.rubric) ? raw.rubric.map(String) : []
+    };
+  }
+
+  return null;
+}
+
+function createSession(exam, { mode = 'test' } = {}) {
+  return {
+    id: uid(),
+    examId: exam.id,
+    mode,
+    answers: {},
+    flags: {},
+    hintsShown: {},
+    revealed: {},
+    known: {},
+    currentCard: 0,
+    startTime: Date.now(),
+    submitted: false,
+    results: null
+  };
+}
+
+function saveToLibrary(exam) {
+  const idx = state.library.findIndex(e => e.id === exam.id);
+  if (idx >= 0) state.library[idx] = exam;
+  else state.library.unshift(exam);
+  state.library = state.library.slice(0, 50);
+  store.write(LIBRARY_STORAGE, state.library);
+}
+
+function renderExam() {
+  const exam = state.exam;
+  const session = state.session;
+
+  if (!exam || !session) {
+    $('#examArea').innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">📝</div>
+        <p class="empty-title">No exam yet</p>
+        <p class="empty-text">Head to Create, add some material, and generate your first exam.</p>
+      </div>
+    `;
+    return;
+  }
+
+  if (session.submitted) {
+    $('#examArea').innerHTML = renderResults(exam, session);
+    bindResults();
+    return;
+  }
+
+  if (session.mode === 'flash') {
+    $('#examArea').innerHTML = renderFlashcards(exam, session);
+    bindFlashcards();
+    return;
+  }
+
+  const totalPoints = exam.questions.reduce((sum, q) => sum + q.points, 0);
+  const header = `
+    <div class="exam-head">
+      <h2>${esc(exam.title)}</h2>
+      ${exam.description ? `<p class="desc">${esc(exam.description)}</p>` : ''}
+      <div class="exam-meta">
+        <span class="chip">📋 ${exam.questions.length} question${exam.questions.length === 1 ? '' : 's'}</span>
+        <span class="chip">🏆 ${totalPoints} point${totalPoints === 1 ? '' : 's'}</span>
+        <span class="chip">🎯 Pass at ${exam.passingScore}%</span>
+        ${exam.topic ? `<span class="chip">📚 ${esc(exam.topic)}</span>` : ''}
+      </div>
+      <div class="exam-actions">
+        <button class="btn btn-sm" id="modeToggle">${session.mode === 'test' ? '📖 Practice mode' : '📝 Test mode'}</button>
+        <button class="btn btn-sm" id="flashToggle">🎴 Study as flashcards</button>
+      </div>
+    </div>
+  `;
+
+  const questionsHtml = exam.questions.map((q, i) => renderQuestion(q, i, session)).join('');
+
+  $('#examArea').innerHTML = header + questionsHtml + renderResultBar(exam, session);
+  bindQuestionInteractions();
+  updateResultBar();
+  bindExamToolbar();
+}
+
+function renderQuestion(q, index, session) {
+  const answer = session.answers[q.id];
+  const showFeedback = session.mode === 'practice' && session.results?.[q.id];
+  const flagged = session.flags[q.id];
+  const hintShown = session.hintsShown[q.id];
+  const result = session.results?.[q.id];
+
+  let stateClass = '';
+  if (showFeedback && result) {
+    stateClass = result.correct === true ? 'correct' : result.correct === false ? 'wrong' : 'partial';
+  }
+
+  let body = '';
+  if (q.type === 'mcq') body = renderMcq(q, answer, showFeedback);
+  else if (q.type === 'tf') body = renderTf(q, answer, showFeedback);
+  else if (q.type === 'fib') body = renderFib(q, answer, showFeedback);
+  else if (q.type === 'short') body = renderShort(q, answer, showFeedback);
+
+  const hintHtml = hintShown && q.hint ? `<div class="hint">${esc(q.hint)}</div>` : '';
+  const feedbackHtml = showFeedback ? renderFeedback(result) : '';
+
+  return `
+    <div class="question ${stateClass}" data-qid="${q.id}">
+      <div class="q-head">
+        <div class="q-num">${index + 1}</div>
+        <div class="q-content">
+          <div class="q-prompt">${esc(q.prompt)}</div>
+        </div>
+        <div class="q-tools">
+          ${q.hint ? `<button class="hint-btn ${hintShown ? 'on' : ''}" data-qid="${q.id}" title="Show hint">💡</button>` : ''}
+          <button class="flag-btn ${flagged ? 'on' : ''}" data-qid="${q.id}" title="Flag for review">🚩</button>
+        </div>
+      </div>
+      ${body}
+      ${hintHtml}
+      ${feedbackHtml}
+    </div>
+  `;
+}
+
+function renderMcq(q, answer, showFeedback) {
+  const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+  return `
+    <div class="options" data-qid="${q.id}">
+      ${q.options.map((opt, i) => {
+        const picked = answer === i;
+        const classes = [];
+        if (showFeedback) {
+          classes.push('disabled');
+          if (opt.correct) classes.push('correct-option');
+          else if (picked) classes.push('wrong-option');
+        }
+        return `
+          <label class="option ${classes.join(' ')}">
+            <input type="radio" name="q_${q.id}" value="${i}" ${picked ? 'checked' : ''} ${showFeedback ? 'disabled' : ''}>
+            <span class="letter">${letters[i]}</span>
+            <span class="text">${esc(opt.text)}</span>
+          </label>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderTf(q, answer, showFeedback) {
+  const render = (value, label) => {
+    const picked = answer === value;
+    const classes = [];
+    if (showFeedback) {
+      classes.push('disabled');
+      if (q.answer === value) classes.push('correct-option');
+      else if (picked) classes.push('wrong-option');
+    }
+    return `
+      <label class="option ${classes.join(' ')}">
+        <input type="radio" name="q_${q.id}" value="${value}" ${picked ? 'checked' : ''} ${showFeedback ? 'disabled' : ''}>
+        <span class="text" style="text-align:center;">${label}</span>
+      </label>
+    `;
+  };
+  return `<div class="tf-row" data-qid="${q.id}">
+    ${render('true', '✓ True')}
+    ${render('false', '✗ False')}
+  </div>`;
+}
+
+function renderFib(q, answer, showFeedback) {
+  const parts = q.prompt.split(/_{2,}/);
+  const given = Array.isArray(answer) ? answer : [];
+  let html = '<div class="fib-wrap">';
+  parts.forEach((part, i) => {
+    html += esc(part);
+    if (i < parts.length - 1) {
+      const val = given[i] || '';
+      const blank = q.blanks[i] || { answer: '', alternatives: [] };
+      let cls = '';
+      if (showFeedback) cls = checkBlank(val, blank) ? 'right' : 'wrong';
+      html += `<input type="text" class="fib-blank ${cls}" data-qid="${q.id}" data-index="${i}" value="${esc(val)}" ${showFeedback ? 'disabled' : ''} placeholder="…">`;
+    }
+  });
+  html += '</div>';
+  return html;
+}
+
+function renderShort(q, answer, showFeedback) {
+  return `
+    <div class="written-wrap">
+      <textarea class="written" data-qid="${q.id}" placeholder="Write your answer here…" ${showFeedback ? 'disabled' : ''}>${esc(answer || '')}</textarea>
+    </div>
+  `;
+}
+
+function renderFeedback(result) {
+  const tone = result.correct === true ? 'good' : result.correct === false ? 'bad' : '';
+  let inner = '';
+
+  if (result.correct === true) {
+    inner += '<div class="row"><span class="label">Correct</span><span class="row-good">Nice — that one\'s right.</span></div>';
+  } else if (result.correct === false) {
+    inner += '<div class="row"><span class="label">Not quite</span><span class="row-bad">See the correct answer below.</span></div>';
+  } else {
+    inner += '<div class="row"><span class="label">Self-check</span>Compare your answer with the model response below.</div>';
+  }
+
+  if (result.correctAnswer) {
+    inner += `<div class="row"><span class="label">Correct answer</span>${esc(result.correctAnswer)}</div>`;
+  }
+  if (result.sampleAnswer) {
+    inner += `<div class="row"><span class="label">Model answer</span>${esc(result.sampleAnswer)}</div>`;
+  }
+  if (result.rubric?.length) {
+    inner += `<div class="row"><span class="label">Look for</span><ul>${result.rubric.map(r => `<li>${esc(r)}</li>`).join('')}</ul></div>`;
+  }
+  if (result.explanation) {
+    inner += `<div class="row"><span class="label">Why</span>${esc(result.explanation)}</div>`;
+  }
+
+  return `<div class="feedback ${tone}">${inner}</div>`;
+}
+
+function renderResultBar(exam, session) {
+  if (session.mode === 'flash') return '';
+  if (session.submitted) return '';
+
+  return `
+    <div class="result-bar">
+      <div class="score-display">
+        <div class="score-main" id="progressMain">0<span class="of">/${exam.questions.length}</span></div>
+        <div class="score-label">answered</div>
+      </div>
+      <div class="result-actions">
+        <button class="btn btn-primary" id="submitBtn">Submit for grading</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderResults(exam, session) {
+  const results = session.results || {};
+  let autoCorrect = 0;
+  let autoTotal = 0;
+  const selfCheck = [];
+
+  exam.questions.forEach(q => {
+    const r = results[q.id];
+    if (!r) return;
+    if (r.correct === true || r.correct === false) {
+      autoTotal++;
+      if (r.correct) autoCorrect++;
+    } else {
+      selfCheck.push({ q, r });
+    }
+  });
+
+  const autoPct = autoTotal > 0 ? Math.round((autoCorrect / autoTotal) * 100) : 0;
+  const pass = autoPct >= exam.passingScore;
+  const circumference = 2 * Math.PI * 52;
+  const offset = circumference * (1 - autoPct / 100);
+  const ringClass = pass ? 'pass' : 'fail';
+
+  const headline = pass
+    ? autoPct >= 90 ? 'Outstanding.' : 'Well done.'
+    : autoPct >= 50 ? 'Getting there.' : 'Keep at it.';
+
+  const subline = selfCheck.length > 0
+    ? `${autoCorrect} of ${autoTotal} auto-graded correctly. ${selfCheck.length} short answer${selfCheck.length === 1 ? '' : 's'} to self-check below.`
+    : `${autoCorrect} of ${autoTotal} questions correct.`;
+
+  return `
+    <div class="result-hero">
+      <div class="score-ring-wrap">
+        <svg class="score-ring ${ringClass}" width="168" height="168" viewBox="0 0 168 168">
+          <circle class="bg" cx="84" cy="84" r="52"></circle>
+          <circle class="arc" cx="84" cy="84" r="52"
+            stroke-dasharray="${circumference}"
+            stroke-dashoffset="${circumference}"
+            data-target="${offset}"></circle>
+        </svg>
+        <div class="score-ring-center">
+          <div class="score-ring-pct">${autoPct}<span class="of">%</span></div>
+          <div class="score-ring-label">${pass ? 'Passed' : 'Try again'}</div>
+        </div>
+      </div>
+      <h2>${headline}</h2>
+      <p>${subline}</p>
+      <div class="result-stats">
+        <div class="result-stat">
+          <div class="val">${autoCorrect}/${autoTotal}</div>
+          <div class="lbl">Auto-graded</div>
+        </div>
+        <div class="result-stat">
+          <div class="val">${selfCheck.length}</div>
+          <div class="lbl">To review</div>
+        </div>
+        <div class="result-stat">
+          <div class="val">${Math.round((Date.now() - session.startTime) / 60000)}m</div>
+          <div class="lbl">Time</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exam-actions" style="margin-bottom: 22px;">
+      <button class="btn" id="retakeBtn">Retake</button>
+      <button class="btn" id="flashFromResults">🎴 Study as flashcards</button>
+      <button class="btn btn-primary" id="newExamBtn">Create a new exam</button>
+    </div>
+
+    <div>
+      ${exam.questions.map((q, i) => renderReviewQuestion(q, i, session)).join('')}
+    </div>
+
+    <div class="result-bar" style="position: static; margin-top: 26px;">
+      <div class="score-display">
+        <div class="score-main ${pass ? 'pass' : 'fail'}">${autoPct}<span class="of">%</span></div>
+        <div class="score-label">${autoCorrect} of ${autoTotal} correct</div>
+      </div>
+      <div class="result-actions">
+        <button class="btn" id="retakeBtn2">Retake</button>
+        <button class="btn btn-primary" id="newExamBtn2">New exam</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderReviewQuestion(q, index, session) {
+  const answer = session.answers[q.id];
+  const result = session.results?.[q.id];
+  const showFeedback = !!result;
+
+  let stateClass = '';
+  if (result) {
+    stateClass = result.correct === true ? 'correct' : result.correct === false ? 'wrong' : 'partial';
+  }
+
+  let body = '';
+  if (q.type === 'mcq') body = renderMcq(q, answer, showFeedback);
+  else if (q.type === 'tf') body = renderTf(q, answer, showFeedback);
+  else if (q.type === 'fib') body = renderFib(q, answer, showFeedback);
+  else if (q.type === 'short') body = renderShort(q, answer, true);
+
+  return `
+    <div class="question ${stateClass}">
+      <div class="q-head">
+        <div class="q-num">${index + 1}</div>
+        <div class="q-content">
+          <div class="q-prompt">${esc(q.prompt)}</div>
+        </div>
+      </div>
+      ${body}
+      ${result ? renderFeedback(result) : ''}
+    </div>
+  `;
+}
+
+function bindResults() {
+  const retake = () => {
+    state.session = createSession(state.exam, { mode: 'test' });
+    renderExam();
+  };
+  const newExam = () => navigate('create');
+  const toFlash = () => {
+    state.session = createSession(state.exam, { mode: 'flash' });
+    renderExam();
+  };
+
+  ['retakeBtn', 'retakeBtn2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', retake);
+  });
+  ['newExamBtn', 'newExamBtn2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', newExam);
+  });
+  const flash = document.getElementById('flashFromResults');
+  if (flash) flash.addEventListener('click', toFlash);
+
+  requestAnimationFrame(() => {
+    const arc = document.querySelector('.score-ring .arc');
+    if (arc) {
+      const target = arc.dataset.target;
+      setTimeout(() => { arc.style.strokeDashoffset = target; }, 50);
+    }
+  });
+}
+
+function updateResultBar() {
+  const session = state.session;
+  const exam = state.exam;
+  if (!session || !exam || session.submitted) return;
+  const total = exam.questions.length;
+  const answered = exam.questions.filter(q => {
+    const a = session.answers[q.id];
+    if (a === undefined || a === null) return false;
+    if (Array.isArray(a)) return a.some(x => x !== '' && x !== undefined);
+    if (typeof a === 'string') return a.trim() !== '';
+    return true;
+  }).length;
+
+  const main = document.getElementById('progressMain');
+  if (main) main.innerHTML = `${answered}<span class="of">/${total}</span>`;
+}
+
+function bindExamToolbar() {
+  const modeBtn = document.getElementById('modeToggle');
+  if (modeBtn) modeBtn.addEventListener('click', () => {
+    state.session.mode = state.session.mode === 'test' ? 'practice' : 'test';
+    state.session.results = null;
+    renderExam();
+  });
+  const flashBtn = document.getElementById('flashToggle');
+  if (flashBtn) flashBtn.addEventListener('click', () => {
+    state.session.mode = 'flash';
+    state.session.currentCard = 0;
+    renderExam();
+  });
+}
+
+function bindQuestionInteractions() {
+  $$('.options input, .tf-row input').forEach(input => {
+    input.addEventListener('change', e => {
+      const wrap = e.target.closest('[data-qid]');
+      const qid = wrap.dataset.qid;
+      const value = e.target.value;
+      state.session.answers[qid] = isNaN(value) ? value : Number(value);
+      updateResultBar();
+      if (state.session.mode === 'practice') {
+        gradeSingle(qid);
+        renderExam();
+      }
+    });
+  });
+
+  $$('.fib-blank').forEach(input => {
+    input.addEventListener('input', e => {
+      const qid = e.target.dataset.qid;
+      const idx = Number(e.target.dataset.index);
+      const q = state.exam.questions.find(x => x.id === qid);
+      if (!Array.isArray(state.session.answers[qid])) {
+        state.session.answers[qid] = q.blanks.map(() => '');
+      }
+      state.session.answers[qid][idx] = e.target.value;
+      updateResultBar();
+    });
+    input.addEventListener('blur', () => {
+      if (state.session.mode === 'practice') {
+        gradeSingle(input.dataset.qid);
+        renderExam();
+      }
+    });
+  });
+
+  $$('textarea.written').forEach(area => {
+    area.addEventListener('input', e => {
+      state.session.answers[e.target.dataset.qid] = e.target.value;
+      updateResultBar();
+    });
+  });
+
+  $$('.flag-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const qid = btn.dataset.qid;
+      state.session.flags[qid] = !state.session.flags[qid];
+      btn.classList.toggle('on');
+    });
+  });
+
+  $$('.hint-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const qid = btn.dataset.qid;
+      state.session.hintsShown[qid] = !state.session.hintsShown[qid];
+      renderExam();
+    });
+  });
+
+  const submitBtn = document.getElementById('submitBtn');
+  if (submitBtn) submitBtn.addEventListener('click', submitExam);
+}
+
+function gradeSingle(qid) {
+  const q = state.exam.questions.find(x => x.id === qid);
+  if (!q) return;
+  const a = state.session.answers[qid];
+  if (a === undefined || a === null) return;
+  if (!state.session.results) state.session.results = {};
+  state.session.results[qid] = gradeOne(q, a);
+}
+
+function submitExam() {
+  const exam = state.exam;
+  const session = state.session;
+  const results = {};
+  exam.questions.forEach(q => {
+    results[q.id] = gradeOne(q, session.answers[q.id]);
+  });
+  session.results = results;
+  session.submitted = true;
+  session.endTime = Date.now();
+  recordHistory(exam, session);
+  renderExam();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function gradeOne(q, answer) {
+  const base = {
+    correct: null,
+    correctAnswer: '',
+    sampleAnswer: '',
+    rubric: [],
+    explanation: q.explanation || ''
+  };
+
+  if (q.type === 'mcq') {
+    const correctIdx = q.options.findIndex(o => o.correct);
+    base.correct = answer === correctIdx;
+    base.correctAnswer = q.options[correctIdx]?.text || '';
+    return base;
+  }
+  if (q.type === 'tf') {
+    base.correct = String(answer) === String(q.answer);
+    base.correctAnswer = q.answer ? 'True' : 'False';
+    return base;
+  }
+  if (q.type === 'fib') {
+    const given = Array.isArray(answer) ? answer : [];
+    const allRight = q.blanks.every((blank, i) => checkBlank(given[i] || '', blank));
+    base.correct = allRight;
+    base.correctAnswer = q.blanks.map(b => b.answer).join(', ');
+    return base;
+  }
+  if (q.type === 'short') {
+    base.correct = null;
+    base.sampleAnswer = q.sampleAnswer || '';
+    base.rubric = q.rubric || [];
+    return base;
+  }
+  return base;
+}
+
+function checkBlank(given, blank) {
+  const norm = s => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  const target = norm(blank.answer);
+  const g = norm(given);
+  if (!g) return false;
+  if (g === target) return true;
+  return (blank.alternatives || []).some(alt => norm(alt) === g);
+}
+
+/* ============ FLASHCARDS ============ */
+
+let flashKeyHandler = null;
+let flashSwipeStart = null;
+
+function renderFlashcards(exam, session) {
+  const total = exam.questions.length;
+  const card = exam.questions[session.currentCard];
+
+  if (!card) {
+    return `<div class="flash-empty">
+      <div class="empty-icon">🎴</div>
+      <p class="empty-title">No cards to study</p>
+    </div>`;
+  }
+
+  const flipped = !!session.revealed[card.id];
+  const totalRevealed = Object.values(session.revealed).filter(Boolean).length;
+
+  const dots = exam.questions.map((q, i) => {
+    const classes = [];
+    if (i === session.currentCard) classes.push('now');
+    else if (session.revealed[q.id]) classes.push('done');
+    return `<div class="flash-dot ${classes.join(' ')}"></div>`;
+  }).join('');
+
+  return `
+    <div class="flash-wrap">
+      <div class="flash-topbar">
+        <div class="flash-counter">
+          ${session.currentCard + 1}<span class="sep">/</span>${total}
+          ${totalRevealed > 0 ? `<span style="color: var(--ink-3); font-weight: 400; margin-left: 8px;">· ${totalRevealed} studied</span>` : ''}
+        </div>
+        <div class="flash-dots">${dots}</div>
+      </div>
+
+      <div class="flash-card ${flipped ? 'flipped' : ''}" id="flashCard" tabindex="0" role="button" aria-label="Flashcard">
+        <div class="flash-inner">
+          <div class="flash-face front">
+            <div class="flash-side">Question</div>
+            <div class="flash-content">${esc(card.prompt)}</div>
+            <div class="flash-foot">
+              Tap to reveal · or press <span class="hint-key">Space</span>
+            </div>
+          </div>
+          <div class="flash-face back">
+            <div class="flash-side">Answer</div>
+            <div class="flash-content">${buildCardBack(card)}</div>
+            <div class="flash-foot">
+              Press <span class="hint-key">Space</span> to flip back
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flash-controls">
+        <button class="btn btn-nav" id="flashPrev" ${session.currentCard === 0 ? 'disabled' : ''} title="Previous (←)">‹</button>
+        <button class="btn btn-primary btn-flip" id="flashFlip">${flipped ? 'Show question' : 'Show answer'}</button>
+        <button class="btn btn-nav" id="flashNext" ${session.currentCard === total - 1 ? 'disabled' : ''} title="Next (→)">›</button>
+      </div>
+
+      <div style="text-align: center; margin-top: 26px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <button class="btn btn-sm" id="flashShuffle">🔀 Shuffle</button>
+        <button class="btn btn-sm" id="flashReset">↺ Reset progress</button>
+        <button class="btn btn-sm" id="exitFlash">Exit flashcards</button>
+      </div>
+    </div>
+  `;
+}
+
+function buildCardBack(card) {
+  if (card.type === 'mcq') {
+    const right = card.options.find(o => o.correct);
+    const letter = right ? ['A', 'B', 'C', 'D', 'E', 'F'][card.options.indexOf(right)] : '';
+    const answerHtml = right
+      ? `<div class="answer-text">${esc(letter)}. ${esc(right.text)}</div>`
+      : '';
+    const explanation = card.explanation
+      ? `<div class="answer-note">${esc(card.explanation)}</div>`
+      : '';
+    return answerHtml + explanation;
+  }
+  if (card.type === 'tf') {
+    const answerHtml = `<div class="answer-text">${card.answer ? '✓ True' : '✗ False'}</div>`;
+    const explanation = card.explanation
+      ? `<div class="answer-note">${esc(card.explanation)}</div>`
+      : '';
+    return answerHtml + explanation;
+  }
+  if (card.type === 'fib') {
+    const answerHtml = `<div class="answer-text">${card.blanks.map(b => esc(b.answer)).join(' · ')}</div>`;
+    const explanation = card.explanation
+      ? `<div class="answer-note">${esc(card.explanation)}</div>`
+      : '';
+    return answerHtml + explanation;
+  }
+  if (card.type === 'short') {
+    const sample = card.sampleAnswer
+      ? `<div style="font-size: 15.5px; line-height: 1.65; color: var(--ink-2);">${esc(card.sampleAnswer)}</div>`
+      : '';
+    const rubric = card.rubric?.length
+      ? `<div style="margin-top: 16px;">
+           <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px;">Look for</div>
+           <ul style="margin: 0; padding-left: 20px; color: var(--ink-2); font-size: 14px; line-height: 1.7;">
+             ${card.rubric.map(r => `<li>${esc(r)}</li>`).join('')}
+           </ul>
+         </div>`
+      : '';
+    return sample + rubric;
+  }
+  return '';
+}
+
+function bindFlashcards() {
+  const exam = state.exam;
+  const session = state.session;
+  const card = exam.questions[session.currentCard];
+  if (!card) return;
+
+  const cardEl = document.getElementById('flashCard');
+
+  function flip() {
+    session.revealed[card.id] = !session.revealed[card.id];
+    renderExam();
+  }
+
+  function goPrev() {
+    if (session.currentCard > 0) {
+      session.currentCard--;
+      renderExam();
+    }
+  }
+
+  function goNext() {
+    if (session.currentCard < exam.questions.length - 1) {
+      session.currentCard++;
+      renderExam();
+    }
+  }
+
+  if (cardEl) {
+    cardEl.addEventListener('click', flip);
+    cardEl.addEventListener('keydown', e => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        flip();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        goPrev();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        goNext();
+      }
+    });
+
+    // Touch swipe
+    cardEl.addEventListener('touchstart', e => {
+      flashSwipeStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }, { passive: true });
+
+    cardEl.addEventListener('touchend', e => {
+      if (!flashSwipeStart) return;
+      const dx = e.changedTouches[0].clientX - flashSwipeStart.x;
+      const dy = e.changedTouches[0].clientY - flashSwipeStart.y;
+      flashSwipeStart = null;
+      // Only treat as swipe if horizontal movement dominates and is large enough
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+        if (dx < 0) goNext();
+        else goPrev();
+      }
+    }, { passive: true });
+  }
+
+  const prev = document.getElementById('flashPrev');
+  if (prev) prev.addEventListener('click', e => { e.stopPropagation(); goPrev(); });
+
+  const next = document.getElementById('flashNext');
+  if (next) next.addEventListener('click', e => { e.stopPropagation(); goNext(); });
+
+  const flipBtn = document.getElementById('flashFlip');
+  if (flipBtn) flipBtn.addEventListener('click', e => { e.stopPropagation(); flip(); });
+
+  const shuffle = document.getElementById('flashShuffle');
+  if (shuffle) shuffle.addEventListener('click', () => {
+    // Fisher-Yates shuffle
+    const arr = exam.questions;
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    session.currentCard = 0;
+    session.revealed = {};
+    renderExam();
+    toast('Shuffled');
+  });
+
+  const reset = document.getElementById('flashReset');
+  if (reset) reset.addEventListener('click', () => {
+    session.revealed = {};
+    session.currentCard = 0;
+    renderExam();
+    toast('Progress reset');
+  });
+
+  const exit = document.getElementById('exitFlash');
+  if (exit) exit.addEventListener('click', () => {
+    session.mode = 'test';
+    session.revealed = {};
+    renderExam();
+  });
+
+  // Global keyboard handler
+  if (flashKeyHandler) document.removeEventListener('keydown', flashKeyHandler);
+  flashKeyHandler = e => {
+    if (state.session?.mode !== 'flash') return;
+    // Ignore if user is typing in an input
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); goNext(); }
+    else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); }
+    else if (e.key === 'Escape') {
+      session.mode = 'test';
+      session.revealed = {};
+      renderExam();
+    }
+  };
+  document.addEventListener('keydown', flashKeyHandler);
+}
+
+function recordHistory(exam, session) {
+  const results = Object.values(session.results || {});
+  const autoResults = results.filter(r => r.correct === true || r.correct === false);
+  const correct = autoResults.filter(r => r.correct).length;
+  const total = autoResults.length || exam.questions.length;
+  const score = Math.round((correct / total) * 100);
+
+  state.history.unshift({
+    id: uid(),
+    examId: exam.id,
+    examTitle: exam.title,
+    topic: exam.topic,
+    score,
+    correct,
+    total,
+    timeSpent: Math.round((Date.now() - session.startTime) / 1000),
+    completedAt: Date.now()
+  });
+  state.history = state.history.slice(0, 200);
+  store.write(HISTORY_STORAGE, state.history);
+}
+
+function renderLibrary() {
+  const area = $('#libraryArea');
+  if (!state.library.length) {
+    area.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">📚</div>
+        <p class="empty-title">Nothing saved yet</p>
+        <p class="empty-text">Exams you generate will show up here automatically.</p>
+      </div>
+    `;
+    return;
+  }
+
+  area.innerHTML = `
+    <div class="library-grid">
+      ${state.library.map(exam => `
+        <div class="lib-card" data-id="${exam.id}">
+          <h3>${esc(exam.title)}</h3>
+          <div class="sub">${exam.questions.length} question${exam.questions.length === 1 ? '' : 's'} · ${new Date(exam.createdAt).toLocaleDateString()}</div>
+          <div class="row">
+            <button class="btn btn-xs" data-action="open" data-id="${exam.id}">Open</button>
+            <button class="btn btn-xs" data-action="flash" data-id="${exam.id}">🎴 Cards</button>
+            <button class="btn btn-xs" data-action="export" data-id="${exam.id}">Export</button>
+            <button class="btn btn-xs" data-action="delete" data-id="${exam.id}">Delete</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  $$('.lib-card').forEach(card => {
+    card.addEventListener('click', e => {
+      const action = e.target.closest('[data-action]')?.dataset.action;
+      const id = card.dataset.id;
+      if (action === 'flash') openFromLibrary(id, 'flash');
+      else if (action === 'open' || !action) openFromLibrary(id);
+      else if (action === 'export') exportExam(id);
+      else if (action === 'delete') deleteExam(id);
+    });
+  });
+}
+
+function openFromLibrary(id, mode = 'test') {
+  const exam = state.library.find(e => e.id === id);
+  if (!exam) return;
+  state.exam = exam;
+  state.session = createSession(exam, { mode });
+  renderExam();
+  navigate('exam');
+}
+
+function deleteExam(id) {
+  state.library = state.library.filter(e => e.id !== id);
+  store.write(LIBRARY_STORAGE, state.library);
+  renderLibrary();
+  toast('Exam deleted');
+}
+
+function exportExam(id) {
+  const exam = state.library.find(e => e.id === id);
+  if (!exam) return;
+  const blob = new Blob([JSON.stringify(exam, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = exam.title.replace(/[^\w\s-]/g, '').slice(0, 40) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function renderStats() {
+  const area = $('#statsArea');
+  const history = state.history;
+
+  if (!history.length) {
+    area.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">📊</div>
+        <p class="empty-title">No attempts yet</p>
+        <p class="empty-text">Take an exam and your progress will appear here.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const totalAttempts = history.length;
+  const avgScore = Math.round(history.reduce((sum, h) => sum + h.score, 0) / totalAttempts);
+  const bestScore = Math.max(...history.map(h => h.score));
+  const totalTime = history.reduce((sum, h) => sum + h.timeSpent, 0);
+
+  const byTopic = {};
+  history.forEach(h => {
+    const key = h.topic || 'General';
+    if (!byTopic[key]) byTopic[key] = { total: 0, count: 0 };
+    byTopic[key].total += h.score;
+    byTopic[key].count += 1;
+  });
+
+  const topicRows = Object.entries(byTopic).map(([topic, data]) => {
+    const avg = Math.round(data.total / data.count);
+    const tone = avg >= 80 ? 'good' : avg < 60 ? 'bad' : '';
+    return `
+      <div class="bar-row">
+        <div class="bar-name">${esc(topic)}</div>
+        <div class="bar-track"><div class="bar-fill ${tone}" style="width: ${avg}%"></div></div>
+        <div class="bar-pct">${avg}%</div>
+      </div>
+    `;
+  }).join('');
+
+  const recentRows = history.slice(0, 8).map(h => `
+    <div class="bar-row">
+      <div class="bar-name">${esc(h.examTitle)}</div>
+      <div class="bar-track"><div class="bar-fill ${h.score >= 80 ? 'good' : h.score < 60 ? 'bad' : ''}" style="width: ${h.score}%"></div></div>
+      <div class="bar-pct">${h.score}%</div>
+    </div>
+  `).join('');
+
+  area.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-val">${totalAttempts}</div>
+        <div class="stat-lbl">Attempts</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">${avgScore}%</div>
+        <div class="stat-lbl">Average score</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">${bestScore}%</div>
+        <div class="stat-lbl">Best score</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">${Math.round(totalTime / 60)}m</div>
+        <div class="stat-lbl">Time studied</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin: 0 0 18px; font-size: 17px; font-weight: 600; letter-spacing: -0.018em;">By topic</h3>
+      <div class="bar-list">${topicRows}</div>
+    </div>
+    <div class="card">
+      <h3 style="margin: 0 0 18px; font-size: 17px; font-weight: 600; letter-spacing: -0.018em;">Recent attempts</h3>
+      <div class="bar-list">${recentRows}</div>
+    </div>
+  `;
+}
+
+document.addEventListener('input', updateResultBar);
+</script>
+</body>
+</html>
