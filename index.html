@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- examforge. built over a bunch of weekends  fib matcher still haunts me -->
 <html lang="en" dir="ltr" data-theme="light">
 <head>
 <meta charset="utf-8">
@@ -10,7 +11,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  /* theme tokens */
   :root {
     --bg-base: #eef2f8;
     --bg-tint-1: #dbe4f5;
@@ -78,7 +78,6 @@
     --glass-shadow-md: 0 2px 6px rgba(0,0,0,0.5), 0 12px 32px rgba(0,0,0,0.5), 0 32px 64px rgba(0,0,0,0.4);
     --glass-shadow-lg: 0 4px 12px rgba(0,0,0,0.6), 0 20px 48px rgba(0,0,0,0.6), 0 48px 96px rgba(0,0,0,0.5);
   }
-  /* arabic-script languages use vazirmatn for cleaner rendering */
   [lang="fa"] body, [lang="ar"] body, [lang="ckb"] body { --font-body: var(--font-arabic); }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -108,7 +107,9 @@
   ::selection { background: color-mix(in srgb, var(--blue) 28%, transparent); }
   :focus-visible { outline: 3px solid color-mix(in srgb, var(--blue) 55%, transparent); outline-offset: 2px; border-radius: 6px; }
 
-  /* glass card base */
+  /* helper so inline SVGs sit right next to text everywhere */
+  .ico { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
   .glass-panel {
     position: relative;
     background: var(--glass-bg);
@@ -136,7 +137,6 @@
   }
   .glass-panel > * { position: relative; z-index: 1; }
 
-  /* intro splash */
   .intro {
     position: fixed;
     inset: 0;
@@ -231,7 +231,7 @@
     border-bottom: .5px solid var(--glass-border-lo);
     box-shadow: 0 1px 0 var(--glass-border-lo) inset, 0 4px 16px rgba(20,30,60,.04);
   }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 17px; letter-spacing: -.022em; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 17px; letter-spacing: -.022em; cursor: pointer; }
   .brand-mark {
     width: 34px; height: 34px; border-radius: 10px;
     display: grid; place-items: center;
@@ -270,6 +270,7 @@
     color: var(--ink);
     box-shadow: 0 1px 2px rgba(20,30,60,.08), 0 0 0 .5px var(--glass-border), 0 1px 0 rgba(255,255,255,.9) inset;
   }
+  nav.tabs button svg { stroke-width: 1.9; }
   .header-actions { display: flex; gap: 8px; margin-inline-start: auto; align-items: center; }
   .icon-btn {
     width: 36px; height: 36px; border-radius: var(--pill);
@@ -279,14 +280,12 @@
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     color: var(--ink-2); cursor: pointer;
     display: grid; place-items: center;
-    font-size: 15px;
     transition: all .2s var(--ease);
     box-shadow: 0 1px 0 rgba(255,255,255,.6) inset;
   }
   .icon-btn:hover { background: var(--glass-bg-hi); color: var(--ink); transform: scale(1.05); }
   .icon-btn:active { transform: scale(.94); }
 
-  /* language picker */
   .lang-wrap { position: relative; }
   .lang-btn {
     width: auto !important;
@@ -334,7 +333,7 @@
   }
   .lang-menu button:hover { background: var(--glass-bg-lo); color: var(--ink); }
   .lang-menu button.active { color: var(--blue); font-weight: 600; }
-  .lang-menu button .check { margin-inline-start: auto; font-size: 13px; opacity: 0; }
+  .lang-menu button .check { margin-inline-start: auto; opacity: 0; display: inline-flex; }
   .lang-menu button.active .check { opacity: 1; }
 
   main {
@@ -424,6 +423,10 @@
     box-shadow: 0 1px 0 rgba(255,255,255,.4) inset;
     font-family: inherit;
   }
+  input[type="number"] { -moz-appearance: textfield; }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
   textarea { resize: vertical; min-height: 140px; line-height: 1.55; }
   input:focus, textarea:focus, select:focus {
     background: var(--glass-bg-hi);
@@ -495,6 +498,17 @@
   .btn-sm { padding: 9px 16px; font-size: 13.5px; }
   .btn-xs { padding: 7px 13px; font-size: 12.5px; border-radius: var(--r-sm); }
 
+  .btn-loading { display: inline-flex; align-items: center; gap: 8px; }
+  .btn-loading::after {
+    content: "";
+    width: 12px; height: 12px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
   .drop {
     border: 1.5px dashed var(--glass-border);
     border-radius: var(--r-lg);
@@ -515,8 +529,13 @@
     color: var(--ink);
     transform: translateY(-1px);
   }
-  .drop-icon { font-size: 32px; margin-bottom: 12px; opacity: .85; transition: transform .35s var(--ease); }
-  .drop:hover .drop-icon { transform: translateY(-4px); }
+  .drop-icon {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-3);
+    margin-bottom: 14px;
+    transition: transform .35s var(--ease), color .2s var(--ease);
+  }
+  .drop:hover .drop-icon, .drop.over .drop-icon { transform: translateY(-4px); color: var(--blue); }
   .drop b { color: var(--blue); font-weight: 600; }
   .drop small { display: block; margin-top: 8px; font-size: 12px; color: var(--ink-3); }
 
@@ -539,7 +558,7 @@
     inset-inline-end: 5px;
     width: 24px; height: 24px; border-radius: 50%;
     border: 0; background: rgba(0,0,0,.7); color: #fff;
-    font-size: 13px; line-height: 1; cursor: pointer; padding: 0;
+    cursor: pointer; padding: 0;
     display: grid; place-items: center;
     backdrop-filter: blur(8px);
     transition: transform .15s var(--ease);
@@ -582,11 +601,18 @@
   .progress-message { font-size: 14px; color: var(--ink-3); margin: 0; min-height: 20px; transition: opacity .3s var(--ease); }
 
   .empty { text-align: center; padding: 88px 24px; color: var(--ink-3); }
-  .empty-icon { font-size: 54px; margin-bottom: 20px; opacity: .4; }
+  .empty-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 80px; height: 80px; border-radius: 50%;
+    background: var(--glass-bg-lo);
+    border: .5px solid var(--glass-border-lo);
+    color: var(--ink-3);
+    margin-bottom: 22px;
+    box-shadow: 0 1px 0 rgba(255,255,255,.4) inset;
+  }
   .empty-title { font-size: 20px; font-weight: 600; color: var(--ink); margin: 0 0 8px; }
-  .empty-text { font-size: 15px; margin: 0 auto; max-width: 360px; line-height: 1.5; }
+  .empty-text { font-size: 15px; margin: 0 auto 20px; max-width: 360px; line-height: 1.5; }
 
-  /* exam view */
   .exam-head { margin-bottom: 30px; text-align: center; }
   .exam-head h2 { font-size: 34px; font-weight: 700; letter-spacing: -.038em; line-height: 1.14; margin: 0 0 10px; }
   .exam-head .desc { font-size: 16px; color: var(--ink-3); margin: 0 auto 18px; max-width: 520px; line-height: 1.5; }
@@ -603,7 +629,27 @@
     font-size: 13px; font-weight: 500;
     box-shadow: 0 1px 0 rgba(255,255,255,.5) inset;
   }
+  .chip svg { color: var(--ink-3); }
   .exam-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 30px; }
+
+  .mode-banner {
+    padding: 11px 16px;
+    border-radius: var(--r-md);
+    margin-bottom: 18px;
+    font-size: 13.5px;
+    font-weight: 500;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    animation: enter .35s var(--ease-out);
+  }
+  .mode-banner.practice {
+    background: color-mix(in srgb, var(--blue) 10%, var(--glass-bg-lo));
+    border: .5px solid color-mix(in srgb, var(--blue) 30%, transparent);
+    color: var(--blue);
+  }
 
   .q-progress-bar {
     position: sticky;
@@ -654,13 +700,17 @@
   .question.wrong { border-color: color-mix(in srgb, var(--red) 60%, var(--glass-border)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--red) 12%, transparent), var(--glass-inner-glow), var(--glass-shadow-sm); }
   .question.partial { border-color: color-mix(in srgb, var(--orange) 60%, var(--glass-border)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--orange) 14%, transparent), var(--glass-inner-glow), var(--glass-shadow-sm); }
   .question.flagged { border-color: color-mix(in srgb, var(--orange) 50%, var(--glass-border)); }
-  .question.flagged::after {
-    content: "🚩";
+  .question.flagged .q-num { position: relative; }
+  .question.flagged .q-num::after {
+    content: "";
     position: absolute;
-    top: -8px;
-    inset-inline-end: -8px;
-    font-size: 18px;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,.2));
+    top: -3px;
+    inset-inline-end: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--orange);
+    box-shadow: 0 0 0 2px var(--glass-bg);
   }
 
   .q-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 20px; }
@@ -686,7 +736,7 @@
     border: 0; background: transparent; cursor: pointer;
     color: var(--ink-3);
     display: grid; place-items: center;
-    font-size: 15px; transition: all .15s var(--ease);
+    transition: all .15s var(--ease);
   }
   .q-tools button:hover { background: var(--glass-bg-lo); color: var(--ink); }
   .q-tools button.on { color: var(--orange); background: color-mix(in srgb, var(--orange) 18%, transparent); }
@@ -719,7 +769,6 @@
   .tf-row { display: flex; gap: 10px; margin-inline-start: 46px; flex-wrap: wrap; }
   .tf-row .option { flex: 1; min-width: 150px; justify-content: center; }
 
-  /* fill-in-blank — fixed so text never gets clipped */
   .fib-wrap {
     margin-inline-start: 46px;
     font-size: 16px;
@@ -833,7 +882,7 @@
     align-items: flex-start;
     animation: enter .35s var(--ease-out);
   }
-  .hint::before { content: "💡"; flex: 0 0 auto; font-size: 16px; }
+  .hint .hint-icon { color: var(--orange); flex: 0 0 auto; margin-top: 1px; }
 
   .result-bar {
     position: sticky;
@@ -898,7 +947,6 @@
   .result-stat .val { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .result-stat .lbl { font-size: 12px; color: var(--ink-3); margin-top: 3px; }
 
-  /* coach report card */
   .coach-card {
     margin-top: 20px;
     padding: 28px;
@@ -923,7 +971,7 @@
     width: 40px; height: 40px; border-radius: 50%;
     background: linear-gradient(140deg, var(--purple), var(--blue));
     display: grid; place-items: center;
-    color: #fff; font-size: 18px;
+    color: #fff;
     box-shadow: 0 2px 10px rgba(175,82,222,.3);
     flex: 0 0 auto;
   }
@@ -935,8 +983,9 @@
     font-size: 11px; font-weight: 700; letter-spacing: .09em;
     text-transform: uppercase; color: var(--ink-3);
     margin: 0 0 10px;
-    display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: center; gap: 6px;
   }
+  .coach-section-title svg { flex-shrink: 0; }
   .coach-section-title.good { color: var(--green); }
   .coach-section-title.warn { color: var(--orange); }
   .coach-section-title.info { color: var(--blue); }
@@ -956,7 +1005,6 @@
   .coach-dot:nth-child(3) { animation-delay: .3s; background: var(--pink); }
   @keyframes pulse { 0%,80%,100% { opacity: .3; transform: scale(.85); } 40% { opacity: 1; transform: scale(1.15); } }
 
-  /* flashcards */
   .flash-wrap { max-width: 680px; margin: 0 auto; }
   .flash-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; gap: 12px; }
   .flash-counter { font-size: 14px; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
@@ -1017,9 +1065,12 @@
     font-weight: 400; line-height: 1.65;
     white-space: pre-wrap;
   }
-  .flash-content .answer-text { font-size: 28px; font-weight: 600; letter-spacing: -.03em; color: var(--ink); margin-bottom: 18px; width: 100%; text-align: start; }
-  .flash-content .answer-text.correct-mark::before { content: "✓ "; color: var(--green); }
-  .flash-content .answer-text.wrong-mark::before { content: "✗ "; color: var(--red); }
+  .flash-content .answer-text {
+    font-size: 28px; font-weight: 600; letter-spacing: -.03em; color: var(--ink);
+    margin-bottom: 18px; width: 100%; text-align: start;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .flash-content .answer-text svg { flex-shrink: 0; }
   .flash-content .answer-note {
     font-size: 14.5px; color: var(--ink-2); line-height: 1.65;
     width: 100%; text-align: start;
@@ -1045,7 +1096,6 @@
   .flash-controls { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; align-items: center; }
   .flash-controls .btn-nav {
     width: 56px; height: 56px; padding: 0; border-radius: 50%;
-    font-size: 22px;
     display: grid; place-items: center;
     background: var(--glass-bg);
     border: .5px solid var(--glass-border);
@@ -1057,10 +1107,10 @@
   .flash-controls .btn-flip { padding: 16px 38px; font-size: 15px; font-weight: 600; border-radius: var(--pill); min-width: 180px; }
   .flash-secondary { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 28px; padding-top: 24px; border-top: .5px solid var(--glass-line); }
 
-  /* chat with the study coach */
   .chat-wrap { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; min-height: calc(100vh - 220px); }
   .chat-head { text-align: center; padding: 8px 0 24px; position: relative; }
-  .chat-head h2 { font-size: 30px; font-weight: 700; margin: 0 0 8px; }
+  .chat-head h2 { font-size: 30px; font-weight: 700; margin: 0 0 8px; display: inline-flex; align-items: center; gap: 10px; }
+  .chat-head h2 svg { color: var(--purple); }
   .chat-head p { font-size: 15px; color: var(--ink-3); margin: 0; }
   .chat-new-btn {
     position: absolute;
@@ -1082,14 +1132,13 @@
     font-family: inherit;
   }
   .chat-new-btn:hover { background: var(--glass-bg-hi); color: var(--ink); transform: translateY(-1px); }
-  .chat-new-btn svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 
   .chat-messages { display: flex; flex-direction: column; gap: 16px; flex: 1; padding: 8px 4px 20px; }
   .chat-msg { display: flex; gap: 12px; font-size: 14.5px; line-height: 1.6; animation: enter .35s var(--ease-out); }
   .chat-msg .avatar {
     width: 34px; height: 34px; border-radius: 50%;
     flex: 0 0 auto; display: grid; place-items: center;
-    font-size: 15px; color: #fff;
+    color: #fff;
     background: linear-gradient(140deg, var(--purple), var(--blue));
     box-shadow: 0 2px 8px rgba(175,82,222,.3);
   }
@@ -1122,7 +1171,15 @@
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
   }
-  .chat-empty .big { font-size: 48px; margin-bottom: 16px; opacity: .4; }
+  .chat-empty .big {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 96px; height: 96px; border-radius: 50%;
+    background: var(--glass-bg-lo);
+    border: .5px solid var(--glass-border-lo);
+    color: var(--purple);
+    margin-bottom: 20px;
+    box-shadow: 0 1px 0 rgba(255,255,255,.4) inset;
+  }
   .chat-empty h3 { font-size: 20px; font-weight: 600; color: var(--ink); margin: 0 0 8px; }
   .chat-empty p { font-size: 14.5px; max-width: 380px; margin: 0 0 24px; line-height: 1.55; }
   .chat-suggestions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 520px; width: 100%; }
@@ -1142,7 +1199,11 @@
     font-family: inherit;
   }
   .chat-suggestion:hover { background: var(--glass-bg-hi); transform: translateY(-2px); box-shadow: var(--glass-inner-glow), var(--glass-shadow-md); color: var(--ink); }
-  .chat-suggestion .title { font-weight: 600; color: var(--ink); margin-bottom: 3px; font-size: 14px; }
+  .chat-suggestion .title {
+    font-weight: 600; color: var(--ink); margin-bottom: 5px; font-size: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .chat-suggestion .title svg { color: var(--blue); flex-shrink: 0; }
 
   .chat-input-wrap {
     position: sticky; bottom: 20px; z-index: 20;
@@ -1189,11 +1250,9 @@
     display: grid; place-items: center;
     flex: 0 0 auto;
     transition: all .2s var(--ease);
-    font-size: 15px;
   }
   .chat-clear:hover { color: var(--red); border-color: color-mix(in srgb, var(--red) 40%, transparent); }
 
-  /* library and stats */
   .library-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
   .lib-card {
     background: var(--glass-bg);
@@ -1259,8 +1318,13 @@
     border: .5px solid var(--glass-border);
     max-width: calc(100vw - 40px);
     text-align: center;
+    display: flex; align-items: center; gap: 8px;
   }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .toast svg { flex-shrink: 0; }
+  .toast.success { color: var(--green); border-color: color-mix(in srgb, var(--green) 35%, var(--glass-border)); }
+  .toast.warn    { color: var(--orange); border-color: color-mix(in srgb, var(--orange) 35%, var(--glass-border)); }
+  .toast.error   { color: var(--red); border-color: color-mix(in srgb, var(--red) 35%, var(--glass-border)); }
 
   @media (max-width: 640px) {
     header { padding: 10px 16px; padding-top: calc(10px + env(safe-area-inset-top)); gap: 8px; }
@@ -1295,7 +1359,7 @@
     body { background: white; color: black; }
     header, nav.tabs, .icon-btn, .result-actions, .toast, .exam-actions,
     .q-tools, .result-bar, .intro, .flash-controls, .flash-topbar, .chat-input-wrap,
-    .q-progress-bar, .lang-wrap {
+    .q-progress-bar, .lang-wrap, .mode-banner {
       display: none !important;
     }
     main { padding: 0; max-width: none; }
@@ -1318,7 +1382,7 @@
 
 <div class="app">
   <header>
-    <div class="brand">
+    <div class="brand" id="brandBtn">
       <div class="brand-mark">
         <svg viewBox="0 0 24 24">
           <path d="M2 9l10-5 10 5-10 5z"/>
@@ -1330,19 +1394,24 @@
 
     <nav class="tabs" id="nav">
       <button data-view="create" class="active">
-        <span>✨</span><span class="tab-label" data-i18n="create">Create</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"/></svg>
+        <span class="tab-label" data-i18n="create">Create</span>
       </button>
       <button data-view="exam">
-        <span>📝</span><span class="tab-label" data-i18n="exam">Exam</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+        <span class="tab-label" data-i18n="exam">Exam</span>
       </button>
       <button data-view="coach">
-        <span>🧑‍🏫</span><span class="tab-label" data-i18n="coach">Coach</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg>
+        <span class="tab-label" data-i18n="coach">Coach</span>
       </button>
       <button data-view="library">
-        <span>📚</span><span class="tab-label" data-i18n="library">Library</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span class="tab-label" data-i18n="library">Library</span>
       </button>
       <button data-view="stats">
-        <span>📊</span><span class="tab-label" data-i18n="stats">Stats</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16v-5M12 16V8M17 16v-9"/></svg>
+        <span class="tab-label" data-i18n="stats">Stats</span>
       </button>
     </nav>
 
@@ -1356,14 +1425,14 @@
           <span class="code" id="langCode">EN</span>
         </button>
         <div class="lang-menu" id="langMenu">
-          <button data-lang="en"><span>English</span><span class="check">✓</span></button>
-          <button data-lang="fa"><span>فارسی</span><span class="check">✓</span></button>
-          <button data-lang="ar"><span>العربية</span><span class="check">✓</span></button>
-          <button data-lang="ckb"><span>کوردی</span><span class="check">✓</span></button>
-          <button data-lang="pl"><span>Polski</span><span class="check">✓</span></button>
+          <button data-lang="en"><span>English</span><span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span></button>
+          <button data-lang="fa"><span>فارسی</span><span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span></button>
+          <button data-lang="ar"><span>العربية</span><span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span></button>
+          <button data-lang="ckb"><span>کوردی</span><span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span></button>
+          <button data-lang="pl"><span>Polski</span><span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span></button>
         </div>
       </div>
-      <button class="icon-btn" id="themeBtn" title="Appearance">☾</button>
+      <button class="icon-btn" id="themeBtn" title="Appearance"></button>
     </div>
   </header>
 
@@ -1377,14 +1446,20 @@
       <div class="card">
         <div class="card-head">
           <h2 class="card-title"><span class="step">1</span> <span data-i18n="sourceMaterial">Source material</span></h2>
-          <p class="card-sub" data-i18n="sourceSub">Text, images, or both — anything you want to be tested on.</p>
+          <p class="card-sub" data-i18n="sourceSub">Text, images, or both - anything you want to be tested on.</p>
         </div>
         <div class="field">
           <textarea id="sourceText" placeholder="Paste a chapter, an article, lecture notes, a Wikipedia page…"></textarea>
         </div>
         <div class="field">
           <div class="drop" id="drop">
-            <div class="drop-icon">🖼️</div>
+            <div class="drop-icon">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+            </div>
             <span data-i18n="dropTitle">Drop photos of pages or slides here</span>
             <small data-i18n="dropSub">or click to browse · PNG · JPG · WEBP · up to 10</small>
           </div>
@@ -1448,7 +1523,10 @@
         </div>
       </div>
 
-      <button class="btn btn-primary btn-large" id="generateBtn">✨ <span data-i18n="generateExam">Generate exam</span></button>
+      <button class="btn btn-primary btn-large" id="generateBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"/></svg>
+        <span data-i18n="generateExam">Generate exam</span>
+      </button>
       <div class="status" id="status"></div>
       <div id="progressArea"></div>
     </section>
@@ -1460,16 +1538,21 @@
     <section class="view" id="view-coach">
       <div class="chat-wrap">
         <div class="chat-head">
-          <h2 data-i18n="coachTitle">🧑‍🏫 Your AI coach</h2>
+          <h2>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg>
+            <span data-i18n="coachTitle">Your AI coach</span>
+          </h2>
           <p data-i18n="coachSubtitle">Ask anything. Get taught the whole concept, step by step.</p>
           <button class="chat-new-btn" id="chatNew">
-            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
             <span data-i18n="newChat">New chat</span>
           </button>
         </div>
         <div id="chatMessages" class="chat-messages"></div>
         <div class="chat-input-wrap">
-          <button class="chat-clear" id="chatClear" title="Clear">✕</button>
+          <button class="chat-clear" id="chatClear" title="Clear">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
           <textarea id="chatInput" class="chat-input" placeholder="Ask me to teach you something…" rows="1"></textarea>
           <button class="chat-send" id="chatSend" title="Send">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -1502,126 +1585,123 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ==============================
-// i18n
-// ==============================
+// svg icon set (lucide-ish stroke icons, inlined so there's no external dep)
+// if you're adding more, keep them stroke-based with the same 24x24 grid
+const ICONS = {
+  sparkle: '<path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"/>',
+  pencil: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  graduation: '<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/>',
+  book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+  chart: '<path d="M3 3v18h18"/><path d="M7 16v-5M12 16V8M17 16v-9"/>',
+  image: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>',
+  bulb: '<path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/>',
+  flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>',
+  bookOpen: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+  cards: '<rect x="3" y="6" width="14" height="14" rx="2"/><path d="M7 6V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-2"/>',
+  printer: '<path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
+  check: '<path d="M20 6L9 17l-5-5"/>',
+  x: '<path d="M18 6L6 18M6 6l12 12"/>',
+  user: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  trophy: '<path d="M6 9H4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2M18 9h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2"/><path d="M8 21h8M12 17v4"/><path d="M6 3h12v6a6 6 0 0 1-12 0z"/>',
+  target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  clipboard: '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>',
+  alert: '<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
+  leaf: '<path d="M12 22V12M6 12c0-3 2-6 6-6 0 3-2 6-6 6zM18 12c0-3-2-6-6-6 0 3 2 6 6 6z"/>',
+  scales: '<path d="M12 3v18M8 21h8"/><path d="M3 9l4-4 4 4"/><path d="M13 9l4-4 4 4"/><path d="M3 9v3a4 4 0 0 0 8 0V9"/><path d="M13 9v3a4 4 0 0 0 8 0V9"/>',
+  shuffle: '<path d="M16 3h5v5M4 20l17-17M21 16v5h-5M15 15l6 6M4 4l5 5"/>',
+  reset: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/>',
+  redo: '<path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/>',
+  message: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  arrowUp: '<path d="M12 19V5M5 12l7-7 7 7"/>',
+  arrowLeft: '<path d="M15 18l-6-6 6-6"/>',
+  arrowRight: '<path d="M9 18l6-6-6-6"/>',
+  moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  halfCircle: '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18"/>',
+  trash: '<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/>',
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+  external: '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>',
+};
+
+function icon(name, size = 16) {
+  const path = ICONS[name];
+  if (!path) return '';
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0;">${path}</svg>`;
+}
 
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 
-const TRANSLATIONS = {
+// translations for 5 langs. the kurdish and polish blocks were the roughest
+// emojis are stripped from all strings - icons are added at render time via icon()
+const T = {
   en: {
-    hello: "Hello",
-    readyForBetterGrades: "Ready for better grades?",
-    letsGo: "Let's go",
-    skip: "Skip",
-    create: "Create",
-    exam: "Exam",
-    coach: "Coach",
-    library: "Library",
-    stats: "Stats",
+    hello: "Hello", readyForBetterGrades: "Ready for better grades?", letsGo: "Let's go", skip: "Skip",
+    create: "Create", exam: "Exam", coach: "Coach", library: "Library", stats: "Stats",
     createHero: "Turn anything into an exam.",
     createHeroSub: "Paste your notes or drop in photos of a page. DeepSeek reads it and writes the questions.",
     sourceMaterial: "Source material",
-    sourceSub: "Text, images, or both — anything you want to be tested on.",
+    sourceSub: "Text, images, or both - anything you want to be tested on.",
     sourcePlaceholder: "Paste a chapter, an article, lecture notes, a Wikipedia page…",
     dropTitle: "Drop photos of pages or slides here",
     dropSub: "or click to browse · PNG · JPG · WEBP · up to 10",
-    questionMix: "Question mix",
-    questionMixSub: "How many of each type do you want?",
-    multipleChoice: "Multiple choice",
-    trueFalse: "True / False",
-    fillInBlank: "Fill in blank",
-    shortAnswer: "Short answer",
-    difficulty: "Difficulty",
-    easy: "Easy",
-    medium: "Medium",
-    hard: "Hard",
-    mixed: "Mixed",
-    passingScore: "Passing score",
-    focusOn: "Focus on",
-    optional: "(optional)",
+    questionMix: "Question mix", questionMixSub: "How many of each type do you want?",
+    multipleChoice: "Multiple choice", trueFalse: "True / False", fillInBlank: "Fill in blank", shortAnswer: "Short answer",
+    difficulty: "Difficulty", easy: "Easy", medium: "Medium", hard: "Hard", mixed: "Mixed",
+    passingScore: "Passing score", focusOn: "Focus on", optional: "(optional)",
     focusPlaceholder: "e.g. chapter 3, definitions, dates",
-    generateExam: "Generate exam",
-    total: "{n} total",
-    // exam view
-    questions_one: "1 question",
-    questions_other: "{n} questions",
-    points_one: "1 point",
-    points_other: "{n} points",
-    passAt: "Pass at {n}%",
-    practiceMode: "📖 Practice mode",
-    testMode: "📝 Test mode",
-    studyAsFlashcards: "🎴 Study as flashcards",
-    print: "🖨️ Print",
-    answered: "answered",
-    submitForGrading: "Submit for grading",
+    generateExam: "Generate exam", total: "{n} total",
+    questions_one: "1 question", questions_other: "{n} questions",
+    points_one: "1 point", points_other: "{n} points",
+    passAt: "Pass at {n}%", practiceMode: "Practice mode", testMode: "Test mode",
+    studyAsFlashcards: "Study as flashcards", print: "Print",
+    answered: "answered", submitForGrading: "Submit for grading",
     noExamYet: "No exam yet",
     noExamText: "Head to Create, add some material, and generate your first exam.",
-    // questions
-    trueLabel: "✓ True",
-    falseLabel: "✗ False",
-    writeAnswer: "Write your answer here…",
-    showHint: "Show hint",
-    flagForReview: "Flag for review",
-    correct: "Correct",
-    correctMsg: "Nice — that one's right.",
-    notQuite: "Not quite",
-    notQuiteMsg: "See the correct answer below.",
-    almost: "Almost",
-    almostMsg: "You got it right in meaning — the expected answer was a slightly different form.",
-    selfCheck: "Self-check",
-    selfCheckMsg: "Compare your answer with the model response below.",
-    correctAnswer: "Correct answer",
-    modelAnswer: "Model answer",
-    lookFor: "Look for",
-    why: "Why",
-    closeHint: "close — expected \"{answer}\"",
-    // results
-    outstanding: "Outstanding.",
-    wellDone: "Well done.",
-    gettingThere: "Getting there.",
-    keepAtIt: "Keep at it.",
-    passed: "Passed",
-    tryAgain: "Try again",
-    correctCount: "{n} correct",
-    closeCount: "{n} close",
-    missedCount: "{n} missed",
-    autoGraded: "Auto-graded",
-    toReview: "To review",
-    timeLabel: "Time",
-    retake: "Retake",
-    createNewExam: "Create a new exam",
-    newExam: "New exam",
-    // coach report
+    emptyGoCreate: "Start creating",
+    trueLabel: "True", falseLabel: "False", writeAnswer: "Write your answer here…",
+    showHint: "Show hint", flagForReview: "Flag for review",
+    correct: "Correct", correctMsg: "Nice - that one's right.",
+    notQuite: "Not quite", notQuiteMsg: "See the correct answer below.",
+    almost: "Almost", almostMsg: "You got it right in meaning - the expected answer was a slightly different form.",
+    selfCheck: "Self-check", selfCheckMsg: "Compare your answer with the model response below.",
+    correctAnswer: "Correct answer", modelAnswer: "Model answer", lookFor: "Look for", why: "Why",
+    closeHint: "close - expected \"{answer}\"",
+    outstanding: "Outstanding.", wellDone: "Well done.", gettingThere: "Getting there.", keepAtIt: "Keep at it.",
+    passed: "Passed", tryAgain: "Try again",
+    correctCount: "{n} correct", closeCount: "{n} close", missedCount: "{n} missed",
+    autoGraded: "Auto-graded", toReview: "To review", timeLabel: "Time",
+    retake: "Retake", createNewExam: "Create a new exam", newExam: "New exam",
     getCoachReport: "Get your coach's report",
     coachReportSub: "Personalized feedback based on your answers and how long you spent",
-    coachReportExplain: "I'll look at every question, your answer, and the time you spent on it — then tell you exactly what to work on, even if you got everything right.",
-    analyzeMyExam: "✨ Analyze my exam",
+    coachReportExplain: "I'll look at every question, your answer, and the time you spent on it - then tell you exactly what to work on, even if you got everything right.",
+    analyzeMyExam: "Analyze my exam",
     analyzingExam: "Analyzing your exam…",
     analyzingSub: "Reading every answer and every second",
     thinking: "Thinking…",
     coachReportTitle: "Your coach's report",
     coachReportSub2: "Based on your answers and time spent",
     overview: "Overview",
-    strengths: "✓ Strengths",
-    areasToImprove: "⚠️ Areas to improve",
-    whatToStudy: "📚 What to study next",
-    pacingNotes: "⏱ Pacing notes",
-    talkToCoach: "💬 Talk to your coach",
-    reanalyze: "↻ Re-analyze",
-    // flashcards
+    strengths: "Strengths",
+    areasToImprove: "Areas to improve",
+    whatToStudy: "What to study next",
+    pacingNotes: "Pacing notes",
+    talkToCoach: "Talk to your coach",
+    reanalyze: "Re-analyze",
     questionSide: "Question",
     answerSide: "Answer",
     tapToReveal: "Tap to reveal",
     spaceFlip: "Space to flip",
     spaceKey: "Space",
     arrowKeys: "← → to move",
-    shuffle: "🔀 Shuffle",
-    resetProgress: "↺ Reset progress",
+    shuffle: "Shuffle",
+    resetProgress: "Reset progress",
     exit: "Exit",
-    reviewAgain: "↻ Review again",
-    iKnowThis: "✓ I know this",
+    reviewAgain: "Review again",
+    iKnowThis: "I know this",
     known: "{n} known",
     toReviewChip: "{n} to review",
     noCards: "No cards to study",
@@ -1629,51 +1709,40 @@ const TRANSLATIONS = {
     cardMovedEnd: "Card moved to the end",
     shuffled: "Shuffled",
     progressReset: "Progress reset",
-    // chat
-    coachTitle: "🧑‍🏫 Your AI coach",
+    coachTitle: "Your AI coach",
     coachSubtitle: "Ask anything. Get taught the whole concept, step by step.",
     newChat: "New chat",
-    chatEmptyTitle: "Hi — I'm your study coach.",
+    chatEmptyTitle: "Hi - I'm your study coach.",
     chatEmptyText: "Ask me to explain a concept, walk you through a problem, or quiz you on something you're learning.",
     chatPlaceholder: "Ask me to teach you something…",
-    suggestTeachTitle: "📖 Teach me a topic",
+    suggestTeachTitle: "Teach me a topic",
     suggestTeachText: "Explain the water cycle like I'm new to it",
     suggestTeachPrompt: "Teach me the water cycle from scratch, like I've never seen it before.",
-    suggestAnalogTitle: "🌱 Explain with an analogy",
+    suggestAnalogTitle: "Explain with an analogy",
     suggestAnalogText: "Photosynthesis, using a real-world comparison",
     suggestAnalogPrompt: "Explain photosynthesis step by step, with a simple analogy.",
-    suggestQuizTitle: "🎯 Quiz me",
+    suggestQuizTitle: "Quiz me",
     suggestQuizText: "5 questions on algebra, one at a time",
     suggestQuizPrompt: "Quiz me on basic algebra with 5 questions, one at a time.",
-    suggestCompareTitle: "⚖️ Compare concepts",
+    suggestCompareTitle: "Compare concepts",
     suggestCompareText: "Mitosis vs meiosis, thoroughly",
     suggestComparePrompt: "What's the difference between mitosis and meiosis? Be thorough.",
     clearConfirm: "Clear the conversation?",
     cleared: "Cleared",
     newChatStarted: "Started a new chat",
-    holdOnThinking: "Hold on — still thinking",
-    // library
+    holdOnThinking: "Hold on - still thinking",
     libraryTitle: "Your library",
     librarySubtitle: "Every exam you generate is saved here.",
     nothingSaved: "Nothing saved yet",
     nothingSavedText: "Exams you generate will show up here automatically.",
-    open: "Open",
-    cards: "🎴 Cards",
-    export: "Export",
-    delete: "Delete",
+    open: "Open", cards: "Cards", export: "Export", delete: "Delete",
     examDeleted: "Exam deleted",
-    // stats
     statsTitle: "Your progress",
     statsSubtitle: "See how you're doing across all your exams.",
     noAttempts: "No attempts yet",
     noAttemptsText: "Take an exam and your progress will appear here.",
-    attempts: "Attempts",
-    avgScore: "Average score",
-    bestScore: "Best score",
-    timeStudied: "Time studied",
-    byTopic: "By topic",
-    recentAttempts: "Recent attempts",
-    // status
+    attempts: "Attempts", avgScore: "Average score", bestScore: "Best score", timeStudied: "Time studied",
+    byTopic: "By topic", recentAttempts: "Recent attempts",
     needSource: "Add some text or an image first.",
     needOneQuestion: "Request at least one question.",
     tooMany: "Keep it under 80 total questions.",
@@ -1682,181 +1751,100 @@ const TRANSLATIONS = {
     examReady: "Exam ready",
     generatedSome: "Generated {n} of {total} questions",
     somethingWrong: "Something went wrong: ",
-    partFailed: "Part {n} failed — keeping what came through.",
-    cutOff: "Heads up — the model got cut off, so you got fewer questions than asked.",
+    partFailed: "Part {n} failed - keeping what came through.",
+    cutOff: "Heads up - the model got cut off, so you got fewer questions than asked.",
     coachReportFailed: "Coach report failed: ",
     storageFull: "Storage full",
     couldNotLoadImage: "Could not load that image",
     onlyMoreImages: "Only {n} more image(s) fit",
+    draftRestored: "Picked up where you left off",
+    practiceHint: "Practice mode - answers reveal as you go",
+    markdownExported: "Markdown saved",
     progressMessages: [
-      "Reading your material…",
-      "Picking out the key ideas…",
-      "Drafting questions…",
-      "Writing plausible distractors…",
-      "Checking the answers…",
-      "Polishing the wording…"
+      "Reading your material…", "Picking out the key ideas…", "Drafting questions…",
+      "Writing plausible distractors…", "Checking the answers…", "Polishing the wording…"
     ],
-    // language names (for the AI)
-    languageName: "English",
-    // intro
-    coachReportOverview: "Overview"
+    languageName: "English"
   },
-
   fa: {
-    hello: "سلام",
-    readyForBetterGrades: "آماده نمرات بهتر هستید؟",
-    letsGo: "بزن بریم",
-    skip: "رد کردن",
-    create: "ساخت",
-    exam: "آزمون",
-    coach: "مربی",
-    library: "کتابخانه",
-    stats: "آمار",
+    hello: "سلام", readyForBetterGrades: "آماده نمرات بهتر هستید؟", letsGo: "بزن بریم", skip: "رد کردن",
+    create: "ساخت", exam: "آزمون", coach: "مربی", library: "کتابخانه", stats: "آمار",
     createHero: "هر چیزی را به آزمون تبدیل کنید.",
     createHeroSub: "یادداشت‌هایتان را بچسبانید یا عکس صفحه اضافه کنید. هوش مصنوعی آن را می‌خواند و سوال می‌سازد.",
     sourceMaterial: "منبع",
-    sourceSub: "متن، تصویر، یا هر دو — هر چیزی که می‌خواهید از آن سوال بسازیم.",
+    sourceSub: "متن، تصویر، یا هر دو - هر چیزی که می‌خواهید از آن سوال بسازیم.",
     sourcePlaceholder: "یک فصل، مقاله، جزوه، صفحه ویکی‌پدیا را بچسبانید…",
     dropTitle: "عکس صفحات یا اسلایدها را اینجا رها کنید",
     dropSub: "یا برای مرور کلیک کنید · PNG · JPG · WEBP · حداکثر ۱۰",
-    questionMix: "ترکیب سوالات",
-    questionMixSub: "از هر نوع چند تا می‌خواهید؟",
-    multipleChoice: "چند گزینه‌ای",
-    trueFalse: "درست / غلط",
-    fillInBlank: "جای خالی",
-    shortAnswer: "پاسخ کوتاه",
-    difficulty: "سختی",
-    easy: "آسان",
-    medium: "متوسط",
-    hard: "سخت",
-    mixed: "ترکیبی",
-    passingScore: "نمره قبولی",
-    focusOn: "تمرکز روی",
-    optional: "(اختیاری)",
+    questionMix: "ترکیب سوالات", questionMixSub: "از هر نوع چند تا می‌خواهید؟",
+    multipleChoice: "چند گزینه‌ای", trueFalse: "درست / غلط", fillInBlank: "جای خالی", shortAnswer: "پاسخ کوتاه",
+    difficulty: "سختی", easy: "آسان", medium: "متوسط", hard: "سخت", mixed: "ترکیبی",
+    passingScore: "نمره قبولی", focusOn: "تمرکز روی", optional: "(اختیاری)",
     focusPlaceholder: "مثلاً فصل ۳، تعاریف، تاریخ‌ها",
-    generateExam: "ساخت آزمون",
-    total: "مجموع {n}",
-    questions_one: "۱ سوال",
-    questions_other: "{n} سوال",
-    points_one: "۱ امتیاز",
-    points_other: "{n} امتیاز",
-    passAt: "قبولی در {n}%",
-    practiceMode: "📖 حالت تمرین",
-    testMode: "📝 حالت آزمون",
-    studyAsFlashcards: "🎴 مطالعه با فلش‌کارت",
-    print: "🖨️ چاپ",
-    answered: "پاسخ داده",
-    submitForGrading: "ارسال برای نمره‌دهی",
+    generateExam: "ساخت آزمون", total: "مجموع {n}",
+    questions_one: "۱ سوال", questions_other: "{n} سوال",
+    points_one: "۱ امتیاز", points_other: "{n} امتیاز",
+    passAt: "قبولی در {n}%", practiceMode: "حالت تمرین", testMode: "حالت آزمون",
+    studyAsFlashcards: "مطالعه با فلش‌کارت", print: "چاپ",
+    answered: "پاسخ داده", submitForGrading: "ارسال برای نمره‌دهی",
     noExamYet: "هنوز آزمونی نیست",
     noExamText: "به ساخت بروید، مطلبی اضافه کنید و اولین آزمون خود را بسازید.",
-    trueLabel: "✓ درست",
-    falseLabel: "✗ غلط",
-    writeAnswer: "پاسخ خود را اینجا بنویسید…",
-    showHint: "نمایش راهنما",
-    flagForReview: "علامت‌گذاری برای مرور",
-    correct: "درست",
-    correctMsg: "آفرین — درست بود.",
-    notQuite: "نه دقیقاً",
-    notQuiteMsg: "پاسخ صحیح را پایین ببینید.",
-    almost: "تقریباً",
-    almostMsg: "معنی را درست فهمیدی — شکل پاسخ فقط کمی متفاوت بود.",
-    selfCheck: "خودارزیابی",
-    selfCheckMsg: "پاسخ خود را با پاسخ نمونه مقایسه کنید.",
-    correctAnswer: "پاسخ درست",
-    modelAnswer: "پاسخ نمونه",
-    lookFor: "به دنبال",
-    why: "چرا",
-    closeHint: "نزدیک — پاسخ مورد انتظار «{answer}»",
-    outstanding: "فوق‌العاده.",
-    wellDone: "آفرین.",
-    gettingThere: "داری نزدیک می‌شی.",
-    keepAtIt: "ادامه بده.",
-    passed: "قبول",
-    tryAgain: "دوباره تلاش کن",
-    correctCount: "{n} درست",
-    closeCount: "{n} نزدیک",
-    missedCount: "{n} اشتباه",
-    autoGraded: "تصحیح خودکار",
-    toReview: "برای مرور",
-    timeLabel: "زمان",
-    retake: "تلاش دوباره",
-    createNewExam: "ساخت آزمون جدید",
-    newExam: "آزمون جدید",
+    emptyGoCreate: "شروع کنید",
+    trueLabel: "درست", falseLabel: "غلط", writeAnswer: "پاسخ خود را اینجا بنویسید…",
+    showHint: "نمایش راهنما", flagForReview: "علامت‌گذاری برای مرور",
+    correct: "درست", correctMsg: "آفرین - درست بود.",
+    notQuite: "نه دقیقاً", notQuiteMsg: "پاسخ صحیح را پایین ببینید.",
+    almost: "تقریباً", almostMsg: "معنی را درست فهمیدی - شکل پاسخ فقط کمی متفاوت بود.",
+    selfCheck: "خودارزیابی", selfCheckMsg: "پاسخ خود را با پاسخ نمونه مقایسه کنید.",
+    correctAnswer: "پاسخ درست", modelAnswer: "پاسخ نمونه", lookFor: "به دنبال", why: "چرا",
+    closeHint: "نزدیک - پاسخ مورد انتظار «{answer}»",
+    outstanding: "فوق‌العاده.", wellDone: "آفرین.", gettingThere: "داری نزدیک می‌شی.", keepAtIt: "ادامه بده.",
+    passed: "قبول", tryAgain: "دوباره تلاش کن",
+    correctCount: "{n} درست", closeCount: "{n} نزدیک", missedCount: "{n} اشتباه",
+    autoGraded: "تصحیح خودکار", toReview: "برای مرور", timeLabel: "زمان",
+    retake: "تلاش دوباره", createNewExam: "ساخت آزمون جدید", newExam: "آزمون جدید",
     getCoachReport: "گزارش مربی خود را دریافت کنید",
     coachReportSub: "بازخورد شخصی‌سازی‌شده بر اساس پاسخ‌ها و زمان شما",
-    coachReportExplain: "من به هر سوال، پاسخ شما، و زمان صرف‌شده نگاه می‌کنم — سپس دقیقاً می‌گویم روی چه چیزی کار کنید، حتی اگر همه را درست زده باشید.",
-    analyzeMyExam: "✨ آزمون من را تحلیل کن",
+    coachReportExplain: "من به هر سوال، پاسخ شما، و زمان صرف‌شده نگاه می‌کنم - سپس دقیقاً می‌گویم روی چه چیزی کار کنید، حتی اگر همه را درست زده باشید.",
+    analyzeMyExam: "آزمون من را تحلیل کن",
     analyzingExam: "در حال تحلیل آزمون شما…",
     analyzingSub: "خواندن هر پاسخ و هر ثانیه",
     thinking: "در حال فکر کردن…",
     coachReportTitle: "گزارش مربی شما",
     coachReportSub2: "بر اساس پاسخ‌ها و زمان شما",
-    overview: "مرور کلی",
-    strengths: "✓ نقاط قوت",
-    areasToImprove: "⚠️ نقاط قابل بهبود",
-    whatToStudy: "📚 چه چیزی بعد بخوانید",
-    pacingNotes: "⏱ یادداشت‌های سرعت",
-    talkToCoach: "💬 با مربی صحبت کن",
-    reanalyze: "↻ تحلیل مجدد",
-    questionSide: "سوال",
-    answerSide: "پاسخ",
-    tapToReveal: "برای نمایش ضربه بزنید",
-    spaceFlip: "فاصله برای برگرداندن",
-    spaceKey: "فاصله",
-    arrowKeys: "← → برای جابه‌جایی",
-    shuffle: "🔀 بُر زدن",
-    resetProgress: "↺ بازنشانی پیشرفت",
-    exit: "خروج",
-    reviewAgain: "↻ دوباره مرور کن",
-    iKnowThis: "✓ این را می‌دانم",
-    known: "{n} می‌دانم",
-    toReviewChip: "{n} برای مرور",
-    noCards: "کارتی برای مطالعه نیست",
-    noCardsText: "این آزمون هنوز سوالی ندارد.",
-    cardMovedEnd: "کارت به آخر منتقل شد",
-    shuffled: "بُر خورد",
-    progressReset: "پیشرفت بازنشانی شد",
-    coachTitle: "🧑‍🏫 مربی هوشمند شما",
-    coachSubtitle: "هر چیزی بپرسید. کل مفهوم را قدم به قدم یاد بگیرید.",
+    overview: "مرور کلی", strengths: "نقاط قوت", areasToImprove: "نقاط قابل بهبود",
+    whatToStudy: "چه چیزی بعد بخوانید", pacingNotes: "یادداشت‌های سرعت",
+    talkToCoach: "با مربی صحبت کن", reanalyze: "تحلیل مجدد",
+    questionSide: "سوال", answerSide: "پاسخ", tapToReveal: "برای نمایش ضربه بزنید",
+    spaceFlip: "فاصله برای برگرداندن", spaceKey: "فاصله", arrowKeys: "← → برای جابه‌جایی",
+    shuffle: "بُر زدن", resetProgress: "بازنشانی پیشرفت", exit: "خروج",
+    reviewAgain: "دوباره مرور کن", iKnowThis: "این را می‌دانم",
+    known: "{n} می‌دانم", toReviewChip: "{n} برای مرور",
+    noCards: "کارتی برای مطالعه نیست", noCardsText: "این آزمون هنوز سوالی ندارد.",
+    cardMovedEnd: "کارت به آخر منتقل شد", shuffled: "بُر خورد", progressReset: "پیشرفت بازنشانی شد",
+    coachTitle: "مربی هوشمند شما", coachSubtitle: "هر چیزی بپرسید. کل مفهوم را قدم به قدم یاد بگیرید.",
     newChat: "چت جدید",
-    chatEmptyTitle: "سلام — من مربی مطالعه شما هستم.",
+    chatEmptyTitle: "سلام - من مربی مطالعه شما هستم.",
     chatEmptyText: "از من بخواهید مفهومی را توضیح دهم، مسئله‌ای را قدم به قدم حل کنم، یا از شما امتحان بگیرم.",
     chatPlaceholder: "از من بخواهید چیزی یادتان بدهم…",
-    suggestTeachTitle: "📖 یک موضوع یادم بده",
-    suggestTeachText: "چرخه آب را طوری توضیح بده که تازه‌کارم",
+    suggestTeachTitle: "یک موضوع یادم بده", suggestTeachText: "چرخه آب را طوری توضیح بده که تازه‌کارم",
     suggestTeachPrompt: "چرخه آب را از صفر برایم توضیح بده، انگار هیچ‌وقت ندیده‌ام.",
-    suggestAnalogTitle: "🌱 با مثال توضیح بده",
-    suggestAnalogText: "فتوسنتز، با یک مقایسه واقعی",
+    suggestAnalogTitle: "با مثال توضیح بده", suggestAnalogText: "فتوسنتز، با یک مقایسه واقعی",
     suggestAnalogPrompt: "فتوسنتز را قدم به قدم با یک مثال ساده توضیح بده.",
-    suggestQuizTitle: "🎯 از من امتحان بگیر",
-    suggestQuizText: "۵ سوال جبر، یکی‌یکی",
+    suggestQuizTitle: "از من امتحان بگیر", suggestQuizText: "۵ سوال جبر، یکی‌یکی",
     suggestQuizPrompt: "از من ۵ سوال جبر بپرس، یکی‌یکی.",
-    suggestCompareTitle: "⚖️ مقایسه مفاهیم",
-    suggestCompareText: "میتوز و میوز، کامل",
+    suggestCompareTitle: "مقایسه مفاهیم", suggestCompareText: "میتوز و میوز، کامل",
     suggestComparePrompt: "تفاوت میتوز و میوز چیست؟ کامل توضیح بده.",
-    clearConfirm: "گفتگو پاک شود؟",
-    cleared: "پاک شد",
-    newChatStarted: "چت جدید شروع شد",
-    holdOnThinking: "صبر کن — در حال فکر کردن",
-    libraryTitle: "کتابخانه شما",
-    librarySubtitle: "هر آزمونی که می‌سازید اینجا ذخیره می‌شود.",
-    nothingSaved: "هنوز چیزی ذخیره نشده",
-    nothingSavedText: "آزمون‌هایی که می‌سازید به‌طور خودکار اینجا ظاهر می‌شوند.",
-    open: "باز کن",
-    cards: "🎴 کارت‌ها",
-    export: "خروجی",
-    delete: "حذف",
+    clearConfirm: "گفتگو پاک شود؟", cleared: "پاک شد", newChatStarted: "چت جدید شروع شد",
+    holdOnThinking: "صبر کن - در حال فکر کردن",
+    libraryTitle: "کتابخانه شما", librarySubtitle: "هر آزمونی که می‌سازید اینجا ذخیره می‌شود.",
+    nothingSaved: "هنوز چیزی ذخیره نشده", nothingSavedText: "آزمون‌هایی که می‌سازید به‌طور خودکار اینجا ظاهر می‌شوند.",
+    open: "باز کن", cards: "کارت‌ها", export: "خروجی", delete: "حذف",
     examDeleted: "آزمون حذف شد",
-    statsTitle: "پیشرفت شما",
-    statsSubtitle: "ببینید در همه آزمون‌ها چطور عمل می‌کنید.",
-    noAttempts: "هنوز تلاشی نیست",
-    noAttemptsText: "یک آزمون بدهید تا پیشرفتتان اینجا ظاهر شود.",
-    attempts: "تلاش‌ها",
-    avgScore: "میانگین نمره",
-    bestScore: "بهترین نمره",
-    timeStudied: "زمان مطالعه",
-    byTopic: "بر اساس موضوع",
-    recentAttempts: "تلاش‌های اخیر",
+    statsTitle: "پیشرفت شما", statsSubtitle: "ببینید در همه آزمون‌ها چطور عمل می‌کنید.",
+    noAttempts: "هنوز تلاشی نیست", noAttemptsText: "یک آزمون بدهید تا پیشرفتتان اینجا ظاهر شود.",
+    attempts: "تلاش‌ها", avgScore: "میانگین نمره", bestScore: "بهترین نمره", timeStudied: "زمان مطالعه",
+    byTopic: "بر اساس موضوع", recentAttempts: "تلاش‌های اخیر",
     needSource: "اول متن یا تصویری اضافه کنید.",
     needOneQuestion: "حداقل یک سوال بخواهید.",
     tooMany: "زیر ۸۰ سوال نگه دارید.",
@@ -1865,559 +1853,309 @@ const TRANSLATIONS = {
     examReady: "آزمون آماده است",
     generatedSome: "{n} از {total} سوال ساخته شد",
     somethingWrong: "مشکلی پیش آمد: ",
-    partFailed: "بخش {n} شکست خورد — بقیه نگه داشته شد.",
-    cutOff: "توجه — مدل قطع شد، پس سوالات کمتری از آنچه خواستید گرفتید.",
+    partFailed: "بخش {n} شکست خورد - بقیه نگه داشته شد.",
+    cutOff: "توجه - مدل قطع شد، پس سوالات کمتری از آنچه خواستید گرفتید.",
     coachReportFailed: "گزارش مربی شکست خورد: ",
     storageFull: "حافظه پر است",
     couldNotLoadImage: "نتوانستم تصویر را بارگذاری کنم",
     onlyMoreImages: "فقط {n} تصویر دیگر جا می‌شود",
+    draftRestored: "از همان جا که بودید ادامه دادیم",
+    practiceHint: "حالت تمرین - پاسخ‌ها همزمان نشان داده می‌شوند",
+    markdownExported: "مارک‌داون ذخیره شد",
     progressMessages: [
-      "خواندن مطالب شما…",
-      "انتخاب ایده‌های کلیدی…",
-      "نوشتن سوالات…",
-      "نوشتن گزینه‌های انحرافی…",
-      "بررسی پاسخ‌ها…",
-      "ویرایش نهایی…"
+      "خواندن مطالب شما…", "انتخاب ایده‌های کلیدی…", "نوشتن سوالات…",
+      "نوشتن گزینه‌های انحرافی…", "بررسی پاسخ‌ها…", "ویرایش نهایی…"
     ],
     languageName: "Persian (Farsi)"
   },
-
   ar: {
-    hello: "مرحبا",
-    readyForBetterGrades: "مستعد لدرجات أفضل؟",
-    letsGo: "هيا بنا",
-    skip: "تخطي",
-    create: "إنشاء",
-    exam: "امتحان",
-    coach: "مدرب",
-    library: "المكتبة",
-    stats: "إحصائيات",
+    hello: "مرحبا", readyForBetterGrades: "مستعد لدرجات أفضل؟", letsGo: "هيا بنا", skip: "تخطي",
+    create: "إنشاء", exam: "امتحان", coach: "مدرب", library: "المكتبة", stats: "إحصائيات",
     createHero: "حوّل أي شيء إلى امتحان.",
     createHeroSub: "الصق ملاحظاتك أو أضف صورًا لصفحة. الذكاء الاصطناعي يقرأها ويكتب الأسئلة.",
     sourceMaterial: "المادة المصدرية",
-    sourceSub: "نص أو صور أو كليهما — أي شيء تريد أن تُختبر فيه.",
+    sourceSub: "نص أو صور أو كليهما - أي شيء تريد أن تُختبر فيه.",
     sourcePlaceholder: "الصق فصلًا أو مقالًا أو ملاحظات…",
     dropTitle: "أفلت صور الصفحات أو الشرائح هنا",
     dropSub: "أو انقر للتصفح · PNG · JPG · WEBP · حتى ١٠",
-    questionMix: "مزيج الأسئلة",
-    questionMixSub: "كم من كل نوع تريد؟",
-    multipleChoice: "اختيار متعدد",
-    trueFalse: "صح / خطأ",
-    fillInBlank: "املأ الفراغ",
-    shortAnswer: "إجابة قصيرة",
-    difficulty: "الصعوبة",
-    easy: "سهل",
-    medium: "متوسط",
-    hard: "صعب",
-    mixed: "مختلط",
-    passingScore: "درجة النجاح",
-    focusOn: "التركيز على",
-    optional: "(اختياري)",
+    questionMix: "مزيج الأسئلة", questionMixSub: "كم من كل نوع تريد؟",
+    multipleChoice: "اختيار متعدد", trueFalse: "صح / خطأ", fillInBlank: "املأ الفراغ", shortAnswer: "إجابة قصيرة",
+    difficulty: "الصعوبة", easy: "سهل", medium: "متوسط", hard: "صعب", mixed: "مختلط",
+    passingScore: "درجة النجاح", focusOn: "التركيز على", optional: "(اختياري)",
     focusPlaceholder: "مثلًا الفصل ٣، التعريفات، التواريخ",
-    generateExam: "إنشاء الامتحان",
-    total: "الإجمالي {n}",
-    questions_one: "سؤال واحد",
-    questions_other: "{n} أسئلة",
-    points_one: "نقطة واحدة",
-    points_other: "{n} نقاط",
-    passAt: "النجاح عند {n}%",
-    practiceMode: "📖 وضع التدريب",
-    testMode: "📝 وضع الامتحان",
-    studyAsFlashcards: "🎴 الدراسة بالبطاقات",
-    print: "🖨️ طباعة",
-    answered: "تمت الإجابة",
-    submitForGrading: "إرسال للتصحيح",
+    generateExam: "إنشاء الامتحان", total: "الإجمالي {n}",
+    questions_one: "سؤال واحد", questions_other: "{n} أسئلة",
+    points_one: "نقطة واحدة", points_other: "{n} نقاط",
+    passAt: "النجاح عند {n}%", practiceMode: "وضع التدريب", testMode: "وضع الامتحان",
+    studyAsFlashcards: "الدراسة بالبطاقات", print: "طباعة",
+    answered: "تمت الإجابة", submitForGrading: "إرسال للتصحيح",
     noExamYet: "لا يوجد امتحان بعد",
     noExamText: "اذهب إلى إنشاء، أضف مادة، وأنشئ امتحانك الأول.",
-    trueLabel: "✓ صح",
-    falseLabel: "✗ خطأ",
-    writeAnswer: "اكتب إجابتك هنا…",
-    showHint: "إظهار التلميح",
-    flagForReview: "وضع علامة للمراجعة",
-    correct: "صحيح",
-    correctMsg: "أحسنت — هذه صحيحة.",
-    notQuite: "ليس تمامًا",
-    notQuiteMsg: "انظر الإجابة الصحيحة أدناه.",
-    almost: "تقريبًا",
-    almostMsg: "فهمت المعنى — الشكل المتوقع كان مختلفًا قليلًا.",
-    selfCheck: "التقييم الذاتي",
-    selfCheckMsg: "قارن إجابتك بالإجابة النموذجية أدناه.",
-    correctAnswer: "الإجابة الصحيحة",
-    modelAnswer: "إجابة نموذجية",
-    lookFor: "ابحث عن",
-    why: "لماذا",
-    closeHint: "قريب — المتوقع «{answer}»",
-    outstanding: "ممتاز.",
-    wellDone: "أحسنت.",
-    gettingThere: "أنت قريب.",
-    keepAtIt: "واصل.",
-    passed: "نجحت",
-    tryAgain: "حاول مجددًا",
-    correctCount: "{n} صحيحة",
-    closeCount: "{n} قريبة",
-    missedCount: "{n} خاطئة",
-    autoGraded: "تصحيح تلقائي",
-    toReview: "للمراجعة",
-    timeLabel: "الوقت",
-    retake: "إعادة",
-    createNewExam: "إنشاء امتحان جديد",
-    newExam: "امتحان جديد",
+    emptyGoCreate: "ابدأ الآن",
+    trueLabel: "صح", falseLabel: "خطأ", writeAnswer: "اكتب إجابتك هنا…",
+    showHint: "إظهار التلميح", flagForReview: "وضع علامة للمراجعة",
+    correct: "صحيح", correctMsg: "أحسنت - هذه صحيحة.",
+    notQuite: "ليس تمامًا", notQuiteMsg: "انظر الإجابة الصحيحة أدناه.",
+    almost: "تقريبًا", almostMsg: "فهمت المعنى - الشكل المتوقع كان مختلفًا قليلًا.",
+    selfCheck: "التقييم الذاتي", selfCheckMsg: "قارن إجابتك بالإجابة النموذجية أدناه.",
+    correctAnswer: "الإجابة الصحيحة", modelAnswer: "إجابة نموذجية", lookFor: "ابحث عن", why: "لماذا",
+    closeHint: "قريب - المتوقع «{answer}»",
+    outstanding: "ممتاز.", wellDone: "أحسنت.", gettingThere: "أنت قريب.", keepAtIt: "واصل.",
+    passed: "نجحت", tryAgain: "حاول مجددًا",
+    correctCount: "{n} صحيحة", closeCount: "{n} قريبة", missedCount: "{n} خاطئة",
+    autoGraded: "تصحيح تلقائي", toReview: "للمراجعة", timeLabel: "الوقت",
+    retake: "إعادة", createNewExam: "إنشاء امتحان جديد", newExam: "امتحان جديد",
     getCoachReport: "احصل على تقرير مدربك",
     coachReportSub: "تغذية راجعة مخصصة بناءً على إجاباتك والوقت الذي قضيته",
-    coachReportExplain: "سأنظر إلى كل سؤال، إجابتك، والوقت الذي قضيته — ثم أخبرك بالضبط ما يجب أن تعمل عليه، حتى لو أجبت كل شيء بشكل صحيح.",
-    analyzeMyExam: "✨ حلل امتحاني",
-    analyzingExam: "جاري تحليل امتحانك…",
-    analyzingSub: "قراءة كل إجابة وكل ثانية",
-    thinking: "أفكر…",
-    coachReportTitle: "تقرير مدربك",
-    coachReportSub2: "بناءً على إجاباتك والوقت",
-    overview: "نظرة عامة",
-    strengths: "✓ نقاط القوة",
-    areasToImprove: "⚠️ مجالات للتحسين",
-    whatToStudy: "📚 ما يجب دراسته بعد ذلك",
-    pacingNotes: "⏱ ملاحظات الإيقاع",
-    talkToCoach: "💬 تحدث مع مدربك",
-    reanalyze: "↻ إعادة التحليل",
-    questionSide: "سؤال",
-    answerSide: "إجابة",
-    tapToReveal: "انقر للكشف",
-    spaceFlip: "مسافة للقلب",
-    spaceKey: "مسافة",
-    arrowKeys: "← → للتنقل",
-    shuffle: "🔀 خلط",
-    resetProgress: "↺ إعادة التقدم",
-    exit: "خروج",
-    reviewAgain: "↻ راجع مجددًا",
-    iKnowThis: "✓ أعرف هذا",
-    known: "{n} معروفة",
-    toReviewChip: "{n} للمراجعة",
-    noCards: "لا توجد بطاقات",
-    noCardsText: "هذا الامتحان لا يحتوي على أسئلة بعد.",
-    cardMovedEnd: "نُقلت البطاقة إلى النهاية",
-    shuffled: "تم الخلط",
-    progressReset: "أُعيد التقدم",
-    coachTitle: "🧑‍🏫 مدربك الذكي",
-    coachSubtitle: "اسأل أي شيء. تعلم المفهوم كاملًا خطوة بخطوة.",
+    coachReportExplain: "سأنظر إلى كل سؤال، إجابتك، والوقت الذي قضيته - ثم أخبرك بالضبط ما يجب أن تعمل عليه، حتى لو أجبت كل شيء بشكل صحيح.",
+    analyzeMyExam: "حلل امتحاني", analyzingExam: "جاري تحليل امتحانك…",
+    analyzingSub: "قراءة كل إجابة وكل ثانية", thinking: "أفكر…",
+    coachReportTitle: "تقرير مدربك", coachReportSub2: "بناءً على إجاباتك والوقت",
+    overview: "نظرة عامة", strengths: "نقاط القوة", areasToImprove: "مجالات للتحسين",
+    whatToStudy: "ما يجب دراسته بعد ذلك", pacingNotes: "ملاحظات الإيقاع",
+    talkToCoach: "تحدث مع مدربك", reanalyze: "إعادة التحليل",
+    questionSide: "سؤال", answerSide: "إجابة", tapToReveal: "انقر للكشف",
+    spaceFlip: "مسافة للقلب", spaceKey: "مسافة", arrowKeys: "← → للتنقل",
+    shuffle: "خلط", resetProgress: "إعادة التقدم", exit: "خروج",
+    reviewAgain: "راجع مجددًا", iKnowThis: "أعرف هذا",
+    known: "{n} معروفة", toReviewChip: "{n} للمراجعة",
+    noCards: "لا توجد بطاقات", noCardsText: "هذا الامتحان لا يحتوي على أسئلة بعد.",
+    cardMovedEnd: "نُقلت البطاقة إلى النهاية", shuffled: "تم الخلط", progressReset: "أُعيد التقدم",
+    coachTitle: "مدربك الذكي", coachSubtitle: "اسأل أي شيء. تعلم المفهوم كاملًا خطوة بخطوة.",
     newChat: "محادثة جديدة",
-    chatEmptyTitle: "مرحبًا — أنا مدرب الدراسة الخاص بك.",
+    chatEmptyTitle: "مرحبًا - أنا مدرب الدراسة الخاص بك.",
     chatEmptyText: "اطلب مني شرح مفهوم، أو حل مسألة خطوة بخطوة، أو اختبرك في شيء تتعلمه.",
     chatPlaceholder: "اطلب مني أن أعلمك شيئًا…",
-    suggestTeachTitle: "📖 علمني موضوعًا",
-    suggestTeachText: "اشرح دورة الماء كما لو كنت جديدًا",
+    suggestTeachTitle: "علمني موضوعًا", suggestTeachText: "اشرح دورة الماء كما لو كنت جديدًا",
     suggestTeachPrompt: "علمني دورة الماء من الصفر، كأنني لم أرها من قبل.",
-    suggestAnalogTitle: "🌱 اشرح بتشبيه",
-    suggestAnalogText: "البناء الضوئي بمقارنة واقعية",
+    suggestAnalogTitle: "اشرح بتشبيه", suggestAnalogText: "البناء الضوئي بمقارنة واقعية",
     suggestAnalogPrompt: "اشرح البناء الضوئي خطوة بخطوة مع تشبيه بسيط.",
-    suggestQuizTitle: "🎯 اختبرني",
-    suggestQuizText: "٥ أسئلة في الجبر، واحدًا واحدًا",
+    suggestQuizTitle: "اختبرني", suggestQuizText: "٥ أسئلة في الجبر، واحدًا واحدًا",
     suggestQuizPrompt: "اختبرني في الجبر الأساسي بـ ٥ أسئلة، واحدًا واحدًا.",
-    suggestCompareTitle: "⚖️ قارن المفاهيم",
-    suggestCompareText: "الانقسام المتساوي والاختزالي، بالتفصيل",
+    suggestCompareTitle: "قارن المفاهيم", suggestCompareText: "الانقسام المتساوي والاختزالي، بالتفصيل",
     suggestComparePrompt: "ما الفرق بين الانقسام المتساوي والاختزالي؟ بالتفصيل.",
-    clearConfirm: "مسح المحادثة؟",
-    cleared: "تم المسح",
-    newChatStarted: "بدأت محادثة جديدة",
-    holdOnThinking: "انتظر — لا يزال يفكر",
-    libraryTitle: "مكتبتك",
-    librarySubtitle: "كل امتحان تنشئه يُحفظ هنا.",
-    nothingSaved: "لا شيء محفوظ بعد",
-    nothingSavedText: "الامتحانات التي تنشئها ستظهر هنا تلقائيًا.",
-    open: "فتح",
-    cards: "🎴 بطاقات",
-    export: "تصدير",
-    delete: "حذف",
+    clearConfirm: "مسح المحادثة؟", cleared: "تم المسح", newChatStarted: "بدأت محادثة جديدة",
+    holdOnThinking: "انتظر - لا يزال يفكر",
+    libraryTitle: "مكتبتك", librarySubtitle: "كل امتحان تنشئه يُحفظ هنا.",
+    nothingSaved: "لا شيء محفوظ بعد", nothingSavedText: "الامتحانات التي تنشئها ستظهر هنا تلقائيًا.",
+    open: "فتح", cards: "بطاقات", export: "تصدير", delete: "حذف",
     examDeleted: "حُذف الامتحان",
-    statsTitle: "تقدمك",
-    statsSubtitle: "انظر كيف تؤدي في جميع امتحاناتك.",
-    noAttempts: "لا محاولات بعد",
-    noAttemptsText: "خُذ امتحانًا وسيظهر تقدمك هنا.",
-    attempts: "المحاولات",
-    avgScore: "متوسط الدرجات",
-    bestScore: "أفضل درجة",
-    timeStudied: "وقت الدراسة",
-    byTopic: "حسب الموضوع",
-    recentAttempts: "المحاولات الأخيرة",
+    statsTitle: "تقدمك", statsSubtitle: "انظر كيف تؤدي في جميع امتحاناتك.",
+    noAttempts: "لا محاولات بعد", noAttemptsText: "خُذ امتحانًا وسيظهر تقدمك هنا.",
+    attempts: "المحاولات", avgScore: "متوسط الدرجات", bestScore: "أفضل درجة", timeStudied: "وقت الدراسة",
+    byTopic: "حسب الموضوع", recentAttempts: "المحاولات الأخيرة",
     needSource: "أضف نصًا أو صورة أولًا.",
     needOneQuestion: "اطلب سؤالًا واحدًا على الأقل.",
     tooMany: "أبقِ على أقل من ٨٠ سؤالًا.",
-    buildingExam: "جاري بناء الامتحان",
-    buildingExamPart: "جاري بناء الامتحان (الجزء {n} من {total})",
-    examReady: "الامتحان جاهز",
-    generatedSome: "تم إنشاء {n} من {total} سؤالًا",
+    buildingExam: "جاري بناء الامتحان", buildingExamPart: "جاري بناء الامتحان (الجزء {n} من {total})",
+    examReady: "الامتحان جاهز", generatedSome: "تم إنشاء {n} من {total} سؤالًا",
     somethingWrong: "حدث خطأ: ",
-    partFailed: "فشل الجزء {n} — الاحتفاظ بالباقي.",
-    cutOff: "تنبيه — انقطع النموذج، لذا حصلت على أسئلة أقل مما طلبت.",
+    partFailed: "فشل الجزء {n} - الاحتفاظ بالباقي.",
+    cutOff: "تنبيه - انقطع النموذج، لذا حصلت على أسئلة أقل مما طلبت.",
     coachReportFailed: "فشل تقرير المدرب: ",
     storageFull: "التخزين ممتلئ",
     couldNotLoadImage: "تعذر تحميل الصورة",
     onlyMoreImages: "يمكن إضافة {n} صور فقط",
+    draftRestored: "واصلنا من حيث توقفت",
+    practiceHint: "وضع التدريب - تظهر الإجابات أثناء الحل",
+    markdownExported: "تم حفظ الماركداون",
     progressMessages: [
-      "قراءة المادة…",
-      "استخراج الأفكار الرئيسية…",
-      "صياغة الأسئلة…",
-      "كتابة الخيارات المشابهة…",
-      "التحقق من الإجابات…",
-      "اللمسة الأخيرة…"
+      "قراءة المادة…", "استخراج الأفكار الرئيسية…", "صياغة الأسئلة…",
+      "كتابة الخيارات المشابهة…", "التحقق من الإجابات…", "اللمسة الأخيرة…"
     ],
     languageName: "Arabic"
   },
-
   ckb: {
-    hello: "سڵاو",
-    readyForBetterGrades: "ئامادەیت بۆ نمرەی باشتر؟",
-    letsGo: "وەرە بڕۆین",
-    skip: "بازدان",
-    create: "دروستکردن",
-    exam: "تاقیکردنەوە",
-    coach: "ڕاهێنەر",
-    library: "کتێبخانە",
-    stats: "ئامارەکان",
+    hello: "سڵاو", readyForBetterGrades: "ئامادەیت بۆ نمرەی باشتر؟", letsGo: "وەرە بڕۆین", skip: "بازدان",
+    create: "دروستکردن", exam: "تاقیکردنەوە", coach: "ڕاهێنەر", library: "کتێبخانە", stats: "ئامارەکان",
     createHero: "هەر شتێک بکە بە تاقیکردنەوە.",
     createHeroSub: "تێبینیەکانت بلکێنە یان وێنەی لاپەڕەیەک دابنێ. زیرەکی دەستکرد دەیخوێنێتەوە و پرسیارەکان دەنووسێت.",
     sourceMaterial: "سەرچاوەی ماددە",
-    sourceSub: "دەق، وێنە، یان هەردووکیان — هەر شتێک کە دەتەوێت تاقیت بکەینەوە.",
+    sourceSub: "دەق، وێنە، یان هەردووکیان - هەر شتێک کە دەتەوێت تاقیت بکەینەوە.",
     sourcePlaceholder: "بەشێک، وتارێک، تێبینی، لاپەڕەی ویکیپیدیا بلکێنە…",
     dropTitle: "وێنەی لاپەڕەکان یان سلایدەکان لێرە دابنێ",
     dropSub: "یان کلیک بکە بۆ گەڕان · PNG · JPG · WEBP · تا ١٠",
-    questionMix: "تێکەڵی پرسیارەکان",
-    questionMixSub: "چەند لە هەر جۆرێک دەتەوێت؟",
-    multipleChoice: "هەڵبژاردنی زۆر",
-    trueFalse: "ڕاست / هەڵە",
-    fillInBlank: "بۆشایی پڕبکە",
-    shortAnswer: "وەڵامی کورت",
-    difficulty: "ئاستی سەختی",
-    easy: "ئاسان",
-    medium: "مامناوەند",
-    hard: "سەخت",
-    mixed: "تێکەڵ",
-    passingScore: "نمرەی دەرچوون",
-    focusOn: "سەرنج بدە بە",
-    optional: "(ئیختیاری)",
+    questionMix: "تێکەڵی پرسیارەکان", questionMixSub: "چەند لە هەر جۆرێک دەتەوێت؟",
+    multipleChoice: "هەڵبژاردنی زۆر", trueFalse: "ڕاست / هەڵە", fillInBlank: "بۆشایی پڕبکە", shortAnswer: "وەڵامی کورت",
+    difficulty: "ئاستی سەختی", easy: "ئاسان", medium: "مامناوەند", hard: "سەخت", mixed: "تێکەڵ",
+    passingScore: "نمرەی دەرچوون", focusOn: "سەرنج بدە بە", optional: "(ئیختیاری)",
     focusPlaceholder: "بۆ نموونە بەشی ٣، پێناسەکان، بەروارەکان",
-    generateExam: "دروستکردنی تاقیکردنەوە",
-    total: "کۆی گشتی {n}",
-    questions_one: "١ پرسیار",
-    questions_other: "{n} پرسیار",
-    points_one: "١ خاڵ",
-    points_other: "{n} خاڵ",
-    passAt: "دەرچوون لە {n}%",
-    practiceMode: "📖 دۆخی ڕاهێنان",
-    testMode: "📝 دۆخی تاقیکردنەوە",
-    studyAsFlashcards: "🎴 بخوێنە بە فلاشکارت",
-    print: "🖨️ چاپکردن",
-    answered: "وەڵامدراوە",
-    submitForGrading: "بنێرە بۆ هەڵسەنگاندن",
+    generateExam: "دروستکردنی تاقیکردنەوە", total: "کۆی گشتی {n}",
+    questions_one: "١ پرسیار", questions_other: "{n} پرسیار",
+    points_one: "١ خاڵ", points_other: "{n} خاڵ",
+    passAt: "دەرچوون لە {n}%", practiceMode: "دۆخی ڕاهێنان", testMode: "دۆخی تاقیکردنەوە",
+    studyAsFlashcards: "بخوێنە بە فلاشکارت", print: "چاپکردن",
+    answered: "وەڵامدراوە", submitForGrading: "بنێرە بۆ هەڵسەنگاندن",
     noExamYet: "هێشتا تاقیکردنەوە نییە",
     noExamText: "بڕۆ بۆ دروستکردن، ماددەیەک زیاد بکە، و یەکەم تاقیکردنەوەت دروست بکە.",
-    trueLabel: "✓ ڕاست",
-    falseLabel: "✗ هەڵە",
-    writeAnswer: "وەڵامەکەت لێرە بنووسە…",
-    showHint: "نیشاندانی ئاماژە",
-    flagForReview: "نیشانکردن بۆ پێداچوونەوە",
-    correct: "ڕاست",
-    correctMsg: "باشە — ئەمە ڕاستە.",
-    notQuite: "بە تەواوی نا",
-    notQuiteMsg: "وەڵامی ڕاست لە خوارەوە ببینە.",
-    almost: "نزیکە",
-    almostMsg: "واتا ڕاستت تێگەیشت — شێوەی وەڵام تەنها کەمێک جیاواز بوو.",
-    selfCheck: "خۆهەڵسەنگاندن",
-    selfCheckMsg: "وەڵامەکەت بەراورد بکە لەگەڵ وەڵامی نموونە.",
-    correctAnswer: "وەڵامی ڕاست",
-    modelAnswer: "وەڵامی نموونە",
-    lookFor: "بگەڕێ بۆ",
-    why: "بۆچی",
-    closeHint: "نزیک — چاوەڕوانی «{answer}»",
-    outstanding: "نایاب.",
-    wellDone: "باشە.",
-    gettingThere: "نزیک دەبیتەوە.",
-    keepAtIt: "بەردەوام بە.",
-    passed: "دەرچوو",
-    tryAgain: "دووبارە هەوڵ بدە",
-    correctCount: "{n} ڕاست",
-    closeCount: "{n} نزیک",
-    missedCount: "{n} هەڵە",
-    autoGraded: "هەڵسەنگاندنی خۆکار",
-    toReview: "بۆ پێداچوونەوە",
-    timeLabel: "کات",
-    retake: "دووبارە",
-    createNewExam: "دروستکردنی تاقیکردنەوەی نوێ",
-    newExam: "تاقیکردنەوەی نوێ",
+    emptyGoCreate: "دەست پێبکە",
+    trueLabel: "ڕاست", falseLabel: "هەڵە", writeAnswer: "وەڵامەکەت لێرە بنووسە…",
+    showHint: "نیشاندانی ئاماژە", flagForReview: "نیشانکردن بۆ پێداچوونەوە",
+    correct: "ڕاست", correctMsg: "باشە - ئەمە ڕاستە.",
+    notQuite: "بە تەواوی نا", notQuiteMsg: "وەڵامی ڕاست لە خوارەوە ببینە.",
+    almost: "نزیکە", almostMsg: "واتا ڕاستت تێگەیشت - شێوەی وەڵام تەنها کەمێک جیاواز بوو.",
+    selfCheck: "خۆهەڵسەنگاندن", selfCheckMsg: "وەڵامەکەت بەراورد بکە لەگەڵ وەڵامی نموونە.",
+    correctAnswer: "وەڵامی ڕاست", modelAnswer: "وەڵامی نموونە", lookFor: "بگەڕێ بۆ", why: "بۆچی",
+    closeHint: "نزیک - چاوەڕوانی «{answer}»",
+    outstanding: "نایاب.", wellDone: "باشە.", gettingThere: "نزیک دەبیتەوە.", keepAtIt: "بەردەوام بە.",
+    passed: "دەرچوو", tryAgain: "دووبارە هەوڵ بدە",
+    correctCount: "{n} ڕاست", closeCount: "{n} نزیک", missedCount: "{n} هەڵە",
+    autoGraded: "هەڵسەنگاندنی خۆکار", toReview: "بۆ پێداچوونەوە", timeLabel: "کات",
+    retake: "دووبارە", createNewExam: "دروستکردنی تاقیکردنەوەی نوێ", newExam: "تاقیکردنەوەی نوێ",
     getCoachReport: "ڕاپۆرتی ڕاهێنەرەکەت وەربگرە",
     coachReportSub: "فیدباکی تایبەت بەپێی وەڵامەکان و کاتی تێدا بەسەربردووت",
-    coachReportExplain: "سەیری هەموو پرسیارێک، وەڵامەکەت، و کاتەکەت دەکەم — پاشان دەڵێم بە ڕاستی چ کارێک بکەیت، تەنانەت ئەگەر هەموویشت ڕاست کردبێت.",
-    analyzeMyExam: "✨ تاقیکردنەوەکەم شیت بکە",
-    analyzingExam: "شیکردنەوەی تاقیکردنەوەکەت…",
-    analyzingSub: "خوێندنەوەی هەموو وەڵامێک و هەموو چرکەیەک",
-    thinking: "بیردەکەمەوە…",
-    coachReportTitle: "ڕاپۆرتی ڕاهێنەرەکەت",
-    coachReportSub2: "بەپێی وەڵامەکان و کات",
-    overview: "گشتی",
-    strengths: "✓ خاڵە بەهێزەکان",
-    areasToImprove: "⚠️ بوارەکانی باشترکردن",
-    whatToStudy: "📚 دواتر چی بخوێنرێت",
-    pacingNotes: "⏱ تێبینی خێرایی",
-    talkToCoach: "💬 قسە لەگەڵ ڕاهێنەرەکەت بکە",
-    reanalyze: "↻ دووبارە شیت بکەرەوە",
-    questionSide: "پرسیار",
-    answerSide: "وەڵام",
-    tapToReveal: "دەست بنێ بۆ دەرکەوتن",
-    spaceFlip: "بۆشایی بۆ وەرگێڕان",
-    spaceKey: "بۆشایی",
-    arrowKeys: "← → بۆ جوڵان",
-    shuffle: "🔀 تێکەڵکردن",
-    resetProgress: "↺ ڕێکخستنەوەی پێشکەوتن",
-    exit: "چوونە دەرەوە",
-    reviewAgain: "↻ دووبارە پێداچوونەوە",
-    iKnowThis: "✓ ئەمە دەزانم",
-    known: "{n} زانراو",
-    toReviewChip: "{n} بۆ پێداچوونەوە",
-    noCards: "کارت نییە بۆ خوێندن",
-    noCardsText: "ئەم تاقیکردنەوەیە هێشتا پرسیاری نییە.",
-    cardMovedEnd: "کارت گواسترایەوە بۆ کۆتایی",
-    shuffled: "تێکەڵکرا",
-    progressReset: "پێشکەوتن ڕێکخرایەوە",
-    coachTitle: "🧑‍🏫 ڕاهێنەری زیرەکی تۆ",
-    coachSubtitle: "هەر شتێک بپرسە. تەواوی چەمکەکە هەنگاو بە هەنگاو فێربە.",
+    coachReportExplain: "سەیری هەموو پرسیارێک، وەڵامەکەت، و کاتەکەت دەکەم - پاشان دەڵێم بە ڕاستی چ کارێک بکەیت، تەنانەت ئەگەر هەموویشت ڕاست کردبێت.",
+    analyzeMyExam: "تاقیکردنەوەکەم شیت بکە", analyzingExam: "شیکردنەوەی تاقیکردنەوەکەت…",
+    analyzingSub: "خوێندنەوەی هەموو وەڵامێک و هەموو چرکەیەک", thinking: "بیردەکەمەوە…",
+    coachReportTitle: "ڕاپۆرتی ڕاهێنەرەکەت", coachReportSub2: "بەپێی وەڵامەکان و کات",
+    overview: "گشتی", strengths: "خاڵە بەهێزەکان", areasToImprove: "بوارەکانی باشترکردن",
+    whatToStudy: "دواتر چی بخوێنرێت", pacingNotes: "تێبینی خێرایی",
+    talkToCoach: "قسە لەگەڵ ڕاهێنەرەکەت بکە", reanalyze: "دووبارە شیت بکەرەوە",
+    questionSide: "پرسیار", answerSide: "وەڵام", tapToReveal: "دەست بنێ بۆ دەرکەوتن",
+    spaceFlip: "بۆشایی بۆ وەرگێڕان", spaceKey: "بۆشایی", arrowKeys: "← → بۆ جوڵان",
+    shuffle: "تێکەڵکردن", resetProgress: "ڕێکخستنەوەی پێشکەوتن", exit: "چوونە دەرەوە",
+    reviewAgain: "دووبارە پێداچوونەوە", iKnowThis: "ئەمە دەزانم",
+    known: "{n} زانراو", toReviewChip: "{n} بۆ پێداچوونەوە",
+    noCards: "کارت نییە بۆ خوێندن", noCardsText: "ئەم تاقیکردنەوەیە هێشتا پرسیاری نییە.",
+    cardMovedEnd: "کارت گواسترایەوە بۆ کۆتایی", shuffled: "تێکەڵکرا", progressReset: "پێشکەوتن ڕێکخرایەوە",
+    coachTitle: "ڕاهێنەری زیرەکی تۆ", coachSubtitle: "هەر شتێک بپرسە. تەواوی چەمکەکە هەنگاو بە هەنگاو فێربە.",
     newChat: "گفتوگۆی نوێ",
-    chatEmptyTitle: "سڵاو — من ڕاهێنەری خوێندنی تۆم.",
+    chatEmptyTitle: "سڵاو - من ڕاهێنەری خوێندنی تۆم.",
     chatEmptyText: "داوام لێبکە چەمکێک ڕوون بکەمەوە، کێشەیەک هەنگاو بە هەنگاو چارەسەر بکەم، یان تاقیت بکەمەوە لەسەر شتێک کە فێری دەبیت.",
     chatPlaceholder: "داوام لێبکە شتێکت فێر بکەم…",
-    suggestTeachTitle: "📖 بابەتێکم فێر بکە",
-    suggestTeachText: "چرخەی ئاو ڕوون بکەرەوە وەک تازەکار",
+    suggestTeachTitle: "بابەتێکم فێر بکە", suggestTeachText: "چرخەی ئاو ڕوون بکەرەوە وەک تازەکار",
     suggestTeachPrompt: "چرخەی ئاو لە سفرەوە فێرم بکە، وەک ئەوەی هەرگیز نەمبینیوە.",
-    suggestAnalogTitle: "🌱 بە نموونە ڕوون بکەرەوە",
-    suggestAnalogText: "فۆتۆسینتێز، بە بەراوردکردنێکی ڕاستەقینە",
+    suggestAnalogTitle: "بە نموونە ڕوون بکەرەوە", suggestAnalogText: "فۆتۆسینتێز، بە بەراوردکردنێکی ڕاستەقینە",
     suggestAnalogPrompt: "فۆتۆسینتێز هەنگاو بە هەنگاو بە نموونەیەکی سادە ڕوون بکەرەوە.",
-    suggestQuizTitle: "🎯 تاقیم بکەرەوە",
-    suggestQuizText: "٥ پرسیار لە جەبر، یەک یەک",
+    suggestQuizTitle: "تاقیم بکەرەوە", suggestQuizText: "٥ پرسیار لە جەبر، یەک یەک",
     suggestQuizPrompt: "لە جەبری بنەڕەتی ٥ پرسیارم لێبکە، یەک یەک.",
-    suggestCompareTitle: "⚖️ چەمکەکان بەراورد بکە",
-    suggestCompareText: "میتۆز و میۆز، بە تەواوی",
+    suggestCompareTitle: "چەمکەکان بەراورد بکە", suggestCompareText: "میتۆز و میۆز، بە تەواوی",
     suggestComparePrompt: "جیاوازی نێوان میتۆز و میۆز چییە؟ بە تەواوی.",
-    clearConfirm: "گفتوگۆ پاک بکرێتەوە؟",
-    cleared: "پاککرایەوە",
-    newChatStarted: "گفتوگۆی نوێ دەستیپێکرد",
-    holdOnThinking: "چاوەڕوان بە — هێشتا بیردەکەمەوە",
-    libraryTitle: "کتێبخانەکەت",
-    librarySubtitle: "هەر تاقیکردنەوەیەک دروستی بکەیت لێرە پاشەکەوت دەکرێت.",
-    nothingSaved: "هێشتا هیچ پاشەکەوت نەکراوە",
-    nothingSavedText: "تاقیکردنەوەکانت بە خۆکاری لێرە دەردەکەون.",
-    open: "کردنەوە",
-    cards: "🎴 کارتەکان",
-    export: "هەناردەکردن",
-    delete: "سڕینەوە",
+    clearConfirm: "گفتوگۆ پاک بکرێتەوە؟", cleared: "پاککرایەوە", newChatStarted: "گفتوگۆی نوێ دەستیپێکرد",
+    holdOnThinking: "چاوەڕوان بە - هێشتا بیردەکەمەوە",
+    libraryTitle: "کتێبخانەکەت", librarySubtitle: "هەر تاقیکردنەوەیەک دروستی بکەیت لێرە پاشەکەوت دەکرێت.",
+    nothingSaved: "هێشتا هیچ پاشەکەوت نەکراوە", nothingSavedText: "تاقیکردنەوەکانت بە خۆکاری لێرە دەردەکەون.",
+    open: "کردنەوە", cards: "کارتەکان", export: "هەناردەکردن", delete: "سڕینەوە",
     examDeleted: "تاقیکردنەوە سڕایەوە",
-    statsTitle: "پێشکەوتنی تۆ",
-    statsSubtitle: "ببینە چۆن لە هەموو تاقیکردنەوەکانتدا دەردەچیت.",
-    noAttempts: "هێشتا هەوڵ نییە",
-    noAttemptsText: "تاقیکردنەوەیەک بکە و پێشکەوتنت لێرە دەردەکەوێت.",
-    attempts: "هەوڵەکان",
-    avgScore: "ناوەندی نمرە",
-    bestScore: "باشترین نمرە",
-    timeStudied: "کاتی خوێندن",
-    byTopic: "بەپێی بابەت",
-    recentAttempts: "هەوڵەکانی نوێ",
+    statsTitle: "پێشکەوتنی تۆ", statsSubtitle: "ببینە چۆن لە هەموو تاقیکردنەوەکانتدا دەردەچیت.",
+    noAttempts: "هێشتا هەوڵ نییە", noAttemptsText: "تاقیکردنەوەیەک بکە و پێشکەوتنت لێرە دەردەکەوێت.",
+    attempts: "هەوڵەکان", avgScore: "ناوەندی نمرە", bestScore: "باشترین نمرە", timeStudied: "کاتی خوێندن",
+    byTopic: "بەپێی بابەت", recentAttempts: "هەوڵەکانی نوێ",
     needSource: "سەرەتا دەق یان وێنەیەک زیاد بکە.",
     needOneQuestion: "لانیکەم یەک پرسیار داوابکە.",
     tooMany: "کەمتر لە ٨٠ پرسیار بهێڵەوە.",
-    buildingExam: "دروستکردنی تاقیکردنەوە",
-    buildingExamPart: "دروستکردنی تاقیکردنەوە (بەشی {n} لە {total})",
-    examReady: "تاقیکردنەوە ئامادەیە",
-    generatedSome: "{n} لە {total} پرسیار دروستکرا",
+    buildingExam: "دروستکردنی تاقیکردنەوە", buildingExamPart: "دروستکردنی تاقیکردنەوە (بەشی {n} لە {total})",
+    examReady: "تاقیکردنەوە ئامادەیە", generatedSome: "{n} لە {total} پرسیار دروستکرا",
     somethingWrong: "کێشەیەک ڕوویدا: ",
-    partFailed: "بەشی {n} شکست هێنا — ئەوانی تر هێڵدرانەوە.",
-    cutOff: "ئاگاداربە — مۆدێل بڕایەوە، کەواتە کەمتر پرسیارت وەرگرت.",
+    partFailed: "بەشی {n} شکست هێنا - ئەوانی تر هێڵدرانەوە.",
+    cutOff: "ئاگاداربە - مۆدێل بڕایەوە، کەواتە کەمتر پرسیارت وەرگرت.",
     coachReportFailed: "ڕاپۆرتی ڕاهێنەر شکست هێنا: ",
     storageFull: "بیرگە پڕە",
     couldNotLoadImage: "نەتوانرا وێنەکە باربکرێت",
     onlyMoreImages: "تەنها {n} وێنەی تر جێدەبێت",
+    draftRestored: "لەو شوێنەوە بەردەوام بووین کە وەستابوویت",
+    practiceHint: "دۆخی ڕاهێنان - وەڵامەکان لەگەڵ نووسین دەردەکەون",
+    markdownExported: "مارکداون پاشەکەوت کرا",
     progressMessages: [
-      "خوێندنەوەی ماددەکەت…",
-      "دەرهێنانی بیرۆکە سەرەکییەکان…",
-      "نووسینی پرسیارەکان…",
-      "نووسینی هەڵبژاردنەکانی تر…",
-      "پشکنینی وەڵامەکان…",
-      "جلاکردنەوەی وشەکان…"
+      "خوێندنەوەی ماددەکەت…", "دەرهێنانی بیرۆکە سەرەکییەکان…", "نووسینی پرسیارەکان…",
+      "نووسینی هەڵبژاردنەکانی تر…", "پشکنینی وەڵامەکان…", "جلاکردنەوەی وشەکان…"
     ],
     languageName: "Kurdish (Sorani)"
   },
-
   pl: {
-    hello: "Cześć",
-    readyForBetterGrades: "Gotowy na lepsze oceny?",
-    letsGo: "Zaczynajmy",
-    skip: "Pomiń",
-    create: "Utwórz",
-    exam: "Egzamin",
-    coach: "Trener",
-    library: "Biblioteka",
-    stats: "Statystyki",
+    hello: "Cześć", readyForBetterGrades: "Gotowy na lepsze oceny?", letsGo: "Zaczynajmy", skip: "Pomiń",
+    create: "Utwórz", exam: "Egzamin", coach: "Trener", library: "Biblioteka", stats: "Statystyki",
     createHero: "Zamień wszystko w egzamin.",
     createHeroSub: "Wklej notatki lub dodaj zdjęcia strony. AI je przeczyta i napisze pytania.",
     sourceMaterial: "Materiał źródłowy",
-    sourceSub: "Tekst, obrazy lub oba — cokolwiek chcesz sprawdzić.",
+    sourceSub: "Tekst, obrazy lub oba - cokolwiek chcesz sprawdzić.",
     sourcePlaceholder: "Wklej rozdział, artykuł, notatki, stronę Wikipedii…",
     dropTitle: "Upuść zdjęcia stron lub slajdów tutaj",
     dropSub: "lub kliknij, aby przeglądać · PNG · JPG · WEBP · do 10",
-    questionMix: "Mieszanka pytań",
-    questionMixSub: "Ile każdego typu chcesz?",
-    multipleChoice: "Wielokrotny wybór",
-    trueFalse: "Prawda / Fałsz",
-    fillInBlank: "Uzupełnij lukę",
-    shortAnswer: "Krótka odpowiedź",
-    difficulty: "Trudność",
-    easy: "Łatwy",
-    medium: "Średni",
-    hard: "Trudny",
-    mixed: "Mieszany",
-    passingScore: "Wynik zaliczenia",
-    focusOn: "Skup się na",
-    optional: "(opcjonalne)",
+    questionMix: "Mieszanka pytań", questionMixSub: "Ile każdego typu chcesz?",
+    multipleChoice: "Wielokrotny wybór", trueFalse: "Prawda / Fałsz", fillInBlank: "Uzupełnij lukę", shortAnswer: "Krótka odpowiedź",
+    difficulty: "Trudność", easy: "Łatwy", medium: "Średni", hard: "Trudny", mixed: "Mieszany",
+    passingScore: "Wynik zaliczenia", focusOn: "Skup się na", optional: "(opcjonalne)",
     focusPlaceholder: "np. rozdział 3, definicje, daty",
-    generateExam: "Wygeneruj egzamin",
-    total: "{n} łącznie",
-    questions_one: "1 pytanie",
-    questions_other: "{n} pytań",
-    points_one: "1 punkt",
-    points_other: "{n} punktów",
-    passAt: "Zaliczenie przy {n}%",
-    practiceMode: "📖 Tryb ćwiczeń",
-    testMode: "📝 Tryb testu",
-    studyAsFlashcards: "🎴 Ucz się z fiszkami",
-    print: "🖨️ Drukuj",
-    answered: "odpowiedziano",
-    submitForGrading: "Wyślij do oceny",
+    generateExam: "Wygeneruj egzamin", total: "{n} łącznie",
+    questions_one: "1 pytanie", questions_other: "{n} pytań",
+    points_one: "1 punkt", points_other: "{n} punktów",
+    passAt: "Zaliczenie przy {n}%", practiceMode: "Tryb ćwiczeń", testMode: "Tryb testu",
+    studyAsFlashcards: "Ucz się z fiszkami", print: "Drukuj",
+    answered: "odpowiedziano", submitForGrading: "Wyślij do oceny",
     noExamYet: "Brak egzaminu",
     noExamText: "Przejdź do Utwórz, dodaj materiał i stwórz swój pierwszy egzamin.",
-    trueLabel: "✓ Prawda",
-    falseLabel: "✗ Fałsz",
-    writeAnswer: "Napisz swoją odpowiedź tutaj…",
-    showHint: "Pokaż podpowiedź",
-    flagForReview: "Oznacz do przeglądu",
-    correct: "Poprawnie",
-    correctMsg: "Świetnie — to jest poprawne.",
-    notQuite: "Nie do końca",
-    notQuiteMsg: "Zobacz poprawną odpowiedź poniżej.",
-    almost: "Prawie",
-    almostMsg: "Znaczenie było poprawne — oczekiwana forma była trochę inna.",
-    selfCheck: "Samoocena",
-    selfCheckMsg: "Porównaj swoją odpowiedź z odpowiedzią wzorcową poniżej.",
-    correctAnswer: "Poprawna odpowiedź",
-    modelAnswer: "Odpowiedź wzorcowa",
-    lookFor: "Szukaj",
-    why: "Dlaczego",
-    closeHint: "blisko — oczekiwano \"{answer}\"",
-    outstanding: "Znakomicie.",
-    wellDone: "Dobra robota.",
-    gettingThere: "Coraz bliżej.",
-    keepAtIt: "Nie poddawaj się.",
-    passed: "Zaliczone",
-    tryAgain: "Spróbuj ponownie",
-    correctCount: "{n} poprawnych",
-    closeCount: "{n} blisko",
-    missedCount: "{n} błędnych",
-    autoGraded: "Oceniane automatycznie",
-    toReview: "Do przeglądu",
-    timeLabel: "Czas",
-    retake: "Powtórz",
-    createNewExam: "Utwórz nowy egzamin",
-    newExam: "Nowy egzamin",
+    emptyGoCreate: "Zacznij",
+    trueLabel: "Prawda", falseLabel: "Fałsz", writeAnswer: "Napisz swoją odpowiedź tutaj…",
+    showHint: "Pokaż podpowiedź", flagForReview: "Oznacz do przeglądu",
+    correct: "Poprawnie", correctMsg: "Świetnie - to jest poprawne.",
+    notQuite: "Nie do końca", notQuiteMsg: "Zobacz poprawną odpowiedź poniżej.",
+    almost: "Prawie", almostMsg: "Znaczenie było poprawne - oczekiwana forma była trochę inna.",
+    selfCheck: "Samoocena", selfCheckMsg: "Porównaj swoją odpowiedź z odpowiedzią wzorcową poniżej.",
+    correctAnswer: "Poprawna odpowiedź", modelAnswer: "Odpowiedź wzorcowa", lookFor: "Szukaj", why: "Dlaczego",
+    closeHint: "blisko - oczekiwano \"{answer}\"",
+    outstanding: "Znakomicie.", wellDone: "Dobra robota.", gettingThere: "Coraz bliżej.", keepAtIt: "Nie poddawaj się.",
+    passed: "Zaliczone", tryAgain: "Spróbuj ponownie",
+    correctCount: "{n} poprawnych", closeCount: "{n} blisko", missedCount: "{n} błędnych",
+    autoGraded: "Oceniane automatycznie", toReview: "Do przeglądu", timeLabel: "Czas",
+    retake: "Powtórz", createNewExam: "Utwórz nowy egzamin", newExam: "Nowy egzamin",
     getCoachReport: "Odbierz raport trenera",
     coachReportSub: "Spersonalizowana informacja zwrotna na podstawie odpowiedzi i czasu",
-    coachReportExplain: "Przejrzę każde pytanie, twoją odpowiedź i czas, jaki na nie poświęciłeś — potem powiem ci dokładnie, nad czym popracować, nawet jeśli wszystko było poprawne.",
-    analyzeMyExam: "✨ Przeanalizuj mój egzamin",
-    analyzingExam: "Analizuję twój egzamin…",
-    analyzingSub: "Czytam każdą odpowiedź i każdą sekundę",
-    thinking: "Myślę…",
-    coachReportTitle: "Raport twojego trenera",
-    coachReportSub2: "Na podstawie odpowiedzi i czasu",
-    overview: "Przegląd",
-    strengths: "✓ Mocne strony",
-    areasToImprove: "⚠️ Obszary do poprawy",
-    whatToStudy: "📚 Co studiować dalej",
-    pacingNotes: "⏱ Uwagi o tempie",
-    talkToCoach: "💬 Porozmawiaj z trenerem",
-    reanalyze: "↻ Ponowna analiza",
-    questionSide: "Pytanie",
-    answerSide: "Odpowiedź",
-    tapToReveal: "Dotknij, aby odkryć",
-    spaceFlip: "Spacja, aby odwrócić",
-    spaceKey: "Spacja",
-    arrowKeys: "← → aby przejść",
-    shuffle: "🔀 Wymieszaj",
-    resetProgress: "↺ Zresetuj postępy",
-    exit: "Wyjdź",
-    reviewAgain: "↻ Powtórz",
-    iKnowThis: "✓ Wiem to",
-    known: "{n} znanych",
-    toReviewChip: "{n} do powtórki",
-    noCards: "Brak fiszek do nauki",
-    noCardsText: "Ten egzamin nie ma jeszcze pytań.",
-    cardMovedEnd: "Fiszka przeniesiona na koniec",
-    shuffled: "Wymieszano",
-    progressReset: "Postępy zresetowane",
-    coachTitle: "🧑‍🏫 Twój trener AI",
-    coachSubtitle: "Zapytaj o cokolwiek. Naucz się całego tematu krok po kroku.",
+    coachReportExplain: "Przejrzę każde pytanie, twoją odpowiedź i czas, jaki na nie poświęciłeś - potem powiem ci dokładnie, nad czym popracować, nawet jeśli wszystko było poprawne.",
+    analyzeMyExam: "Przeanalizuj mój egzamin", analyzingExam: "Analizuję twój egzamin…",
+    analyzingSub: "Czytam każdą odpowiedź i każdą sekundę", thinking: "Myślę…",
+    coachReportTitle: "Raport twojego trenera", coachReportSub2: "Na podstawie odpowiedzi i czasu",
+    overview: "Przegląd", strengths: "Mocne strony", areasToImprove: "Obszary do poprawy",
+    whatToStudy: "Co studiować dalej", pacingNotes: "Uwagi o tempie",
+    talkToCoach: "Porozmawiaj z trenerem", reanalyze: "Ponowna analiza",
+    questionSide: "Pytanie", answerSide: "Odpowiedź", tapToReveal: "Dotknij, aby odkryć",
+    spaceFlip: "Spacja, aby odwrócić", spaceKey: "Spacja", arrowKeys: "← → aby przejść",
+    shuffle: "Wymieszaj", resetProgress: "Zresetuj postępy", exit: "Wyjdź",
+    reviewAgain: "Powtórz", iKnowThis: "Wiem to",
+    known: "{n} znanych", toReviewChip: "{n} do powtórki",
+    noCards: "Brak fiszek do nauki", noCardsText: "Ten egzamin nie ma jeszcze pytań.",
+    cardMovedEnd: "Fiszka przeniesiona na koniec", shuffled: "Wymieszano", progressReset: "Postępy zresetowane",
+    coachTitle: "Twój trener AI", coachSubtitle: "Zapytaj o cokolwiek. Naucz się całego tematu krok po kroku.",
     newChat: "Nowy czat",
-    chatEmptyTitle: "Cześć — jestem twoim trenerem nauki.",
+    chatEmptyTitle: "Cześć - jestem twoim trenerem nauki.",
     chatEmptyText: "Poproś mnie o wyjaśnienie pojęcia, przeprowadzenie przez problem lub przepytanie z czegoś, czego się uczysz.",
     chatPlaceholder: "Poproś mnie, żebym czegoś cię nauczył…",
-    suggestTeachTitle: "📖 Naucz mnie tematu",
-    suggestTeachText: "Wyjaśnij obieg wody, jakbym był nowy",
+    suggestTeachTitle: "Naucz mnie tematu", suggestTeachText: "Wyjaśnij obieg wody, jakbym był nowy",
     suggestTeachPrompt: "Naucz mnie obiegu wody od zera, jakbym nigdy go nie widział.",
-    suggestAnalogTitle: "🌱 Wyjaśnij analogią",
-    suggestAnalogText: "Fotosynteza, używając porównania z życia",
+    suggestAnalogTitle: "Wyjaśnij analogią", suggestAnalogText: "Fotosynteza, używając porównania z życia",
     suggestAnalogPrompt: "Wyjaśnij fotosyntezę krok po kroku, z prostą analogią.",
-    suggestQuizTitle: "🎯 Przepytaj mnie",
-    suggestQuizText: "5 pytań z algebry, jedno po drugim",
+    suggestQuizTitle: "Przepytaj mnie", suggestQuizText: "5 pytań z algebry, jedno po drugim",
     suggestQuizPrompt: "Przepytaj mnie z podstaw algebry, 5 pytań, jedno po drugim.",
-    suggestCompareTitle: "⚖️ Porównaj pojęcia",
-    suggestCompareText: "Mojoza vs mejoza, dokładnie",
+    suggestCompareTitle: "Porównaj pojęcia", suggestCompareText: "Mojoza vs mejoza, dokładnie",
     suggestComparePrompt: "Jaka jest różnica między mitozą a mejozą? Dokładnie.",
-    clearConfirm: "Wyczyścić rozmowę?",
-    cleared: "Wyczyszczono",
-    newChatStarted: "Rozpoczęto nowy czat",
-    holdOnThinking: "Chwila — wciąż myślę",
-    libraryTitle: "Twoja biblioteka",
-    librarySubtitle: "Każdy wygenerowany egzamin jest tu zapisywany.",
-    nothingSaved: "Nic jeszcze nie zapisano",
-    nothingSavedText: "Wygenerowane egzaminy pojawią się tu automatycznie.",
-    open: "Otwórz",
-    cards: "🎴 Fiszki",
-    export: "Eksportuj",
-    delete: "Usuń",
+    clearConfirm: "Wyczyścić rozmowę?", cleared: "Wyczyszczono", newChatStarted: "Rozpoczęto nowy czat",
+    holdOnThinking: "Chwila - wciąż myślę",
+    libraryTitle: "Twoja biblioteka", librarySubtitle: "Każdy wygenerowany egzamin jest tu zapisywany.",
+    nothingSaved: "Nic jeszcze nie zapisano", nothingSavedText: "Wygenerowane egzaminy pojawią się tu automatycznie.",
+    open: "Otwórz", cards: "Fiszki", export: "Eksportuj", delete: "Usuń",
     examDeleted: "Egzamin usunięty",
-    statsTitle: "Twoje postępy",
-    statsSubtitle: "Zobacz, jak sobie radzisz ze wszystkimi egzaminami.",
-    noAttempts: "Brak prób",
-    noAttemptsText: "Rozwiąż egzamin, a twoje postępy pojawią się tutaj.",
-    attempts: "Próby",
-    avgScore: "Średni wynik",
-    bestScore: "Najlepszy wynik",
-    timeStudied: "Czas nauki",
-    byTopic: "Według tematu",
-    recentAttempts: "Ostatnie próby",
+    statsTitle: "Twoje postępy", statsSubtitle: "Zobacz, jak sobie radzisz ze wszystkimi egzaminami.",
+    noAttempts: "Brak prób", noAttemptsText: "Rozwiąż egzamin, a twoje postępy pojawią się tutaj.",
+    attempts: "Próby", avgScore: "Średni wynik", bestScore: "Najlepszy wynik", timeStudied: "Czas nauki",
+    byTopic: "Według tematu", recentAttempts: "Ostatnie próby",
     needSource: "Najpierw dodaj tekst lub obraz.",
     needOneQuestion: "Poproś o co najmniej jedno pytanie.",
     tooMany: "Zatrzymaj się poniżej 80 pytań.",
-    buildingExam: "Buduję egzamin",
-    buildingExamPart: "Buduję egzamin (część {n} z {total})",
-    examReady: "Egzamin gotowy",
-    generatedSome: "Wygenerowano {n} z {total} pytań",
+    buildingExam: "Buduję egzamin", buildingExamPart: "Buduję egzamin (część {n} z {total})",
+    examReady: "Egzamin gotowy", generatedSome: "Wygenerowano {n} z {total} pytań",
     somethingWrong: "Coś poszło nie tak: ",
-    partFailed: "Część {n} nie powiodła się — zachowuję resztę.",
-    cutOff: "Uwaga — model został ucięty, więc dostałeś mniej pytań niż prosiłeś.",
+    partFailed: "Część {n} nie powiodła się - zachowuję resztę.",
+    cutOff: "Uwaga - model został ucięty, więc dostałeś mniej pytań niż prosiłeś.",
     coachReportFailed: "Raport trenera nie powiódł się: ",
     storageFull: "Pamięć pełna",
     couldNotLoadImage: "Nie udało się wczytać tego obrazu",
     onlyMoreImages: "Zmieszczą się jeszcze {n} obrazy",
+    draftRestored: "Wznowiliśmy tam, gdzie skończyłeś",
+    practiceHint: "Tryb ćwiczeń - odpowiedzi pokazują się na bieżąco",
+    markdownExported: "Markdown zapisany",
     progressMessages: [
-      "Czytam twój materiał…",
-      "Wybieram kluczowe pomysły…",
-      "Szkicuję pytania…",
-      "Piszę prawdopodobne dystraktory…",
-      "Sprawdzam odpowiedzi…",
-      "Dopracowuję sformułowania…"
+      "Czytam twój materiał…", "Wybieram kluczowe pomysły…", "Szkicuję pytania…",
+      "Piszę prawdopodobne dystraktory…", "Sprawdzam odpowiedzi…", "Dopracowuję sformułowania…"
     ],
     languageName: "Polish"
   }
@@ -2427,14 +2165,10 @@ let currentLang = localStorage.getItem('examforge.lang') || 'en';
 const RTL_LANGS = ['fa', 'ar', 'ckb'];
 
 function t(key, vars) {
-  let str = (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key])
-    || TRANSLATIONS.en[key]
-    || key;
+  let str = (T[currentLang] && T[currentLang][key]) || T.en[key] || key;
   if (vars && 'n' in vars) {
     const pluralKey = vars.n === 1 ? key + '_one' : key + '_other';
-    str = (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][pluralKey])
-      || TRANSLATIONS.en[pluralKey]
-      || str;
+    str = (T[currentLang] && T[currentLang][pluralKey]) || T.en[pluralKey] || str;
   }
   if (vars) {
     Object.entries(vars).forEach(([k, v]) => {
@@ -2445,8 +2179,7 @@ function t(key, vars) {
 }
 
 function currentLanguageName() {
-  return (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang].languageName)
-    || 'English';
+  return (T[currentLang] && T[currentLang].languageName) || 'English';
 }
 
 function isRTL() { return RTL_LANGS.includes(currentLang); }
@@ -2463,35 +2196,28 @@ function applyLanguage(code) {
   setText('#langCode', code.toUpperCase());
   $$('#langMenu button').forEach(b => b.classList.toggle('active', b.dataset.lang === code));
 
-  // intro (may already be removed)
   setText('#introHello', t('hello'));
   setText('#introReady', t('readyForBetterGrades'));
   setText('#startBtn', t('letsGo'));
   setText('#skipBtn', t('skip'));
 
-  // hero
   setText('#createHero', t('createHero'));
   setText('#createHeroSub', t('createHeroSub'));
 
-  // all data-i18n elements
   $$('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
 
-  // placeholders
   setPlaceholder('#sourceText', t('sourcePlaceholder'));
   setPlaceholder('#focus', t('focusPlaceholder'));
   setPlaceholder('#chatInput', t('chatPlaceholder'));
 
-  // total badge refresh
   updateTotalBadge();
 
-  // re-render current view
   if (state.view === 'exam' && state.exam) renderExam();
   if (state.view === 'coach') renderChat();
   if (state.view === 'library') renderLibrary();
   if (state.view === 'stats') renderStats();
 }
 
-// language menu
 const langBtn = $('#langBtn');
 const langMenu = $('#langMenu');
 langBtn.addEventListener('click', e => {
@@ -2510,11 +2236,7 @@ $$('#langMenu button').forEach(btn => {
   });
 });
 
-// ==============================
-// state & storage
-// ==============================
-
-
+// state and storage
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
 }[c]));
@@ -2527,8 +2249,11 @@ const store = {
     catch { return fallback; }
   },
   write(key, value) {
-    try { localStorage.setItem(key, JSON.stringify(value)); }
-    catch { toast(t('storageFull')); }
+    try {
+      if (value === null || value === undefined) localStorage.removeItem(key);
+      else localStorage.setItem(key, JSON.stringify(value));
+    }
+    catch { toast(t('storageFull'), 'error'); }
   }
 };
 
@@ -2541,20 +2266,21 @@ const LIBRARY_STORAGE = 'examforge.library';
 const HISTORY_STORAGE = 'examforge.history';
 const THEME_STORAGE = 'examforge.theme';
 const INTRO_STORAGE = 'examforge.introSeen';
+const DRAFT_STORAGE = 'examforge.draft';
 
+// toast. small icon on the left, colored border by kind
 let toastTimer;
-function toast(message) {
+function toast(message, kind = 'info') {
   const el = $('#toast');
-  el.textContent = message;
-  el.classList.add('show');
+  const iconMap = { success: 'check', error: 'x', warn: 'alert' };
+  const ic = iconMap[kind];
+  el.innerHTML = (ic ? `<span class="ico">${icon(ic, 15)}</span>` : '') + `<span>${esc(message)}</span>`;
+  el.className = 'toast show ' + kind;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
 }
 
-// ==============================
-// theme (light / dark / auto)
-// ==============================
-
+// theme: light -> dark -> auto. cycles on click
 function applyTheme(mode) {
   let effective = mode;
   if (mode === 'auto') {
@@ -2564,15 +2290,14 @@ function applyTheme(mode) {
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', effective === 'dark' ? '#050608' : '#eef2f8');
 
-  const icons = { light: '☾', dark: '☀', auto: '◐' };
-  $('#themeBtn').textContent = icons[mode] || '☾';
+  const iconMap = { light: 'moon', dark: 'sun', auto: 'halfCircle' };
+  $('#themeBtn').innerHTML = icon(iconMap[mode] || 'moon', 16);
   store.write(THEME_STORAGE, mode);
 }
 
 const savedTheme = store.read(THEME_STORAGE, 'light');
 applyTheme(savedTheme);
 
-// cycle light → dark → auto → light
 $('#themeBtn').addEventListener('click', () => {
   const cur = store.read(THEME_STORAGE, 'light');
   const next = cur === 'light' ? 'dark' : cur === 'dark' ? 'auto' : 'light';
@@ -2584,27 +2309,28 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
   if (store.read(THEME_STORAGE, 'light') === 'auto') applyTheme('auto');
 });
 
-// ==============================
-// intro splash
-// ==============================
-
+// intro splash. escape skips it
 (function showIntro() {
   const intro = $('#intro');
+  if (!intro) return;
   const seen = sessionStorage.getItem(INTRO_STORAGE);
+  if (seen) { intro.remove(); return; }
+
   function dismiss() {
     intro.classList.add('hiding');
     sessionStorage.setItem(INTRO_STORAGE, '1');
+    document.removeEventListener('keydown', onKey);
     setTimeout(() => intro.remove(), 900);
   }
-  if (seen) { intro.remove(); return; }
+  function onKey(e) {
+    if (e.key === 'Escape') dismiss();
+  }
+
   $('#startBtn').addEventListener('click', dismiss);
   $('#skipBtn').addEventListener('click', dismiss);
   intro.addEventListener('click', e => { if (e.target === intro) dismiss(); });
+  document.addEventListener('keydown', onKey);
 })();
-
-// ==============================
-// nav
-// ==============================
 
 function navigate(view) {
   state.view = view;
@@ -2617,10 +2343,7 @@ function navigate(view) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 $$('#nav button').forEach(btn => btn.addEventListener('click', () => navigate(btn.dataset.view)));
-
-// ==============================
-// state
-// ==============================
+$('#brandBtn')?.addEventListener('click', () => navigate('create'));
 
 const state = {
   view: 'create',
@@ -2634,10 +2357,7 @@ const state = {
   coachReport: null
 };
 
-// ==============================
 // image upload
-// ==============================
-
 const dropZone = $('#drop');
 const fileInput = $('#fileInput');
 
@@ -2683,17 +2403,19 @@ function handleFiles(files) {
       renderThumbs();
     } catch (err) {
       console.error(err);
-      toast(t('couldNotLoadImage'));
+      toast(t('couldNotLoadImage'), 'error');
     }
   });
-  if (files.length > room) toast(t('onlyMoreImages', { n: room }));
+  if (files.length > room) toast(t('onlyMoreImages', { n: room }), 'warn');
 }
 
 function renderThumbs() {
   $('#thumbs').innerHTML = state.images.map((img, i) => `
     <div class="thumb">
       <img src="${img.dataUrl}" alt="">
-      <button data-index="${i}" title="Remove">×</button>
+      <button data-index="${i}" title="Remove">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
     </div>
   `).join('');
   $$('#thumbs button').forEach(btn => {
@@ -2722,12 +2444,55 @@ function updateTotalBadge() {
   $('#' + id).addEventListener('input', updateTotalBadge);
 });
 
-// ==============================
-// progress ui
-// ==============================
+// draft autosave
+let draftTimer;
+function saveDraft() {
+  const text = $('#sourceText').value.trim();
+  const focus = $('#focus').value.trim();
+  if (!text && !focus) {
+    store.write(DRAFT_STORAGE, null);
+    return;
+  }
+  store.write(DRAFT_STORAGE, {
+    text,
+    focus,
+    counts: {
+      mcq: $('#countMcq').value,
+      tf: $('#countTf').value,
+      fib: $('#countFib').value,
+      short: $('#countShort').value
+    },
+    difficulty: $('#difficulty').value,
+    passingScore: $('#passingScore').value
+  });
+}
+function scheduleDraftSave() {
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(saveDraft, 500);
+}
+function restoreDraft() {
+  const d = store.read(DRAFT_STORAGE, null);
+  if (!d) return;
+  if (d.text) $('#sourceText').value = d.text;
+  if (d.focus) $('#focus').value = d.focus;
+  if (d.counts) {
+    if (d.counts.mcq != null) $('#countMcq').value = d.counts.mcq;
+    if (d.counts.tf != null) $('#countTf').value = d.counts.tf;
+    if (d.counts.fib != null) $('#countFib').value = d.counts.fib;
+    if (d.counts.short != null) $('#countShort').value = d.counts.short;
+  }
+  if (d.difficulty) $('#difficulty').value = d.difficulty;
+  if (d.passingScore) $('#passingScore').value = d.passingScore;
+  updateTotalBadge();
+  setTimeout(() => toast(t('draftRestored')), 800);
+}
+['sourceText', 'focus', 'countMcq', 'countTf', 'countFib', 'countShort', 'difficulty', 'passingScore'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', scheduleDraftSave);
+});
 
 function showProgress() {
-  const messages = TRANSLATIONS[currentLang].progressMessages || TRANSLATIONS.en.progressMessages;
+  const messages = T[currentLang].progressMessages || T.en.progressMessages;
   $('#progressArea').innerHTML = `
     <div class="progress" id="progress">
       <div class="progress-ring">
@@ -2752,10 +2517,6 @@ function showProgress() {
 }
 
 function hideProgress() { const el = $('#progress'); if (el) el.remove(); }
-
-// ==============================
-// api client
-// ==============================
 
 async function askAI(messages) {
   const url = API.baseUrl + '/chat/completions';
@@ -2791,7 +2552,6 @@ function parseJsonResponse(text) {
       try { return JSON.parse(slice.replace(/,\s*([}\]])/g, '$1')); } catch {}
     }
   }
-  // truncated response — keep whatever questions came through
   const qMatch = clean.match(/"questions"\s*:\s*\[/);
   if (!qMatch) throw new Error('cut off before any questions');
   const arrayStart = qMatch.index + qMatch[0].length;
@@ -2811,18 +2571,14 @@ function parseJsonResponse(text) {
   const repaired = head + questions + '\n  ]\n}';
   try {
     const parsed = JSON.parse(repaired);
-    toast(t('cutOff'));
+    toast(t('cutOff'), 'warn');
     return parsed;
   } catch {
     const parsed = JSON.parse(repaired.replace(/,\s*([}\]])/g, '$1'));
-    toast(t('cutOff'));
+    toast(t('cutOff'), 'warn');
     return parsed;
   }
 }
-
-// ==============================
-// normalization
-// ==============================
 
 function normalizeExam(data, { difficulty, passingScore }) {
   const questions = (data.questions || []).map(normalizeQuestion).filter(Boolean);
@@ -2904,10 +2660,7 @@ function saveToLibrary(exam) {
   store.write(LIBRARY_STORAGE, state.library);
 }
 
-// ==============================
-// fuzzy matching for fill-in-blank
-// ==============================
-
+// fuzzy matching for fill-in-blank. hairiest bit in the whole app
 function normalizeText(s) {
   return String(s || '')
     .toLowerCase()
@@ -2946,7 +2699,6 @@ function similarity(a, b) {
   return 1 - levenshtein(a, b) / Math.max(a.length, b.length);
 }
 
-// returns 'exact' | 'close' | 'none'
 function checkBlank(given, blank) {
   const g = normalizeText(given);
   if (!g) return { match: 'none' };
@@ -2959,12 +2711,10 @@ function checkBlank(given, blank) {
     const ncNoArt = stripArticles(nc);
     if (g === nc || g === ncNoArt || gNoArt === nc || gNoArt === ncNoArt) return { match: 'exact' };
   }
-  // plural / singular
   for (const c of candidates) {
     const nc = normalizeText(c);
     if (g.replace(/(\w+)s$/, '$1') === nc.replace(/(\w+)s$/, '$1') && g.length > 2) return { match: 'exact' };
   }
-  // substring for longer answers
   for (const c of candidates) {
     const nc = normalizeText(c);
     if (nc.length >= 4 && g.length >= 4) {
@@ -2973,7 +2723,6 @@ function checkBlank(given, blank) {
       }
     }
   }
-  // fuzzy
   let best = 0;
   for (const c of candidates) {
     const nc = normalizeText(c);
@@ -2991,10 +2740,6 @@ function checkBlank(given, blank) {
   if (best >= 0.72) return { match: 'close' };
   return { match: 'none' };
 }
-
-// ==============================
-// grading
-// ==============================
 
 function gradeOne(q, answer) {
   const base = { correct: null, correctAnswer: '', sampleAnswer: '', rubric: [], explanation: q.explanation || '' };
@@ -3032,10 +2777,7 @@ function gradeOne(q, answer) {
   return base;
 }
 
-// ==============================
-// generate exam
-// ==============================
-
+// exam generation
 $('#generateBtn').addEventListener('click', generateExam);
 
 function buildExamPrompt({ text, counts, difficulty, focus, hasImages, isFirstBatch, existingQuestions }) {
@@ -3107,7 +2849,7 @@ function buildExamPrompt({ text, counts, difficulty, focus, hasImages, isFirstBa
   lines.push('- Include a hint on at least half the questions.');
   lines.push('');
   lines.push('Source material:');
-  lines.push(text ? text.slice(0, 24000) : '(no text — use the attached images)');
+  lines.push(text ? text.slice(0, 24000) : '(no text - use the attached images)');
 
   return lines.join('\n');
 }
@@ -3133,11 +2875,13 @@ async function generateExam() {
   const passingScore = Number($('#passingScore').value) || 70;
 
   const btn = $('#generateBtn');
+  const origBtnHTML = btn.innerHTML;
   btn.disabled = true;
+  btn.innerHTML = `<span class="ico">${icon('sparkle', 16)}</span><span class="btn-loading">${esc(t('buildingExam'))}</span>`;
   setStatus('');
   const progressTicker = showProgress();
 
-  // split into small batches so we never blow past the output token limit
+  // split into batches so we never blow past the output token limit
   const BATCH_SIZE = 8;
   const batches = [];
   const remaining = { ...counts };
@@ -3184,7 +2928,7 @@ async function generateExam() {
       }
 
       const messages = [
-        { role: 'system', content: 'You are an expert exam author. Respond with valid JSON only — no prose, no markdown fences.' },
+        { role: 'system', content: 'You are an expert exam author. Respond with valid JSON only - no prose, no markdown fences.' },
         { role: 'user', content: userContent }
       ];
 
@@ -3206,7 +2950,7 @@ async function generateExam() {
       } catch (batchErr) {
         console.error('batch ' + (i + 1) + ' failed', batchErr);
         if (allQuestions.length === 0) throw batchErr;
-        toast(t('partFailed', { n: i + 1 }));
+        toast(t('partFailed', { n: i + 1 }), 'warn');
       }
     }
 
@@ -3222,24 +2966,22 @@ async function generateExam() {
     state.coachReport = null;
 
     saveToLibrary(exam);
+    store.write(DRAFT_STORAGE, null);
     renderExam();
     navigate('exam');
 
-    if (allQuestions.length < total) toast(t('generatedSome', { n: allQuestions.length, total }));
-    else toast(t('examReady'));
+    if (allQuestions.length < total) toast(t('generatedSome', { n: allQuestions.length, total }), 'warn');
+    else toast(t('examReady'), 'success');
   } catch (err) {
     console.error(err);
     setStatus(t('somethingWrong') + err.message, 'error');
   } finally {
     clearInterval(progressTicker);
     hideProgress();
+    btn.innerHTML = origBtnHTML;
     btn.disabled = false;
   }
 }
-
-// ==============================
-// exam rendering
-// ==============================
 
 function renderExam() {
   const exam = state.exam;
@@ -3247,10 +2989,15 @@ function renderExam() {
   if (!exam || !session) {
     $('#examArea').innerHTML = `
       <div class="empty">
-        <div class="empty-icon">📝</div>
+        <div class="empty-icon">${icon('pencil', 32)}</div>
         <p class="empty-title">${esc(t('noExamYet'))}</p>
         <p class="empty-text">${esc(t('noExamText'))}</p>
+        <button class="btn btn-primary" id="emptyCreateBtn">
+          <span class="ico">${icon('sparkle', 16)}</span>
+          <span>${esc(t('emptyGoCreate'))}</span>
+        </button>
       </div>`;
+    document.getElementById('emptyCreateBtn')?.addEventListener('click', () => navigate('create'));
     return;
   }
 
@@ -3287,18 +3034,31 @@ function renderExam() {
       <h2>${esc(exam.title)}</h2>
       ${exam.description ? `<p class="desc">${esc(exam.description)}</p>` : ''}
       <div class="exam-meta">
-        <span class="chip">📋 ${esc(t('questions', { n: exam.questions.length }))}</span>
-        <span class="chip">🏆 ${esc(t('points', { n: totalPoints }))}</span>
-        <span class="chip">🎯 ${esc(t('passAt', { n: exam.passingScore }))}</span>
-        ${exam.topic ? `<span class="chip">📚 ${esc(exam.topic)}</span>` : ''}
+        <span class="chip"><span class="ico">${icon('clipboard', 13)}</span>${esc(t('questions', { n: exam.questions.length }))}</span>
+        <span class="chip"><span class="ico">${icon('trophy', 13)}</span>${esc(t('points', { n: totalPoints }))}</span>
+        <span class="chip"><span class="ico">${icon('target', 13)}</span>${esc(t('passAt', { n: exam.passingScore }))}</span>
+        ${exam.topic ? `<span class="chip"><span class="ico">${icon('book', 13)}</span>${esc(exam.topic)}</span>` : ''}
       </div>
       <div class="exam-actions">
-        <button class="btn btn-sm" id="modeToggle">${session.mode === 'test' ? esc(t('practiceMode')) : esc(t('testMode'))}</button>
-        <button class="btn btn-sm" id="flashToggle">${esc(t('studyAsFlashcards'))}</button>
-        <button class="btn btn-sm" id="printBtn">${esc(t('print'))}</button>
+        <button class="btn btn-sm" id="modeToggle">
+          <span class="ico">${icon('bookOpen', 14)}</span>
+          <span>${session.mode === 'test' ? esc(t('practiceMode')) : esc(t('testMode'))}</span>
+        </button>
+        <button class="btn btn-sm" id="flashToggle">
+          <span class="ico">${icon('cards', 14)}</span>
+          <span>${esc(t('studyAsFlashcards'))}</span>
+        </button>
+        <button class="btn btn-sm" id="printBtn">
+          <span class="ico">${icon('printer', 14)}</span>
+          <span>${esc(t('print'))}</span>
+        </button>
       </div>
     </div>
   `;
+
+  const modeBanner = session.mode === 'practice'
+    ? `<div class="mode-banner practice"><span class="ico">${icon('bookOpen', 14)}</span>${esc(t('practiceHint'))}</div>`
+    : '';
 
   const progressBar = `
     <div class="q-progress-bar">
@@ -3311,7 +3071,7 @@ function renderExam() {
   `;
 
   const questionsHtml = exam.questions.map((q, i) => renderQuestion(q, i, session)).join('');
-  $('#examArea').innerHTML = header + progressBar + questionsHtml + renderResultBar(exam, session);
+  $('#examArea').innerHTML = header + modeBanner + progressBar + questionsHtml + renderResultBar(exam, session);
   bindQuestionInteractions();
   updateResultBar();
   bindExamToolbar();
@@ -3336,7 +3096,9 @@ function renderQuestion(q, index, session) {
   else if (q.type === 'fib') body = renderFib(q, answer, showFeedback);
   else if (q.type === 'short') body = renderShort(q, answer, showFeedback);
 
-  const hintHtml = hintShown && q.hint ? `<div class="hint">${esc(q.hint)}</div>` : '';
+  const hintHtml = hintShown && q.hint
+    ? `<div class="hint"><span class="hint-icon">${icon('bulb', 16)}</span><span>${esc(q.hint)}</span></div>`
+    : '';
   const feedbackHtml = showFeedback ? renderFeedback(result) : '';
 
   return `
@@ -3347,8 +3109,8 @@ function renderQuestion(q, index, session) {
           <div class="q-prompt">${esc(q.prompt)}</div>
         </div>
         <div class="q-tools">
-          ${q.hint ? `<button class="hint-btn ${hintShown ? 'on' : ''}" data-qid="${q.id}" title="${esc(t('showHint'))}">💡</button>` : ''}
-          <button class="flag-btn ${flagged ? 'on' : ''}" data-qid="${q.id}" title="${esc(t('flagForReview'))}">🚩</button>
+          ${q.hint ? `<button class="hint-btn ${hintShown ? 'on' : ''}" data-qid="${q.id}" title="${esc(t('showHint'))}">${icon('bulb', 15)}</button>` : ''}
+          <button class="flag-btn ${flagged ? 'on' : ''}" data-qid="${q.id}" title="${esc(t('flagForReview'))}">${icon('flag', 15)}</button>
         </div>
       </div>
       ${body}
@@ -3383,7 +3145,7 @@ function renderMcq(q, answer, showFeedback) {
 }
 
 function renderTf(q, answer, showFeedback) {
-  const render = (value, label) => {
+  const render = (value, label, ic) => {
     const picked = answer === value;
     const classes = [];
     if (showFeedback) {
@@ -3394,13 +3156,16 @@ function renderTf(q, answer, showFeedback) {
     return `
       <label class="option ${classes.join(' ')}">
         <input type="radio" name="q_${q.id}" value="${value}" ${picked ? 'checked' : ''} ${showFeedback ? 'disabled' : ''}>
-        <span class="text" style="text-align:center;">${esc(label)}</span>
+        <span class="text" style="text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;">
+          ${ic ? `<span class="ico">${icon(ic, 16)}</span>` : ''}
+          <span>${esc(label)}</span>
+        </span>
       </label>
     `;
   };
   return `<div class="tf-row" data-qid="${q.id}">
-    ${render('true', t('trueLabel'))}
-    ${render('false', t('falseLabel'))}
+    ${render('true', t('trueLabel'), 'check')}
+    ${render('false', t('falseLabel'), 'x')}
   </div>`;
 }
 
@@ -3472,15 +3237,14 @@ function renderResultBar(exam, session) {
         <div class="score-label">${esc(t('answered'))}</div>
       </div>
       <div class="result-actions">
-        <button class="btn btn-primary" id="submitBtn">${esc(t('submitForGrading'))}</button>
+        <button class="btn btn-primary" id="submitBtn">
+          <span class="ico">${icon('check', 15)}</span>
+          <span>${esc(t('submitForGrading'))}</span>
+        </button>
       </div>
     </div>
   `;
 }
-
-// ==============================
-// results
-// ==============================
 
 function renderResults(exam, session) {
   const results = session.results || {};
@@ -3549,9 +3313,18 @@ function renderResults(exam, session) {
     ${renderCoachSection()}
 
     <div class="exam-actions" style="margin-top: 20px; margin-bottom: 22px;">
-      <button class="btn" id="retakeBtn">${esc(t('retake'))}</button>
-      <button class="btn" id="flashFromResults">${esc(t('studyAsFlashcards'))}</button>
-      <button class="btn btn-primary" id="newExamBtn">${esc(t('createNewExam'))}</button>
+      <button class="btn" id="retakeBtn">
+        <span class="ico">${icon('reset', 14)}</span>
+        <span>${esc(t('retake'))}</span>
+      </button>
+      <button class="btn" id="flashFromResults">
+        <span class="ico">${icon('cards', 14)}</span>
+        <span>${esc(t('studyAsFlashcards'))}</span>
+      </button>
+      <button class="btn btn-primary" id="newExamBtn">
+        <span class="ico">${icon('sparkle', 15)}</span>
+        <span>${esc(t('createNewExam'))}</span>
+      </button>
     </div>
 
     <div>
@@ -3564,8 +3337,14 @@ function renderResults(exam, session) {
         <div class="score-label">${esc(t('correctCount', { n: autoCorrect }))} / ${autoTotal}</div>
       </div>
       <div class="result-actions">
-        <button class="btn" id="retakeBtn2">${esc(t('retake'))}</button>
-        <button class="btn btn-primary" id="newExamBtn2">${esc(t('newExam'))}</button>
+        <button class="btn" id="retakeBtn2">
+          <span class="ico">${icon('reset', 14)}</span>
+          <span>${esc(t('retake'))}</span>
+        </button>
+        <button class="btn btn-primary" id="newExamBtn2">
+          <span class="ico">${icon('plus', 15)}</span>
+          <span>${esc(t('newExam'))}</span>
+        </button>
       </div>
     </div>
   `;
@@ -3576,14 +3355,17 @@ function renderCoachSection() {
     return `
       <div class="coach-card" id="coachCard">
         <div class="coach-head">
-          <div class="coach-avatar">🧑‍🏫</div>
+          <div class="coach-avatar">${icon('graduation', 20)}</div>
           <div>
             <p class="coach-title">${esc(t('getCoachReport'))}</p>
             <p class="coach-sub">${esc(t('coachReportSub'))}</p>
           </div>
         </div>
         <p class="coach-text" style="margin-bottom: 16px;">${esc(t('coachReportExplain'))}</p>
-        <button class="btn btn-primary" id="getCoachReportBtn" style="width: 100%;">${esc(t('analyzeMyExam'))}</button>
+        <button class="btn btn-primary" id="getCoachReportBtn" style="width: 100%;">
+          <span class="ico">${icon('sparkle', 16)}</span>
+          <span>${esc(t('analyzeMyExam'))}</span>
+        </button>
       </div>
     `;
   }
@@ -3591,7 +3373,7 @@ function renderCoachSection() {
     return `
       <div class="coach-card">
         <div class="coach-head">
-          <div class="coach-avatar">🧑‍🏫</div>
+          <div class="coach-avatar">${icon('graduation', 20)}</div>
           <div>
             <p class="coach-title">${esc(t('analyzingExam'))}</p>
             <p class="coach-sub">${esc(t('analyzingSub'))}</p>
@@ -3610,20 +3392,26 @@ function renderCoachSection() {
   return `
     <div class="coach-card" id="coachCard">
       <div class="coach-head">
-        <div class="coach-avatar">🧑‍🏫</div>
+        <div class="coach-avatar">${icon('graduation', 20)}</div>
         <div>
           <p class="coach-title">${esc(t('coachReportTitle'))}</p>
           <p class="coach-sub">${esc(t('coachReportSub2'))}</p>
         </div>
       </div>
       ${r.summary ? `<div class="coach-section"><p class="coach-section-title info">${esc(t('overview'))}</p><p class="coach-text">${esc(r.summary)}</p></div>` : ''}
-      ${r.strengths?.length ? `<div class="coach-section"><p class="coach-section-title good">${esc(t('strengths'))}</p><ul class="coach-list">${r.strengths.map(s => `<li>${esc(s)}</li>`).join('')}</ul></div>` : ''}
-      ${r.weaknesses?.length ? `<div class="coach-section"><p class="coach-section-title warn">${esc(t('areasToImprove'))}</p><ul class="coach-list">${r.weaknesses.map(w => `<li>${esc(w)}</li>`).join('')}</ul></div>` : ''}
-      ${r.study?.length ? `<div class="coach-section"><p class="coach-section-title info">${esc(t('whatToStudy'))}</p><ul class="coach-list">${r.study.map(s => `<li>${esc(s)}</li>`).join('')}</ul></div>` : ''}
-      ${r.pace ? `<div class="coach-section"><p class="coach-section-title">${esc(t('pacingNotes'))}</p><p class="coach-text">${esc(r.pace)}</p></div>` : ''}
+      ${r.strengths?.length ? `<div class="coach-section"><p class="coach-section-title good"><span class="ico">${icon('check', 12)}</span>${esc(t('strengths'))}</p><ul class="coach-list">${r.strengths.map(s => `<li>${esc(s)}</li>`).join('')}</ul></div>` : ''}
+      ${r.weaknesses?.length ? `<div class="coach-section"><p class="coach-section-title warn"><span class="ico">${icon('alert', 12)}</span>${esc(t('areasToImprove'))}</p><ul class="coach-list">${r.weaknesses.map(w => `<li>${esc(w)}</li>`).join('')}</ul></div>` : ''}
+      ${r.study?.length ? `<div class="coach-section"><p class="coach-section-title info"><span class="ico">${icon('book', 12)}</span>${esc(t('whatToStudy'))}</p><ul class="coach-list">${r.study.map(s => `<li>${esc(s)}</li>`).join('')}</ul></div>` : ''}
+      ${r.pace ? `<div class="coach-section"><p class="coach-section-title"><span class="ico">${icon('clock', 12)}</span>${esc(t('pacingNotes'))}</p><p class="coach-text">${esc(r.pace)}</p></div>` : ''}
       <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px;">
-        <button class="btn btn-sm" id="coachChatBtn">${esc(t('talkToCoach'))}</button>
-        <button class="btn btn-sm" id="coachRerunBtn">${esc(t('reanalyze'))}</button>
+        <button class="btn btn-sm" id="coachChatBtn">
+          <span class="ico">${icon('message', 14)}</span>
+          <span>${esc(t('talkToCoach'))}</span>
+        </button>
+        <button class="btn btn-sm" id="coachRerunBtn">
+          <span class="ico">${icon('redo', 14)}</span>
+          <span>${esc(t('reanalyze'))}</span>
+        </button>
       </div>
     </div>
   `;
@@ -3646,7 +3434,9 @@ function renderReviewQuestion(q, index, session) {
   else if (q.type === 'fib') body = renderFib(q, answer, showFeedback);
   else if (q.type === 'short') body = renderShort(q, answer, true);
 
-  const timeBadge = timeSpent ? `<span class="chip" style="margin-inline-start: 8px; font-size: 11.5px; padding: 3px 10px;">⏱ ${timeSpent}s</span>` : '';
+  const timeBadge = timeSpent
+    ? `<span class="chip" style="margin-inline-start: 8px; font-size: 11.5px; padding: 3px 10px;"><span class="ico">${icon('clock', 11)}</span>${timeSpent}s</span>`
+    : '';
 
   return `
     <div class="question ${stateClass}">
@@ -3698,10 +3488,6 @@ function bindResults() {
   });
 }
 
-// ==============================
-// coach report
-// ==============================
-
 async function generateCoachReport() {
   if (!state.exam || !state.session) return;
   state.coachBusy = true;
@@ -3722,7 +3508,7 @@ async function generateCoachReport() {
     '',
     'For each question: prompt, type, correct answer, student answer, result, and time spent in seconds.',
     '',
-    'Even if all answers are correct, still find areas to improve — look at questions answered suspiciously fast (guessing?) or very slowly (struggling?), or single-topic coverage.',
+    'Even if all answers are correct, still find areas to improve - look at questions answered suspiciously fast (guessing?) or very slowly (struggling?), or single-topic coverage.',
     '',
     '---'
   ];
@@ -3782,17 +3568,13 @@ async function generateCoachReport() {
     };
   } catch (err) {
     console.error(err);
-    toast(t('coachReportFailed') + err.message);
+    toast(t('coachReportFailed') + err.message, 'error');
     state.coachReport = null;
   } finally {
     state.coachBusy = false;
     renderExam();
   }
 }
-
-// ==============================
-// interactions
-// ==============================
 
 function updateResultBar() {
   const session = state.session;
@@ -3964,10 +3746,7 @@ function submitExam() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ==============================
 // flashcards
-// ==============================
-
 let flashKeyHandler = null;
 let flashSwipeStart = null;
 
@@ -3976,7 +3755,7 @@ function renderFlashcards(exam, session) {
   const card = exam.questions[session.currentCard];
   if (!card) {
     return `<div class="flash-wrap"><div class="empty">
-      <div class="empty-icon">🎴</div>
+      <div class="empty-icon">${icon('cards', 32)}</div>
       <p class="empty-title">${esc(t('noCards'))}</p>
       <p class="empty-text">${esc(t('noCardsText'))}</p>
     </div></div>`;
@@ -4022,21 +3801,33 @@ function renderFlashcards(exam, session) {
       </div>
 
       <div class="flash-controls">
-        <button class="btn btn-nav" id="flashPrev" ${session.currentCard === 0 ? 'disabled' : ''}>‹</button>
+        <button class="btn btn-nav" id="flashPrev" ${session.currentCard === 0 ? 'disabled' : ''}>${icon('arrowLeft', 20)}</button>
         <button class="btn btn-primary btn-flip" id="flashFlip">${flipped ? esc(t('questionSide')) : esc(t('answerSide'))}</button>
-        <button class="btn btn-nav" id="flashNext" ${session.currentCard === total - 1 ? 'disabled' : ''}>›</button>
+        <button class="btn btn-nav" id="flashNext" ${session.currentCard === total - 1 ? 'disabled' : ''}>${icon('arrowRight', 20)}</button>
       </div>
 
       ${flipped ? `
         <div style="display: flex; gap: 10px; justify-content: center; margin-top: 18px; flex-wrap: wrap;">
-          <button class="btn btn-sm" id="flashAgain" style="border-color: color-mix(in srgb, var(--orange) 40%, transparent); color: var(--orange);">${esc(t('reviewAgain'))}</button>
-          <button class="btn btn-sm" id="flashKnown" style="border-color: color-mix(in srgb, var(--green) 40%, transparent); color: var(--green);">${esc(t('iKnowThis'))}</button>
+          <button class="btn btn-sm" id="flashAgain" style="border-color: color-mix(in srgb, var(--orange) 40%, transparent); color: var(--orange);">
+            <span class="ico">${icon('redo', 14)}</span>
+            <span>${esc(t('reviewAgain'))}</span>
+          </button>
+          <button class="btn btn-sm" id="flashKnown" style="border-color: color-mix(in srgb, var(--green) 40%, transparent); color: var(--green);">
+            <span class="ico">${icon('check', 14)}</span>
+            <span>${esc(t('iKnowThis'))}</span>
+          </button>
         </div>
       ` : ''}
 
       <div class="flash-secondary">
-        <button class="btn btn-sm" id="flashShuffle">${esc(t('shuffle'))}</button>
-        <button class="btn btn-sm" id="flashReset">${esc(t('resetProgress'))}</button>
+        <button class="btn btn-sm" id="flashShuffle">
+          <span class="ico">${icon('shuffle', 14)}</span>
+          <span>${esc(t('shuffle'))}</span>
+        </button>
+        <button class="btn btn-sm" id="flashReset">
+          <span class="ico">${icon('reset', 14)}</span>
+          <span>${esc(t('resetProgress'))}</span>
+        </button>
         <button class="btn btn-sm" id="exitFlash">${esc(t('exit'))}</button>
       </div>
     </div>
@@ -4044,20 +3835,23 @@ function renderFlashcards(exam, session) {
 }
 
 function buildCardBack(card) {
+  const checkMark = `<span class="ico" style="color: var(--green);">${icon('check', 22)}</span>`;
+  const xMark = `<span class="ico" style="color: var(--red);">${icon('x', 22)}</span>`;
+
   if (card.type === 'mcq') {
     const right = card.options.find(o => o.correct);
     const letter = right ? ['A', 'B', 'C', 'D', 'E', 'F'][card.options.indexOf(right)] : '';
-    const answerHtml = right ? `<div class="answer-text correct-mark">${esc(letter)}. ${esc(right.text)}</div>` : '';
+    const answerHtml = right ? `<div class="answer-text">${checkMark}<span>${esc(letter)}. ${esc(right.text)}</span></div>` : '';
     const note = card.explanation ? `<div class="answer-note">${esc(card.explanation)}</div>` : '';
     return answerHtml + note;
   }
   if (card.type === 'tf') {
-    const answerHtml = `<div class="answer-text ${card.answer ? 'correct-mark' : 'wrong-mark'}">${esc(card.answer ? t('trueLabel') : t('falseLabel'))}</div>`;
+    const answerHtml = `<div class="answer-text">${card.answer ? checkMark : xMark}<span>${esc(card.answer ? t('trueLabel') : t('falseLabel'))}</span></div>`;
     const note = card.explanation ? `<div class="answer-note">${esc(card.explanation)}</div>` : '';
     return answerHtml + note;
   }
   if (card.type === 'fib') {
-    const answerHtml = `<div class="answer-text correct-mark">${card.blanks.map(b => esc(b.answer)).join(' · ')}</div>`;
+    const answerHtml = `<div class="answer-text">${checkMark}<span>${card.blanks.map(b => esc(b.answer)).join(' · ')}</span></div>`;
     const note = card.explanation ? `<div class="answer-note">${esc(card.explanation)}</div>` : '';
     return answerHtml + note;
   }
@@ -4177,33 +3971,30 @@ function bindFlashcards() {
   document.addEventListener('keydown', flashKeyHandler);
 }
 
-// ==============================
 // coach chat
-// ==============================
-
 function renderChat() {
   const area = $('#chatMessages');
   if (!state.chat.length) {
     area.innerHTML = `
       <div class="chat-empty">
-        <div class="big">🧑‍🏫</div>
+        <div class="big">${icon('graduation', 44)}</div>
         <h3>${esc(t('chatEmptyTitle'))}</h3>
         <p>${esc(t('chatEmptyText'))}</p>
         <div class="chat-suggestions">
           <button class="chat-suggestion" data-prompt="${esc(t('suggestTeachPrompt'))}">
-            <div class="title">${esc(t('suggestTeachTitle'))}</div>
+            <div class="title"><span class="ico">${icon('bookOpen', 15)}</span><span>${esc(t('suggestTeachTitle'))}</span></div>
             ${esc(t('suggestTeachText'))}
           </button>
           <button class="chat-suggestion" data-prompt="${esc(t('suggestAnalogPrompt'))}">
-            <div class="title">${esc(t('suggestAnalogTitle'))}</div>
+            <div class="title"><span class="ico">${icon('leaf', 15)}</span><span>${esc(t('suggestAnalogTitle'))}</span></div>
             ${esc(t('suggestAnalogText'))}
           </button>
           <button class="chat-suggestion" data-prompt="${esc(t('suggestQuizPrompt'))}">
-            <div class="title">${esc(t('suggestQuizTitle'))}</div>
+            <div class="title"><span class="ico">${icon('target', 15)}</span><span>${esc(t('suggestQuizTitle'))}</span></div>
             ${esc(t('suggestQuizText'))}
           </button>
           <button class="chat-suggestion" data-prompt="${esc(t('suggestComparePrompt'))}">
-            <div class="title">${esc(t('suggestCompareTitle'))}</div>
+            <div class="title"><span class="ico">${icon('scales', 15)}</span><span>${esc(t('suggestCompareTitle'))}</span></div>
             ${esc(t('suggestCompareText'))}
           </button>
         </div>
@@ -4217,7 +4008,7 @@ function renderChat() {
 
   area.innerHTML = state.chat.map(msg => `
     <div class="chat-msg ${msg.role}">
-      <div class="avatar">${msg.role === 'user' ? '🧑' : '🧑‍🏫'}</div>
+      <div class="avatar">${msg.role === 'user' ? icon('user', 16) : icon('graduation', 18)}</div>
       <div class="bubble">${formatChatContent(msg.content)}</div>
     </div>
   `).join('');
@@ -4253,7 +4044,7 @@ async function sendChatMessage(text) {
   typing.className = 'chat-msg ai';
   typing.id = typingId;
   typing.innerHTML = `
-    <div class="avatar">🧑‍🏫</div>
+    <div class="avatar">${icon('graduation', 18)}</div>
     <div class="bubble"><div class="coach-loading" style="padding: 4px;"><div class="coach-dot"></div><div class="coach-dot"></div><div class="coach-dot"></div></div></div>
   `;
   msgsArea.appendChild(typing);
@@ -4325,10 +4116,7 @@ if (chatNewBtn) chatNewBtn.addEventListener('click', () => {
   toast(t('newChatStarted'));
 });
 
-// ==============================
 // history, library, stats
-// ==============================
-
 function recordHistory(exam, session) {
   const results = Object.values(session.results || {});
   const autoResults = results.filter(r => r.correct === true || r.correct === 'close' || r.correct === false);
@@ -4355,7 +4143,7 @@ function renderLibrary() {
   if (!state.library.length) {
     area.innerHTML = `
       <div class="empty">
-        <div class="empty-icon">📚</div>
+        <div class="empty-icon">${icon('book', 32)}</div>
         <p class="empty-title">${esc(t('nothingSaved'))}</p>
         <p class="empty-text">${esc(t('nothingSavedText'))}</p>
       </div>
@@ -4370,9 +4158,18 @@ function renderLibrary() {
           <div class="sub">${esc(t('questions', { n: exam.questions.length }))} · ${new Date(exam.createdAt).toLocaleDateString()}</div>
           <div class="row">
             <button class="btn btn-xs" data-action="open">${esc(t('open'))}</button>
-            <button class="btn btn-xs" data-action="flash">${esc(t('cards'))}</button>
-            <button class="btn btn-xs" data-action="export">${esc(t('export'))}</button>
-            <button class="btn btn-xs" data-action="delete">${esc(t('delete'))}</button>
+            <button class="btn btn-xs" data-action="flash">
+              <span class="ico">${icon('cards', 12)}</span>
+              <span>${esc(t('cards'))}</span>
+            </button>
+            <button class="btn btn-xs" data-action="export">
+              <span class="ico">${icon('download', 12)}</span>
+              <span>${esc(t('export'))}</span>
+            </button>
+            <button class="btn btn-xs" data-action="delete">
+              <span class="ico">${icon('trash', 12)}</span>
+              <span>${esc(t('delete'))}</span>
+            </button>
           </div>
         </div>
       `).join('')}
@@ -4425,7 +4222,7 @@ function renderStats() {
   if (!history.length) {
     area.innerHTML = `
       <div class="empty">
-        <div class="empty-icon">📊</div>
+        <div class="empty-icon">${icon('chart', 32)}</div>
         <p class="empty-title">${esc(t('noAttempts'))}</p>
         <p class="empty-text">${esc(t('noAttemptsText'))}</p>
       </div>
@@ -4484,10 +4281,7 @@ function renderStats() {
   `;
 }
 
-// ==============================
 // boot
-// ==============================
-
 document.addEventListener('input', updateResultBar);
 applyLanguage(currentLang);
 updateTotalBadge();
