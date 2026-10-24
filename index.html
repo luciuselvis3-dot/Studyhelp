@@ -107,7 +107,6 @@
   ::selection { background: color-mix(in srgb, var(--blue) 28%, transparent); }
   :focus-visible { outline: 3px solid color-mix(in srgb, var(--blue) 55%, transparent); outline-offset: 2px; border-radius: 6px; }
 
-  /* helper so inline SVGs sit right next to text everywhere */
   .ico { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
   .glass-panel {
@@ -632,6 +631,8 @@
   .chip svg { color: var(--ink-3); }
   .exam-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 30px; }
 
+  .q-timer { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 12px; padding: 4px 10px; }
+
   .mode-banner {
     padding: 11px 16px;
     border-radius: var(--r-md);
@@ -730,7 +731,7 @@
   .q-content { flex: 1; min-width: 0; }
   .q-prompt { font-size: 16.5px; line-height: 1.55; font-weight: 500; }
   .q-prompt p { margin: 0; }
-  .q-tools { display: flex; gap: 2px; flex: 0 0 auto; margin-inline-start: auto; }
+  .q-tools { display: flex; gap: 4px; flex: 0 0 auto; margin-inline-start: auto; align-items: center; }
   .q-tools button {
     width: 32px; height: 32px; border-radius: 50%;
     border: 0; background: transparent; cursor: pointer;
@@ -866,6 +867,7 @@
   .feedback .row-bad { color: var(--red); font-weight: 600; }
   .feedback .row-close { color: var(--orange); font-weight: 600; }
   .feedback ul { margin: 6px 0 0; padding-inline-start: 20px; }
+  .feedback .explain-row { margin-top: 14px; padding-top: 12px; border-top: .5px solid var(--glass-line); display: flex; gap: 8px; flex-wrap: wrap; }
 
   .hint {
     margin-top: 16px;
@@ -1326,6 +1328,28 @@
   .toast.warn    { color: var(--orange); border-color: color-mix(in srgb, var(--orange) 35%, var(--glass-border)); }
   .toast.error   { color: var(--red); border-color: color-mix(in srgb, var(--red) 35%, var(--glass-border)); }
 
+  .url-row { display: flex; gap: 8px; align-items: stretch; }
+  .url-row input { flex: 1; }
+  .url-row .btn { flex: 0 0 auto; }
+
+  .review-banner {
+    margin-bottom: 16px;
+    padding: 20px 24px;
+    border-radius: var(--r-lg);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--blue) 12%, var(--glass-bg)), color-mix(in srgb, var(--purple) 10%, var(--glass-bg)));
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+    border: .5px solid color-mix(in srgb, var(--blue) 35%, var(--glass-border));
+    box-shadow: var(--glass-inner-glow), var(--glass-shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    animation: enter .4s var(--ease-out);
+  }
+  .review-banner-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .review-banner-desc { font-size: 13px; color: var(--ink-2); }
+
   @media (max-width: 640px) {
     header { padding: 10px 16px; padding-top: calc(10px + env(safe-area-inset-top)); gap: 8px; }
     nav.tabs button .tab-label { display: none; }
@@ -1359,7 +1383,7 @@
     body { background: white; color: black; }
     header, nav.tabs, .icon-btn, .result-actions, .toast, .exam-actions,
     .q-tools, .result-bar, .intro, .flash-controls, .flash-topbar, .chat-input-wrap,
-    .q-progress-bar, .lang-wrap, .mode-banner {
+    .q-progress-bar, .lang-wrap, .mode-banner, .review-banner, .url-row {
       display: none !important;
     }
     main { padding: 0; max-width: none; }
@@ -1440,13 +1464,15 @@
     <section class="view active" id="view-create">
       <div class="hero">
         <h1 id="createHero">Turn anything into an exam.</h1>
-        <p id="createHeroSub">Paste your notes or drop in photos of a page. DeepSeek reads it and writes the questions.</p>
+        <p id="createHeroSub">Paste your notes, drop in photos, and get an exam.</p>
       </div>
+
+      <div id="reviewBanner"></div>
 
       <div class="card">
         <div class="card-head">
           <h2 class="card-title"><span class="step">1</span> <span data-i18n="sourceMaterial">Source material</span></h2>
-          <p class="card-sub" data-i18n="sourceSub">Text, images, or both - anything you want to be tested on.</p>
+          <p class="card-sub" data-i18n="sourceSub">Text, images, PDFs, or a YouTube link - anything you want to be tested on.</p>
         </div>
         <div class="field">
           <textarea id="sourceText" placeholder="Paste a chapter, an article, lecture notes, a Wikipedia page…"></textarea>
@@ -1460,11 +1486,23 @@
                 <path d="M21 15l-5-5L5 21"/>
               </svg>
             </div>
-            <span data-i18n="dropTitle">Drop photos of pages or slides here</span>
-            <small data-i18n="dropSub">or click to browse · PNG · JPG · WEBP · up to 10</small>
+            <span data-i18n="dropTitle">Drop photos or a PDF here</span>
+            <small data-i18n="dropSub">or click to browse · PNG · JPG · WEBP · PDF · up to 10</small>
           </div>
-          <input type="file" id="fileInput" accept="image/*" multiple hidden>
+          <input type="file" id="fileInput" accept="image/*,.pdf,application/pdf" multiple hidden>
           <div class="thumbs" id="thumbs"></div>
+        </div>
+        <div class="field">
+          <label data-i18n="youtubeLink">Or paste a YouTube link</label>
+          <div class="url-row">
+            <input type="text" id="youtubeUrl" placeholder="https://youtube.com/watch?v=…">
+            <button class="btn btn-sm" id="youtubeBtn">
+              <span class="ico">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
+              </span>
+              <span data-i18n="importBtn">Import</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1585,8 +1623,8 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// svg icon set (lucide-ish stroke icons, inlined so there's no external dep)
-// if you're adding more, keep them stroke-based with the same 24x24 grid
+// stroke icons, 24 grid, all inlined so nothing loads externally. if you add
+// more, match the style or the header looks patchy
 const ICONS = {
   sparkle: '<path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"/>',
   pencil: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>',
@@ -1624,6 +1662,8 @@ const ICONS = {
   trash: '<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/>',
   download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
   external: '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>',
+  file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+  youtube: '<path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/>',
 };
 
 function icon(name, size = 16) {
@@ -1635,19 +1675,21 @@ function icon(name, size = 16) {
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 
-// translations for 5 langs. the kurdish and polish blocks were the roughest
-// emojis are stripped from all strings - icons are added at render time via icon()
+// every string the UI shows. the plural keys use _one/_other, and the t()
+// helper picks whichever matches. the polish block is the shakiest of these
 const T = {
   en: {
     hello: "Hello", readyForBetterGrades: "Ready for better grades?", letsGo: "Let's go", skip: "Skip",
     create: "Create", exam: "Exam", coach: "Coach", library: "Library", stats: "Stats",
     createHero: "Turn anything into an exam.",
-    createHeroSub: "Paste your notes or drop in photos of a page. DeepSeek reads it and writes the questions.",
+    createHeroSub: "Paste your notes, drop in photos, and get an exam.",
     sourceMaterial: "Source material",
-    sourceSub: "Text, images, or both - anything you want to be tested on.",
+    sourceSub: "Text, images, PDFs, or a YouTube link - anything you want to be tested on.",
     sourcePlaceholder: "Paste a chapter, an article, lecture notes, a Wikipedia page…",
-    dropTitle: "Drop photos of pages or slides here",
-    dropSub: "or click to browse · PNG · JPG · WEBP · up to 10",
+    dropTitle: "Drop photos or a PDF here",
+    dropSub: "or click to browse · PNG · JPG · WEBP · PDF · up to 10",
+    youtubeLink: "Or paste a YouTube link",
+    importBtn: "Import",
     questionMix: "Question mix", questionMixSub: "How many of each type do you want?",
     multipleChoice: "Multiple choice", trueFalse: "True / False", fillInBlank: "Fill in blank", shortAnswer: "Short answer",
     difficulty: "Difficulty", easy: "Easy", medium: "Medium", hard: "Hard", mixed: "Mixed",
@@ -1675,6 +1717,9 @@ const T = {
     correctCount: "{n} correct", closeCount: "{n} close", missedCount: "{n} missed",
     autoGraded: "Auto-graded", toReview: "To review", timeLabel: "Time",
     retake: "Retake", createNewExam: "Create a new exam", newExam: "New exam",
+    retryMissed_one: "Retry the one you missed",
+    retryMissed_other: "Retry the {n} you missed",
+    explainThis: "Explain this",
     getCoachReport: "Get your coach's report",
     coachReportSub: "Personalized feedback based on your answers and how long you spent",
     coachReportExplain: "I'll look at every question, your answer, and the time you spent on it - then tell you exactly what to work on, even if you got everything right.",
@@ -1684,63 +1729,37 @@ const T = {
     thinking: "Thinking…",
     coachReportTitle: "Your coach's report",
     coachReportSub2: "Based on your answers and time spent",
-    overview: "Overview",
-    strengths: "Strengths",
-    areasToImprove: "Areas to improve",
-    whatToStudy: "What to study next",
-    pacingNotes: "Pacing notes",
-    talkToCoach: "Talk to your coach",
-    reanalyze: "Re-analyze",
-    questionSide: "Question",
-    answerSide: "Answer",
-    tapToReveal: "Tap to reveal",
-    spaceFlip: "Space to flip",
-    spaceKey: "Space",
-    arrowKeys: "← → to move",
-    shuffle: "Shuffle",
-    resetProgress: "Reset progress",
-    exit: "Exit",
-    reviewAgain: "Review again",
-    iKnowThis: "I know this",
-    known: "{n} known",
-    toReviewChip: "{n} to review",
-    noCards: "No cards to study",
-    noCardsText: "This exam doesn't have any questions yet.",
-    cardMovedEnd: "Card moved to the end",
-    shuffled: "Shuffled",
-    progressReset: "Progress reset",
-    coachTitle: "Your AI coach",
-    coachSubtitle: "Ask anything. Get taught the whole concept, step by step.",
+    overview: "Overview", strengths: "Strengths", areasToImprove: "Areas to improve",
+    whatToStudy: "What to study next", pacingNotes: "Pacing notes",
+    talkToCoach: "Talk to your coach", reanalyze: "Re-analyze",
+    questionSide: "Question", answerSide: "Answer", tapToReveal: "Tap to reveal",
+    spaceFlip: "Space to flip", spaceKey: "Space", arrowKeys: "← → to move",
+    shuffle: "Shuffle", resetProgress: "Reset progress", exit: "Exit",
+    reviewAgain: "Review again", iKnowThis: "I know this",
+    known: "{n} known", toReviewChip: "{n} to review",
+    noCards: "No cards to study", noCardsText: "This exam doesn't have any questions yet.",
+    cardMovedEnd: "Card moved to the end", shuffled: "Shuffled", progressReset: "Progress reset",
+    coachTitle: "Your AI coach", coachSubtitle: "Ask anything. Get taught the whole concept, step by step.",
     newChat: "New chat",
     chatEmptyTitle: "Hi - I'm your study coach.",
     chatEmptyText: "Ask me to explain a concept, walk you through a problem, or quiz you on something you're learning.",
     chatPlaceholder: "Ask me to teach you something…",
-    suggestTeachTitle: "Teach me a topic",
-    suggestTeachText: "Explain the water cycle like I'm new to it",
+    suggestTeachTitle: "Teach me a topic", suggestTeachText: "Explain the water cycle like I'm new to it",
     suggestTeachPrompt: "Teach me the water cycle from scratch, like I've never seen it before.",
-    suggestAnalogTitle: "Explain with an analogy",
-    suggestAnalogText: "Photosynthesis, using a real-world comparison",
+    suggestAnalogTitle: "Explain with an analogy", suggestAnalogText: "Photosynthesis, using a real-world comparison",
     suggestAnalogPrompt: "Explain photosynthesis step by step, with a simple analogy.",
-    suggestQuizTitle: "Quiz me",
-    suggestQuizText: "5 questions on algebra, one at a time",
+    suggestQuizTitle: "Quiz me", suggestQuizText: "5 questions on algebra, one at a time",
     suggestQuizPrompt: "Quiz me on basic algebra with 5 questions, one at a time.",
-    suggestCompareTitle: "Compare concepts",
-    suggestCompareText: "Mitosis vs meiosis, thoroughly",
+    suggestCompareTitle: "Compare concepts", suggestCompareText: "Mitosis vs meiosis, thoroughly",
     suggestComparePrompt: "What's the difference between mitosis and meiosis? Be thorough.",
-    clearConfirm: "Clear the conversation?",
-    cleared: "Cleared",
-    newChatStarted: "Started a new chat",
+    clearConfirm: "Clear the conversation?", cleared: "Cleared", newChatStarted: "Started a new chat",
     holdOnThinking: "Hold on - still thinking",
-    libraryTitle: "Your library",
-    librarySubtitle: "Every exam you generate is saved here.",
-    nothingSaved: "Nothing saved yet",
-    nothingSavedText: "Exams you generate will show up here automatically.",
+    libraryTitle: "Your library", librarySubtitle: "Every exam you generate is saved here.",
+    nothingSaved: "Nothing saved yet", nothingSavedText: "Exams you generate will show up here automatically.",
     open: "Open", cards: "Cards", export: "Export", delete: "Delete",
     examDeleted: "Exam deleted",
-    statsTitle: "Your progress",
-    statsSubtitle: "See how you're doing across all your exams.",
-    noAttempts: "No attempts yet",
-    noAttemptsText: "Take an exam and your progress will appear here.",
+    statsTitle: "Your progress", statsSubtitle: "See how you're doing across all your exams.",
+    noAttempts: "No attempts yet", noAttemptsText: "Take an exam and your progress will appear here.",
     attempts: "Attempts", avgScore: "Average score", bestScore: "Best score", timeStudied: "Time studied",
     byTopic: "By topic", recentAttempts: "Recent attempts",
     needSource: "Add some text or an image first.",
@@ -1751,6 +1770,7 @@ const T = {
     examReady: "Exam ready",
     generatedSome: "Generated {n} of {total} questions",
     somethingWrong: "Something went wrong: ",
+    serviceUnavailable: "Couldn't reach the exam service. Try again.",
     partFailed: "Part {n} failed - keeping what came through.",
     cutOff: "Heads up - the model got cut off, so you got fewer questions than asked.",
     coachReportFailed: "Coach report failed: ",
@@ -1760,6 +1780,31 @@ const T = {
     draftRestored: "Picked up where you left off",
     practiceHint: "Practice mode - answers reveal as you go",
     markdownExported: "Markdown saved",
+    readingPdf: "Reading PDF…",
+    readingPdfPage: "Reading PDF page {n} of {total}…",
+    pdfImported: "Imported {n} pages ({chars} chars)",
+    pdfScanned: "No text layer - converting to images…",
+    pdfScannedDone: "Scanned PDF - added {n} page images",
+    pdfFailed: "Couldn't read that PDF. Try a different file or paste the text manually.",
+    pdfTooLong: "That PDF is too long. Try 25 pages or fewer, or paste the chapter you need.",
+    fetchingTranscript: "Fetching transcript…",
+    transcriptImported: "Transcript added to source",
+    transcriptFailed: "Couldn't fetch the transcript. Paste the video text manually.",
+    notYoutube: "That doesn't look like a YouTube link.",
+    grading: "Grading…",
+    aiFeedback: "Grader's note",
+    reviewDue_one: "{n} question due for review",
+    reviewDue_other: "{n} questions due for review",
+    reviewDueDesc: "Spaced repetition - questions you missed come back after a day, then three, then a week.",
+    startReview: "Start review",
+    reviewSession: "Review session", reviewSessionDesc: "Revisit the questions you missed",
+    shareExam: "Share",
+    shareLinkCopied: "Link copied - send it to anyone",
+    shareLinkTooLong: "Link is long - some apps may cut it",
+    sharedExamLoaded: "Shared exam loaded",
+    shareFailed: "Couldn't build that share link",
+    copyManually: "Copy this link:",
+    sharedBadge: "Shared",
     progressMessages: [
       "Reading your material…", "Picking out the key ideas…", "Drafting questions…",
       "Writing plausible distractors…", "Checking the answers…", "Polishing the wording…"
@@ -1770,12 +1815,14 @@ const T = {
     hello: "سلام", readyForBetterGrades: "آماده نمرات بهتر هستید؟", letsGo: "بزن بریم", skip: "رد کردن",
     create: "ساخت", exam: "آزمون", coach: "مربی", library: "کتابخانه", stats: "آمار",
     createHero: "هر چیزی را به آزمون تبدیل کنید.",
-    createHeroSub: "یادداشت‌هایتان را بچسبانید یا عکس صفحه اضافه کنید. هوش مصنوعی آن را می‌خواند و سوال می‌سازد.",
+    createHeroSub: "یادداشت‌هایتان را بچسبانید، عکس اضافه کنید، و آزمون بگیرید.",
     sourceMaterial: "منبع",
-    sourceSub: "متن، تصویر، یا هر دو - هر چیزی که می‌خواهید از آن سوال بسازیم.",
+    sourceSub: "متن، تصویر، پی‌دی‌اف، یا لینک یوتیوب - هر چیزی که می‌خواهید از آن سوال بسازیم.",
     sourcePlaceholder: "یک فصل، مقاله، جزوه، صفحه ویکی‌پدیا را بچسبانید…",
-    dropTitle: "عکس صفحات یا اسلایدها را اینجا رها کنید",
-    dropSub: "یا برای مرور کلیک کنید · PNG · JPG · WEBP · حداکثر ۱۰",
+    dropTitle: "عکس یا پی‌دی‌اف را اینجا رها کنید",
+    dropSub: "یا برای مرور کلیک کنید · PNG · JPG · WEBP · PDF · حداکثر ۱۰",
+    youtubeLink: "یا لینک یوتیوب را بچسبانید",
+    importBtn: "دریافت",
     questionMix: "ترکیب سوالات", questionMixSub: "از هر نوع چند تا می‌خواهید؟",
     multipleChoice: "چند گزینه‌ای", trueFalse: "درست / غلط", fillInBlank: "جای خالی", shortAnswer: "پاسخ کوتاه",
     difficulty: "سختی", easy: "آسان", medium: "متوسط", hard: "سخت", mixed: "ترکیبی",
@@ -1803,6 +1850,9 @@ const T = {
     correctCount: "{n} درست", closeCount: "{n} نزدیک", missedCount: "{n} اشتباه",
     autoGraded: "تصحیح خودکار", toReview: "برای مرور", timeLabel: "زمان",
     retake: "تلاش دوباره", createNewExam: "ساخت آزمون جدید", newExam: "آزمون جدید",
+    retryMissed_one: "سوالی که جا انداختی را دوباره بزن",
+    retryMissed_other: "{n} سوالی که جا انداختی را دوباره بزن",
+    explainThis: "این را توضیح بده",
     getCoachReport: "گزارش مربی خود را دریافت کنید",
     coachReportSub: "بازخورد شخصی‌سازی‌شده بر اساس پاسخ‌ها و زمان شما",
     coachReportExplain: "من به هر سوال، پاسخ شما، و زمان صرف‌شده نگاه می‌کنم - سپس دقیقاً می‌گویم روی چه چیزی کار کنید، حتی اگر همه را درست زده باشید.",
@@ -1810,8 +1860,7 @@ const T = {
     analyzingExam: "در حال تحلیل آزمون شما…",
     analyzingSub: "خواندن هر پاسخ و هر ثانیه",
     thinking: "در حال فکر کردن…",
-    coachReportTitle: "گزارش مربی شما",
-    coachReportSub2: "بر اساس پاسخ‌ها و زمان شما",
+    coachReportTitle: "گزارش مربی شما", coachReportSub2: "بر اساس پاسخ‌ها و زمان شما",
     overview: "مرور کلی", strengths: "نقاط قوت", areasToImprove: "نقاط قابل بهبود",
     whatToStudy: "چه چیزی بعد بخوانید", pacingNotes: "یادداشت‌های سرعت",
     talkToCoach: "با مربی صحبت کن", reanalyze: "تحلیل مجدد",
@@ -1848,11 +1897,10 @@ const T = {
     needSource: "اول متن یا تصویری اضافه کنید.",
     needOneQuestion: "حداقل یک سوال بخواهید.",
     tooMany: "زیر ۸۰ سوال نگه دارید.",
-    buildingExam: "در حال ساخت آزمون",
-    buildingExamPart: "در حال ساخت آزمون (بخش {n} از {total})",
-    examReady: "آزمون آماده است",
-    generatedSome: "{n} از {total} سوال ساخته شد",
+    buildingExam: "در حال ساخت آزمون", buildingExamPart: "در حال ساخت آزمون (بخش {n} از {total})",
+    examReady: "آزمون آماده است", generatedSome: "{n} از {total} سوال ساخته شد",
     somethingWrong: "مشکلی پیش آمد: ",
+    serviceUnavailable: "نتوانستیم به سرویس آزمون وصل شویم. دوباره امتحان کنید.",
     partFailed: "بخش {n} شکست خورد - بقیه نگه داشته شد.",
     cutOff: "توجه - مدل قطع شد، پس سوالات کمتری از آنچه خواستید گرفتید.",
     coachReportFailed: "گزارش مربی شکست خورد: ",
@@ -1862,6 +1910,26 @@ const T = {
     draftRestored: "از همان جا که بودید ادامه دادیم",
     practiceHint: "حالت تمرین - پاسخ‌ها همزمان نشان داده می‌شوند",
     markdownExported: "مارک‌داون ذخیره شد",
+    readingPdf: "خواندن پی‌دی‌اف…", readingPdfPage: "خواندن صفحه {n} از {total}…",
+    pdfImported: "{n} صفحه وارد شد ({chars} کاراکتر)",
+    pdfScanned: "لایه متنی ندارد - تبدیل به تصویر…",
+    pdfScannedDone: "پی‌دی‌اف اسکن‌شده - {n} تصویر صفحه اضافه شد",
+    pdfFailed: "نتوانستیم پی‌دی‌اف را بخوانیم. فایل دیگری امتحان کنید یا متن را دستی بچسبانید.",
+    pdfTooLong: "پی‌دی‌اف خیلی طولانی است. حداکثر ۲۵ صفحه، یا فصل موردنظر را بچسبانید.",
+    fetchingTranscript: "در حال دریافت متن…", transcriptImported: "متن ویدیو به منبع اضافه شد",
+    transcriptFailed: "نتوانستیم متن ویدیو را دریافت کنیم. لطفاً متن را دستی بچسبانید.",
+    notYoutube: "این لینک یوتیوب به نظر نمی‌رسد.",
+    grading: "در حال نمره‌دهی…", aiFeedback: "یادداشت نمره‌دهنده",
+    reviewDue_one: "{n} سوال برای مرور",
+    reviewDue_other: "{n} سوال برای مرور",
+    reviewDueDesc: "مرور فاصله‌دار - سوالاتی که اشتباه زدید بعد از یک روز، سه روز، و یک هفته برمی‌گردند.",
+    startReview: "شروع مرور", reviewSession: "جلسه مرور", reviewSessionDesc: "سوالاتی را که اشتباه زدید دوباره ببینید",
+    shareExam: "اشتراک‌گذاری", shareLinkCopied: "لینک کپی شد - برای هرکسی بفرستید",
+    shareLinkTooLong: "لینک طولانی است - ممکن است برخی برنامه‌ها قطعش کنند",
+    sharedExamLoaded: "آزمون مشترک بارگذاری شد",
+    shareFailed: "نتوانستم لینک را کپی کنم",
+    copyManually: "این لینک را کپی کنید:",
+    sharedBadge: "مشترک",
     progressMessages: [
       "خواندن مطالب شما…", "انتخاب ایده‌های کلیدی…", "نوشتن سوالات…",
       "نوشتن گزینه‌های انحرافی…", "بررسی پاسخ‌ها…", "ویرایش نهایی…"
@@ -1872,12 +1940,13 @@ const T = {
     hello: "مرحبا", readyForBetterGrades: "مستعد لدرجات أفضل؟", letsGo: "هيا بنا", skip: "تخطي",
     create: "إنشاء", exam: "امتحان", coach: "مدرب", library: "المكتبة", stats: "إحصائيات",
     createHero: "حوّل أي شيء إلى امتحان.",
-    createHeroSub: "الصق ملاحظاتك أو أضف صورًا لصفحة. الذكاء الاصطناعي يقرأها ويكتب الأسئلة.",
+    createHeroSub: "الصق ملاحظاتك، أضف صورًا، واحصل على امتحان.",
     sourceMaterial: "المادة المصدرية",
-    sourceSub: "نص أو صور أو كليهما - أي شيء تريد أن تُختبر فيه.",
+    sourceSub: "نص أو صور أو PDF أو رابط يوتيوب - أي شيء تريد أن تُختبر فيه.",
     sourcePlaceholder: "الصق فصلًا أو مقالًا أو ملاحظات…",
-    dropTitle: "أفلت صور الصفحات أو الشرائح هنا",
-    dropSub: "أو انقر للتصفح · PNG · JPG · WEBP · حتى ١٠",
+    dropTitle: "أفلت صورًا أو ملف PDF هنا",
+    dropSub: "أو انقر للتصفح · PNG · JPG · WEBP · PDF · حتى ١٠",
+    youtubeLink: "أو الصق رابط يوتيوب", importBtn: "استيراد",
     questionMix: "مزيج الأسئلة", questionMixSub: "كم من كل نوع تريد؟",
     multipleChoice: "اختيار متعدد", trueFalse: "صح / خطأ", fillInBlank: "املأ الفراغ", shortAnswer: "إجابة قصيرة",
     difficulty: "الصعوبة", easy: "سهل", medium: "متوسط", hard: "صعب", mixed: "مختلط",
@@ -1905,6 +1974,9 @@ const T = {
     correctCount: "{n} صحيحة", closeCount: "{n} قريبة", missedCount: "{n} خاطئة",
     autoGraded: "تصحيح تلقائي", toReview: "للمراجعة", timeLabel: "الوقت",
     retake: "إعادة", createNewExam: "إنشاء امتحان جديد", newExam: "امتحان جديد",
+    retryMissed_one: "أعد المحاولة في السؤال الذي فوّتته",
+    retryMissed_other: "أعد المحاولة في {n} أسئلة فوّتتها",
+    explainThis: "اشرح هذا",
     getCoachReport: "احصل على تقرير مدربك",
     coachReportSub: "تغذية راجعة مخصصة بناءً على إجاباتك والوقت الذي قضيته",
     coachReportExplain: "سأنظر إلى كل سؤال، إجابتك، والوقت الذي قضيته - ثم أخبرك بالضبط ما يجب أن تعمل عليه، حتى لو أجبت كل شيء بشكل صحيح.",
@@ -1950,15 +2022,35 @@ const T = {
     buildingExam: "جاري بناء الامتحان", buildingExamPart: "جاري بناء الامتحان (الجزء {n} من {total})",
     examReady: "الامتحان جاهز", generatedSome: "تم إنشاء {n} من {total} سؤالًا",
     somethingWrong: "حدث خطأ: ",
+    serviceUnavailable: "تعذر الوصول إلى خدمة الامتحان. حاول مرة أخرى.",
     partFailed: "فشل الجزء {n} - الاحتفاظ بالباقي.",
     cutOff: "تنبيه - انقطع النموذج، لذا حصلت على أسئلة أقل مما طلبت.",
     coachReportFailed: "فشل تقرير المدرب: ",
-    storageFull: "التخزين ممتلئ",
-    couldNotLoadImage: "تعذر تحميل الصورة",
+    storageFull: "التخزين ممتلئ", couldNotLoadImage: "تعذر تحميل الصورة",
     onlyMoreImages: "يمكن إضافة {n} صور فقط",
     draftRestored: "واصلنا من حيث توقفت",
     practiceHint: "وضع التدريب - تظهر الإجابات أثناء الحل",
     markdownExported: "تم حفظ الماركداون",
+    readingPdf: "قراءة PDF…", readingPdfPage: "قراءة صفحة {n} من {total}…",
+    pdfImported: "تم استيراد {n} صفحة ({chars} حرفًا)",
+    pdfScanned: "لا طبقة نصية - تحويل إلى صور…",
+    pdfScannedDone: "PDF ممسوح - تمت إضافة {n} صورة",
+    pdfFailed: "تعذر قراءة ملف PDF. جرّب ملفًا آخر أو الصق النص يدويًا.",
+    pdfTooLong: "هذا الملف طويل جدًا. جرّب ٢٥ صفحة أو أقل، أو الصق الفصل الذي تحتاجه.",
+    fetchingTranscript: "جاري جلب النص…", transcriptImported: "أُضيف نص الفيديو إلى المصدر",
+    transcriptFailed: "تعذر جلب النص. الصق نص الفيديو يدويًا.",
+    notYoutube: "هذا لا يبدو رابط يوتيوب.",
+    grading: "جاري التصحيح…", aiFeedback: "ملاحظة المصحح",
+    reviewDue_one: "{n} سؤال للمراجعة",
+    reviewDue_other: "{n} سؤال للمراجعة",
+    reviewDueDesc: "المراجعة المتباعدة - الأسئلة التي أخطأت فيها تعود بعد يوم، ثم ثلاثة، ثم أسبوع.",
+    startReview: "ابدأ المراجعة", reviewSession: "جلسة مراجعة", reviewSessionDesc: "راجع الأسئلة التي أخطأت فيها",
+    shareExam: "مشاركة", shareLinkCopied: "تم نسخ الرابط - أرسله لأي شخص",
+    shareLinkTooLong: "الرابط طويل - بعض التطبيقات قد تقطعه",
+    sharedExamLoaded: "تم تحميل الامتحان المشارك",
+    shareFailed: "تعذر نسخ الرابط",
+    copyManually: "انسخ هذا الرابط:",
+    sharedBadge: "مشترك",
     progressMessages: [
       "قراءة المادة…", "استخراج الأفكار الرئيسية…", "صياغة الأسئلة…",
       "كتابة الخيارات المشابهة…", "التحقق من الإجابات…", "اللمسة الأخيرة…"
@@ -1969,12 +2061,13 @@ const T = {
     hello: "سڵاو", readyForBetterGrades: "ئامادەیت بۆ نمرەی باشتر؟", letsGo: "وەرە بڕۆین", skip: "بازدان",
     create: "دروستکردن", exam: "تاقیکردنەوە", coach: "ڕاهێنەر", library: "کتێبخانە", stats: "ئامارەکان",
     createHero: "هەر شتێک بکە بە تاقیکردنەوە.",
-    createHeroSub: "تێبینیەکانت بلکێنە یان وێنەی لاپەڕەیەک دابنێ. زیرەکی دەستکرد دەیخوێنێتەوە و پرسیارەکان دەنووسێت.",
+    createHeroSub: "تێبینیەکانت بلکێنە، وێنە زیاد بکە، و تاقیکردنەوەیەک وەربگرە.",
     sourceMaterial: "سەرچاوەی ماددە",
-    sourceSub: "دەق، وێنە، یان هەردووکیان - هەر شتێک کە دەتەوێت تاقیت بکەینەوە.",
+    sourceSub: "دەق، وێنە، PDF، یان لینکی یوتیوب - هەر شتێک کە دەتەوێت تاقیت بکەینەوە.",
     sourcePlaceholder: "بەشێک، وتارێک، تێبینی، لاپەڕەی ویکیپیدیا بلکێنە…",
-    dropTitle: "وێنەی لاپەڕەکان یان سلایدەکان لێرە دابنێ",
-    dropSub: "یان کلیک بکە بۆ گەڕان · PNG · JPG · WEBP · تا ١٠",
+    dropTitle: "وێنە یان PDF لێرە دابنێ",
+    dropSub: "یان کلیک بکە بۆ گەڕان · PNG · JPG · WEBP · PDF · تا ١٠",
+    youtubeLink: "یان لینکی یوتیوب بلکێنە", importBtn: "هێنان",
     questionMix: "تێکەڵی پرسیارەکان", questionMixSub: "چەند لە هەر جۆرێک دەتەوێت؟",
     multipleChoice: "هەڵبژاردنی زۆر", trueFalse: "ڕاست / هەڵە", fillInBlank: "بۆشایی پڕبکە", shortAnswer: "وەڵامی کورت",
     difficulty: "ئاستی سەختی", easy: "ئاسان", medium: "مامناوەند", hard: "سەخت", mixed: "تێکەڵ",
@@ -2002,6 +2095,9 @@ const T = {
     correctCount: "{n} ڕاست", closeCount: "{n} نزیک", missedCount: "{n} هەڵە",
     autoGraded: "هەڵسەنگاندنی خۆکار", toReview: "بۆ پێداچوونەوە", timeLabel: "کات",
     retake: "دووبارە", createNewExam: "دروستکردنی تاقیکردنەوەی نوێ", newExam: "تاقیکردنەوەی نوێ",
+    retryMissed_one: "دووبارە هەوڵ بدە لە پرسیارەکەی لەدەستت داوە",
+    retryMissed_other: "دووبارە هەوڵ بدە لە {n} پرسیارەی لەدەستت داوە",
+    explainThis: "ئەمە ڕوون بکەرەوە",
     getCoachReport: "ڕاپۆرتی ڕاهێنەرەکەت وەربگرە",
     coachReportSub: "فیدباکی تایبەت بەپێی وەڵامەکان و کاتی تێدا بەسەربردووت",
     coachReportExplain: "سەیری هەموو پرسیارێک، وەڵامەکەت، و کاتەکەت دەکەم - پاشان دەڵێم بە ڕاستی چ کارێک بکەیت، تەنانەت ئەگەر هەموویشت ڕاست کردبێت.",
@@ -2047,15 +2143,35 @@ const T = {
     buildingExam: "دروستکردنی تاقیکردنەوە", buildingExamPart: "دروستکردنی تاقیکردنەوە (بەشی {n} لە {total})",
     examReady: "تاقیکردنەوە ئامادەیە", generatedSome: "{n} لە {total} پرسیار دروستکرا",
     somethingWrong: "کێشەیەک ڕوویدا: ",
+    serviceUnavailable: "نەتوانرا پەیوەندی بە خزمەتگوزاری تاقیکردنەوە بکەین. دووبارە هەوڵ بدە.",
     partFailed: "بەشی {n} شکست هێنا - ئەوانی تر هێڵدرانەوە.",
     cutOff: "ئاگاداربە - مۆدێل بڕایەوە، کەواتە کەمتر پرسیارت وەرگرت.",
     coachReportFailed: "ڕاپۆرتی ڕاهێنەر شکست هێنا: ",
-    storageFull: "بیرگە پڕە",
-    couldNotLoadImage: "نەتوانرا وێنەکە باربکرێت",
+    storageFull: "بیرگە پڕە", couldNotLoadImage: "نەتوانرا وێنەکە باربکرێت",
     onlyMoreImages: "تەنها {n} وێنەی تر جێدەبێت",
     draftRestored: "لەو شوێنەوە بەردەوام بووین کە وەستابوویت",
     practiceHint: "دۆخی ڕاهێنان - وەڵامەکان لەگەڵ نووسین دەردەکەون",
     markdownExported: "مارکداون پاشەکەوت کرا",
+    readingPdf: "خوێندنەوەی PDF…", readingPdfPage: "خوێندنەوەی لاپەڕەی {n} لە {total}…",
+    pdfImported: "{n} لاپەڕە هێنرا ({chars} پیت)",
+    pdfScanned: "چینی دەق نییە - گۆڕین بۆ وێنە…",
+    pdfScannedDone: "PDF سکانکراو - {n} وێنەی لاپەڕە زیادکرا",
+    pdfFailed: "نەتوانرا PDF بخوێنرێتەوە. فایلێکی تر تاقی بکەرەوە یان دەقەکە بە دەست بلکێنە.",
+    pdfTooLong: "ئەم PDF زۆر درێژە. ٢٥ لاپەڕە یان کەمتر تاقی بکەرەوە، یان بەشەکەی پێویستت بلکێنە.",
+    fetchingTranscript: "هێنانی دەق…", transcriptImported: "دەقی ڤیدیۆ زیادکرا بۆ سەرچاوە",
+    transcriptFailed: "نەتوانرا دەقی ڤیدیۆ بهێنرێت. تکایە دەقەکە بە دەست بلکێنە.",
+    notYoutube: "ئەمە لینکی یوتیوب نابێت.",
+    grading: "هەڵسەنگاندن…", aiFeedback: "تێبینی هەڵسەنگێنەر",
+    reviewDue_one: "{n} پرسیار بۆ پێداچوونەوە",
+    reviewDue_other: "{n} پرسیار بۆ پێداچوونەوە",
+    reviewDueDesc: "پێداچوونەوەی بۆشایی - پرسیارەکان کە لەدەستت داون دوای ڕۆژێک، سێ ڕۆژ، و هەفتەیەک دەگەڕێنەوە.",
+    startReview: "دەستپێکردنی پێداچوونەوە", reviewSession: "دانیشتنی پێداچوونەوە", reviewSessionDesc: "پرسیارەکانی لەدەستت داون ببینەوە",
+    shareExam: "هاوبەشکردن", shareLinkCopied: "لینک کۆپی کرا - بۆ هەر کەسێک بنێرە",
+    shareLinkTooLong: "لینک درێژە - هەندێک ئەپڵیکەیشن لەوانەیە بیبڕنەوە",
+    sharedExamLoaded: "تاقیکردنەوەی هاوبەش بارکرا",
+    shareFailed: "نەتوانرا لینکەکە کۆپی بکرێت",
+    copyManually: "ئەم لینکە کۆپی بکە:",
+    sharedBadge: "هاوبەش",
     progressMessages: [
       "خوێندنەوەی ماددەکەت…", "دەرهێنانی بیرۆکە سەرەکییەکان…", "نووسینی پرسیارەکان…",
       "نووسینی هەڵبژاردنەکانی تر…", "پشکنینی وەڵامەکان…", "جلاکردنەوەی وشەکان…"
@@ -2066,12 +2182,13 @@ const T = {
     hello: "Cześć", readyForBetterGrades: "Gotowy na lepsze oceny?", letsGo: "Zaczynajmy", skip: "Pomiń",
     create: "Utwórz", exam: "Egzamin", coach: "Trener", library: "Biblioteka", stats: "Statystyki",
     createHero: "Zamień wszystko w egzamin.",
-    createHeroSub: "Wklej notatki lub dodaj zdjęcia strony. AI je przeczyta i napisze pytania.",
+    createHeroSub: "Wklej notatki, dodaj zdjęcia i masz egzamin.",
     sourceMaterial: "Materiał źródłowy",
-    sourceSub: "Tekst, obrazy lub oba - cokolwiek chcesz sprawdzić.",
+    sourceSub: "Tekst, obrazy, PDF lub link do YouTube - cokolwiek chcesz sprawdzić.",
     sourcePlaceholder: "Wklej rozdział, artykuł, notatki, stronę Wikipedii…",
-    dropTitle: "Upuść zdjęcia stron lub slajdów tutaj",
-    dropSub: "lub kliknij, aby przeglądać · PNG · JPG · WEBP · do 10",
+    dropTitle: "Upuść zdjęcia lub PDF tutaj",
+    dropSub: "lub kliknij, aby przeglądać · PNG · JPG · WEBP · PDF · do 10",
+    youtubeLink: "Lub wklej link do YouTube", importBtn: "Importuj",
     questionMix: "Mieszanka pytań", questionMixSub: "Ile każdego typu chcesz?",
     multipleChoice: "Wielokrotny wybór", trueFalse: "Prawda / Fałsz", fillInBlank: "Uzupełnij lukę", shortAnswer: "Krótka odpowiedź",
     difficulty: "Trudność", easy: "Łatwy", medium: "Średni", hard: "Trudny", mixed: "Mieszany",
@@ -2099,6 +2216,9 @@ const T = {
     correctCount: "{n} poprawnych", closeCount: "{n} blisko", missedCount: "{n} błędnych",
     autoGraded: "Oceniane automatycznie", toReview: "Do przeglądu", timeLabel: "Czas",
     retake: "Powtórz", createNewExam: "Utwórz nowy egzamin", newExam: "Nowy egzamin",
+    retryMissed_one: "Powtórz pytanie, które przegapiłeś",
+    retryMissed_other: "Powtórz {n} pytań, które przegapiłeś",
+    explainThis: "Wyjaśnij to",
     getCoachReport: "Odbierz raport trenera",
     coachReportSub: "Spersonalizowana informacja zwrotna na podstawie odpowiedzi i czasu",
     coachReportExplain: "Przejrzę każde pytanie, twoją odpowiedź i czas, jaki na nie poświęciłeś - potem powiem ci dokładnie, nad czym popracować, nawet jeśli wszystko było poprawne.",
@@ -2144,15 +2264,35 @@ const T = {
     buildingExam: "Buduję egzamin", buildingExamPart: "Buduję egzamin (część {n} z {total})",
     examReady: "Egzamin gotowy", generatedSome: "Wygenerowano {n} z {total} pytań",
     somethingWrong: "Coś poszło nie tak: ",
+    serviceUnavailable: "Nie udało się połączyć z usługą egzaminacyjną. Spróbuj ponownie.",
     partFailed: "Część {n} nie powiodła się - zachowuję resztę.",
     cutOff: "Uwaga - model został ucięty, więc dostałeś mniej pytań niż prosiłeś.",
     coachReportFailed: "Raport trenera nie powiódł się: ",
-    storageFull: "Pamięć pełna",
-    couldNotLoadImage: "Nie udało się wczytać tego obrazu",
+    storageFull: "Pamięć pełna", couldNotLoadImage: "Nie udało się wczytać tego obrazu",
     onlyMoreImages: "Zmieszczą się jeszcze {n} obrazy",
     draftRestored: "Wznowiliśmy tam, gdzie skończyłeś",
     practiceHint: "Tryb ćwiczeń - odpowiedzi pokazują się na bieżąco",
     markdownExported: "Markdown zapisany",
+    readingPdf: "Czytam PDF…", readingPdfPage: "Czytam stronę {n} z {total}…",
+    pdfImported: "Zaimportowano {n} stron ({chars} znaków)",
+    pdfScanned: "Brak warstwy tekstowej - konwersja na obrazy…",
+    pdfScannedDone: "PDF zeskanowany - dodano {n} obrazów stron",
+    pdfFailed: "Nie udało się odczytać tego PDF-a. Spróbuj innego pliku lub wklej tekst ręcznie.",
+    pdfTooLong: "Ten PDF jest za długi. Spróbuj 25 stron lub mniej, albo wklej potrzebny rozdział.",
+    fetchingTranscript: "Pobieram transkrypcję…", transcriptImported: "Transkrypcja dodana do źródła",
+    transcriptFailed: "Nie udało się pobrać transkrypcji. Wklej tekst wideo ręcznie.",
+    notYoutube: "To nie wygląda na link YouTube.",
+    grading: "Oceniam…", aiFeedback: "Notatka oceniającego",
+    reviewDue_one: "{n} pytanie do powtórki",
+    reviewDue_other: "{n} pytań do powtórki",
+    reviewDueDesc: "Powtórki w odstępach - pytania, które przegapiłeś, wracają po dniu, potem po trzech, potem po tygodniu.",
+    startReview: "Rozpocznij powtórkę", reviewSession: "Sesja powtórkowa", reviewSessionDesc: "Powtórz pytania, które przegapiłeś",
+    shareExam: "Udostępnij", shareLinkCopied: "Link skopiowany - wyślij komukolwiek",
+    shareLinkTooLong: "Link jest długi - niektóre aplikacje mogą go uciąć",
+    sharedExamLoaded: "Wczytano udostępniony egzamin",
+    shareFailed: "Nie udało się skopiować linku",
+    copyManually: "Skopiuj ten link:",
+    sharedBadge: "Udostępniony",
     progressMessages: [
       "Czytam twój materiał…", "Wybieram kluczowe pomysły…", "Szkicuję pytania…",
       "Piszę prawdopodobne dystraktory…", "Sprawdzam odpowiedzi…", "Dopracowuję sformułowania…"
@@ -2211,6 +2351,7 @@ function applyLanguage(code) {
   setPlaceholder('#chatInput', t('chatPlaceholder'));
 
   updateTotalBadge();
+  renderReviewBanner();
 
   if (state.view === 'exam' && state.exam) renderExam();
   if (state.view === 'coach') renderChat();
@@ -2236,13 +2377,14 @@ $$('#langMenu button').forEach(btn => {
   });
 });
 
-// state and storage
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
 }[c]));
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
+// localstorage wrapper that never throws. if quota blows, we just show a toast
+// and let the app keep running without persistence rather than crash
 const store = {
   read(key, fallback) {
     try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
@@ -2267,8 +2409,8 @@ const HISTORY_STORAGE = 'examforge.history';
 const THEME_STORAGE = 'examforge.theme';
 const INTRO_STORAGE = 'examforge.introSeen';
 const DRAFT_STORAGE = 'examforge.draft';
+const REVIEW_STORAGE = 'examforge.review';
 
-// toast. small icon on the left, colored border by kind
 let toastTimer;
 function toast(message, kind = 'info') {
   const el = $('#toast');
@@ -2280,7 +2422,8 @@ function toast(message, kind = 'info') {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
 }
 
-// theme: light -> dark -> auto. cycles on click
+// cycle light > dark > auto. the auto mode follows the OS setting and re-runs
+// whenever the OS flips, which is why the media query listener is a bit below
 function applyTheme(mode) {
   let effective = mode;
   if (mode === 'auto') {
@@ -2309,7 +2452,8 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
   if (store.read(THEME_STORAGE, 'light') === 'auto') applyTheme('auto');
 });
 
-// intro splash. escape skips it
+// splash on first load. sessionStorage not localStorage so it comes back on
+// every fresh tab instead of once per browser. that's the point
 (function showIntro() {
   const intro = $('#intro');
   if (!intro) return;
@@ -2322,9 +2466,7 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
     document.removeEventListener('keydown', onKey);
     setTimeout(() => intro.remove(), 900);
   }
-  function onKey(e) {
-    if (e.key === 'Escape') dismiss();
-  }
+  function onKey(e) { if (e.key === 'Escape') dismiss(); }
 
   $('#startBtn').addEventListener('click', dismiss);
   $('#skipBtn').addEventListener('click', dismiss);
@@ -2332,10 +2474,40 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
   document.addEventListener('keydown', onKey);
 })();
 
+// shared between the exam view and the flash view. only one is active at a
+// time, but if they leak into each other you get weird keys firing twice
+let examKeyHandler = null;
+let timerInterval = null;
+
+function stopExamTimers() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+function formatTime(secs) {
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+function startExamTimers() {
+  stopExamTimers();
+  // single interval for the whole view, updates only the chips on screen.
+  // one tick every 500ms, whatever is visible gets its number bumped
+  timerInterval = setInterval(() => {
+    if (state.view !== 'exam' || !state.session || state.session.submitted) return;
+    const session = state.session;
+    document.querySelectorAll('.q-timer').forEach(el => {
+      const qid = el.dataset.qid;
+      const start = session.questionStart[qid];
+      if (start) el.textContent = formatTime(Math.round((Date.now() - start) / 1000));
+    });
+  }, 500);
+}
+
 function navigate(view) {
+  stopExamTimers();
   state.view = view;
   $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
   $$('#nav button').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  if (view === 'create') renderReviewBanner();
   if (view === 'library') renderLibrary();
   if (view === 'stats') renderStats();
   if (view === 'coach') { renderChat(); setTimeout(() => $('#chatInput')?.focus(), 200); }
@@ -2352,12 +2524,127 @@ const state = {
   session: null,
   library: store.read(LIBRARY_STORAGE, []),
   history: store.read(HISTORY_STORAGE, []),
+  review: store.read(REVIEW_STORAGE, []),
   chat: [],
   chatBusy: false,
   coachReport: null
 };
 
-// image upload
+// pdf.js only loads once. the first pdf dropped pulls in the wasm-adjacent
+// worker from CDN, subsequent ones reuse the module
+let pdfjsLoaded = null;
+async function loadPdfJs() {
+  if (pdfjsLoaded) return pdfjsLoaded;
+  pdfjsLoaded = import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4/build/pdf.min.mjs').then(m => {
+    m.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4/build/pdf.worker.min.mjs';
+    return m;
+  });
+  return pdfjsLoaded;
+}
+
+async function processPdf(file) {
+  try {
+    setStatus(t('readingPdf'), '');
+    const pdfjs = await loadPdfJs();
+    const doc = await pdfjs.getDocument(await file.arrayBuffer()).promise;
+
+    // long pdfs get cut off at the model's token budget anyway, and a clean
+    // "too long" beats a mid-sentence truncation. 25 pages is the soft cap
+    if (doc.numPages > 25) {
+      setStatus(t('pdfTooLong'), 'error');
+      return;
+    }
+
+    const textParts = [];
+    for (let i = 1; i <= doc.numPages; i++) {
+      setStatus(t('readingPdfPage', { n: i, total: doc.numPages }), '');
+      const page = await doc.getPage(i);
+      const content = await page.getTextContent();
+      textParts.push(content.items.map(it => it.str).join(' ').trim());
+    }
+
+    const text = textParts.join('\n\n').trim();
+
+    // scanned pdf with no text layer. render pages as canvas and route through
+    // the vision path like any other photo. this works and you already have it
+    if (text.length < 40) {
+      setStatus(t('pdfScanned'), '');
+      const room = 10 - state.images.length;
+      const pages = Math.min(doc.numPages, room);
+      for (let i = 1; i <= pages; i++) {
+        const page = await doc.getPage(i);
+        const viewport = page.getViewport({ scale: 2 });
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+        state.images.push({
+          name: `page-${i}`,
+          dataUrl: canvas.toDataURL('image/jpeg', 0.75),
+          mediaType: 'image/jpeg'
+        });
+        renderThumbs();
+      }
+      setStatus(t('pdfScannedDone', { n: pages }), 'success');
+      return;
+    }
+
+    const existing = $('#sourceText').value.trim();
+    $('#sourceText').value = existing ? existing + '\n\n' + text : text;
+    scheduleDraftSave();
+    setStatus(t('pdfImported', { n: doc.numPages, chars: text.length }), 'success');
+  } catch (err) {
+    console.error('[examforge] pdf failed', err);
+    setStatus(t('pdfFailed'), 'error');
+  }
+}
+
+function extractYouTubeId(url) {
+  const m = String(url).match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+  return m ? m[1] : null;
+}
+
+async function importYouTube(url) {
+  const id = extractYouTubeId(url);
+  if (!id) throw new Error('not youtube');
+  setStatus(t('fetchingTranscript'), '');
+  const res = await fetch(API.baseUrl + '/transcript?id=' + encodeURIComponent(id));
+  if (!res.ok) throw new Error('transcript unavailable');
+  const data = await res.json();
+  const text = data.transcript || data.text || '';
+  if (!String(text).trim()) throw new Error('empty');
+  return text;
+}
+
+$('#youtubeBtn').addEventListener('click', async () => {
+  const input = $('#youtubeUrl');
+  const url = input.value.trim();
+  if (!url) return;
+  const btn = $('#youtubeBtn');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="ico">${icon('youtube', 14)}</span><span class="btn-loading">…</span>`;
+  try {
+    const text = await importYouTube(url);
+    const existing = $('#sourceText').value.trim();
+    $('#sourceText').value = existing ? existing + '\n\n' + text : text;
+    input.value = '';
+    scheduleDraftSave();
+    setStatus(t('transcriptImported'), 'success');
+  } catch (err) {
+    console.error('[examforge] transcript failed', err);
+    if (String(err.message) === 'not youtube') setStatus(t('notYoutube'), 'error');
+    else setStatus(t('transcriptFailed'), 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  }
+});
+
+$('#youtubeUrl').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); $('#youtubeBtn').click(); }
+});
+
 const dropZone = $('#drop');
 const fileInput = $('#fileInput');
 
@@ -2365,7 +2652,7 @@ dropZone.addEventListener('click', () => fileInput.click());
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
 dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('over'); handleFiles(e.dataTransfer.files); });
-fileInput.addEventListener('change', e => handleFiles(e.target.files));
+fileInput.addEventListener('change', e => { handleFiles(e.target.files); fileInput.value = ''; });
 
 const MAX_DIM = 1600;
 const JPEG_Q = 0.75;
@@ -2393,20 +2680,27 @@ function compressImage(file) {
 }
 
 function handleFiles(files) {
-  const room = 10 - state.images.length;
-  const list = [...files].filter(f => f.type.startsWith('image/')).slice(0, room);
-  if (!list.length) return;
-  list.forEach(async file => {
-    try {
-      const compressed = await compressImage(file);
-      state.images.push(compressed);
-      renderThumbs();
-    } catch (err) {
-      console.error(err);
-      toast(t('couldNotLoadImage'), 'error');
-    }
-  });
-  if (files.length > room) toast(t('onlyMoreImages', { n: room }), 'warn');
+  const list = [...files];
+  const pdfs = list.filter(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name || ''));
+  const images = list.filter(f => f.type.startsWith('image/'));
+
+  pdfs.forEach(pdf => processPdf(pdf));
+
+  if (images.length) {
+    const room = 10 - state.images.length;
+    const trimmed = images.slice(0, room);
+    trimmed.forEach(async file => {
+      try {
+        const compressed = await compressImage(file);
+        state.images.push(compressed);
+        renderThumbs();
+      } catch (err) {
+        console.error(err);
+        toast(t('couldNotLoadImage'), 'error');
+      }
+    });
+    if (images.length > room) toast(t('onlyMoreImages', { n: room }), 'warn');
+  }
 }
 
 function renderThumbs() {
@@ -2444,7 +2738,8 @@ function updateTotalBadge() {
   $('#' + id).addEventListener('input', updateTotalBadge);
 });
 
-// draft autosave
+// typing into the source box autosaves after half a second. anything longer
+// and a refresh eats their work, anything shorter and we thrash localStorage
 let draftTimer;
 function saveDraft() {
   const text = $('#sourceText').value.trim();
@@ -2518,6 +2813,9 @@ function showProgress() {
 
 function hideProgress() { const el = $('#progress'); if (el) el.remove(); }
 
+// every api call funnels through here. on error the upstream body goes to
+// console and the student gets a generic string - upstream messages sometimes
+// echo the model id back and that's not something they should see
 async function askAI(messages) {
   const url = API.baseUrl + '/chat/completions';
   const headers = { 'Content-Type': 'application/json' };
@@ -2525,9 +2823,8 @@ async function askAI(messages) {
   const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(payload) });
   const raw = await res.text();
   if (!res.ok) {
-    let detail = raw;
-    try { const parsed = JSON.parse(raw); detail = parsed.error?.message || parsed.message || raw; } catch {}
-    throw new Error(`API ${res.status}: ${detail.slice(0, 260)}`);
+    console.error('[examforge] upstream error', res.status, raw.slice(0, 500));
+    throw new Error(t('serviceUnavailable'));
   }
   let data;
   try { data = JSON.parse(raw); }
@@ -2537,6 +2834,10 @@ async function askAI(messages) {
   return content;
 }
 
+// the model cuts off mid-json sometimes. try a clean parse first, then
+// trim trailing commas, then if that fails rebuild by finding complete
+// question objects in the array. the last one is ugly but it salvages
+// most truncated responses
 function parseJsonResponse(text) {
   if (!text) throw new Error('empty');
   let clean = String(text).trim();
@@ -2660,7 +2961,101 @@ function saveToLibrary(exam) {
   store.write(LIBRARY_STORAGE, state.library);
 }
 
-// fuzzy matching for fill-in-blank. hairiest bit in the whole app
+// spaced repetition timing. first miss is due right away, then 1, 3, 7, 14, 30.
+// past six misses it just stays at 30 - if they've failed that many times the
+// review queue isn't going to be the thing that saves them
+const DAY_MS = 24 * 60 * 60 * 1000;
+function nextReviewInterval(missCount) {
+  const days = [0, 1, 3, 7, 14, 30];
+  return days[Math.min(missCount, days.length - 1)] * DAY_MS;
+}
+
+function updateReviewQueue(exam, session) {
+  const now = Date.now();
+  const results = session.results || {};
+  exam.questions.forEach(q => {
+    const r = results[q.id];
+    if (!r) return;
+    // short answers without a real grade have correct === null. skip those
+    if (r.correct !== true && r.correct !== 'close' && r.correct !== false) return;
+
+    const idx = state.review.findIndex(x => x.qid === q.id);
+    if (r.correct === true) {
+      if (idx >= 0) state.review.splice(idx, 1);
+    } else {
+      if (idx >= 0) {
+        const item = state.review[idx];
+        item.missCount = (item.missCount || 1) + 1;
+        item.dueAt = now + nextReviewInterval(item.missCount);
+        item.lastResult = r.correct;
+      } else {
+        // snapshot the whole question, not a reference. exams get deleted
+        // from the library and the review card has to survive that
+        state.review.push({
+          qid: q.id,
+          examId: exam.id,
+          dueAt: now + nextReviewInterval(0),
+          missCount: 1,
+          question: JSON.parse(JSON.stringify(q)),
+          lastResult: r.correct
+        });
+      }
+    }
+  });
+  store.write(REVIEW_STORAGE, state.review);
+}
+
+function dueReviewItems() {
+  const now = Date.now();
+  return state.review.filter(r => r.dueAt <= now);
+}
+
+function renderReviewBanner() {
+  const el = document.querySelector('#reviewBanner');
+  if (!el) return;
+  const due = dueReviewItems();
+  if (!due.length) { el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div class="review-banner">
+      <div style="flex: 1; min-width: 200px;">
+        <div class="review-banner-title">${esc(t('reviewDue', { n: due.length }))}</div>
+        <div class="review-banner-desc">${esc(t('reviewDueDesc'))}</div>
+      </div>
+      <button class="btn btn-primary" id="startReviewBannerBtn">
+        <span class="ico">${icon('redo', 14)}</span>
+        <span>${esc(t('startReview'))}</span>
+      </button>
+    </div>
+  `;
+  document.getElementById('startReviewBannerBtn')?.addEventListener('click', startReviewSession);
+}
+
+function startReviewSession() {
+  const due = dueReviewItems();
+  if (!due.length) return;
+  // synthetic exam from the snapshots. everything downstream (grading, coach,
+  // history) works unchanged because it's just a normal exam with a subset
+  const reviewExam = {
+    id: 'review-' + uid(),
+    title: t('reviewSession'),
+    description: t('reviewSessionDesc'),
+    topic: 'Review',
+    difficulty: 'mixed',
+    passingScore: 70,
+    createdAt: Date.now(),
+    questions: due.map(r => ({ ...r.question })),
+    isReview: true
+  };
+  state.exam = reviewExam;
+  state.session = createSession(reviewExam, { mode: 'test' });
+  state.coachReport = null;
+  renderExam();
+  navigate('exam');
+}
+
+// the fib matcher. this thing has been rewritten four times. levenshtein
+// over normalized strings, with a word-by-word check when both sides have
+// the same number of words, and a substring pass for multi-word answers
 function normalizeText(s) {
   return String(s || '')
     .toLowerCase()
@@ -2702,7 +3097,6 @@ function similarity(a, b) {
 function checkBlank(given, blank) {
   const g = normalizeText(given);
   if (!g) return { match: 'none' };
-
   const candidates = [blank.answer, ...(blank.alternatives || [])].filter(Boolean);
   const gNoArt = stripArticles(g);
 
@@ -2711,10 +3105,13 @@ function checkBlank(given, blank) {
     const ncNoArt = stripArticles(nc);
     if (g === nc || g === ncNoArt || gNoArt === nc || gNoArt === ncNoArt) return { match: 'exact' };
   }
+  // singular/plural tolerance. only when the given string is longer than 2
+  // so we don't accidentally match "s" against ""
   for (const c of candidates) {
     const nc = normalizeText(c);
     if (g.replace(/(\w+)s$/, '$1') === nc.replace(/(\w+)s$/, '$1') && g.length > 2) return { match: 'exact' };
   }
+  // substring pass. catches "the Seine" vs "Seine" and similar
   for (const c of candidates) {
     const nc = normalizeText(c);
     if (nc.length >= 4 && g.length >= 4) {
@@ -2769,6 +3166,8 @@ function gradeOne(q, answer) {
     return base;
   }
   if (q.type === 'short') {
+    // short answers come back as null until the ai grader runs a few seconds
+    // later and patches a real true/close/false on them
     base.correct = null;
     base.sampleAnswer = q.sampleAnswer || '';
     base.rubric = q.rubric || [];
@@ -2777,7 +3176,6 @@ function gradeOne(q, answer) {
   return base;
 }
 
-// exam generation
 $('#generateBtn').addEventListener('click', generateExam);
 
 function buildExamPrompt({ text, counts, difficulty, focus, hasImages, isFirstBatch, existingQuestions }) {
@@ -2881,7 +3279,8 @@ async function generateExam() {
   setStatus('');
   const progressTicker = showProgress();
 
-  // split into batches so we never blow past the output token limit
+  // eight questions per call. anything more and the model starts truncating
+  // its output, so instead of one huge request it's several small ones
   const BATCH_SIZE = 8;
   const batches = [];
   const remaining = { ...counts };
@@ -2949,6 +3348,8 @@ async function generateExam() {
         allQuestions.push(...batchQuestions);
       } catch (batchErr) {
         console.error('batch ' + (i + 1) + ' failed', batchErr);
+        // if the first batch dies there's nothing to salvage, bail entirely.
+        // later batches can fail without killing the whole run
         if (allQuestions.length === 0) throw batchErr;
         toast(t('partFailed', { n: i + 1 }), 'warn');
       }
@@ -2973,8 +3374,8 @@ async function generateExam() {
     if (allQuestions.length < total) toast(t('generatedSome', { n: allQuestions.length, total }), 'warn');
     else toast(t('examReady'), 'success');
   } catch (err) {
-    console.error(err);
-    setStatus(t('somethingWrong') + err.message, 'error');
+    console.error('[examforge] generate failed', err);
+    setStatus(t('serviceUnavailable'), 'error');
   } finally {
     clearInterval(progressTicker);
     hideProgress();
@@ -3029,6 +3430,10 @@ function renderExam() {
     return `<div class="q-mini-dot ${cls}"></div>`;
   }).join('');
 
+  const sharedChip = exam.shareCode
+    ? `<span class="chip" style="color: var(--purple); border-color: color-mix(in srgb, var(--purple) 40%, transparent);"><span class="ico">${icon('external', 13)}</span>${esc(t('sharedBadge'))}</span>`
+    : '';
+
   const header = `
     <div class="exam-head">
       <h2>${esc(exam.title)}</h2>
@@ -3038,6 +3443,7 @@ function renderExam() {
         <span class="chip"><span class="ico">${icon('trophy', 13)}</span>${esc(t('points', { n: totalPoints }))}</span>
         <span class="chip"><span class="ico">${icon('target', 13)}</span>${esc(t('passAt', { n: exam.passingScore }))}</span>
         ${exam.topic ? `<span class="chip"><span class="ico">${icon('book', 13)}</span>${esc(exam.topic)}</span>` : ''}
+        ${sharedChip}
       </div>
       <div class="exam-actions">
         <button class="btn btn-sm" id="modeToggle">
@@ -3075,6 +3481,8 @@ function renderExam() {
   bindQuestionInteractions();
   updateResultBar();
   bindExamToolbar();
+  bindExamKeyboard();
+  startExamTimers();
 }
 
 function renderQuestion(q, index, session) {
@@ -3099,7 +3507,11 @@ function renderQuestion(q, index, session) {
   const hintHtml = hintShown && q.hint
     ? `<div class="hint"><span class="hint-icon">${icon('bulb', 16)}</span><span>${esc(q.hint)}</span></div>`
     : '';
-  const feedbackHtml = showFeedback ? renderFeedback(result) : '';
+  const feedbackHtml = showFeedback ? renderFeedback(result, q) : '';
+
+  const timerChip = session.questionStart[q.id]
+    ? `<span class="q-timer chip" data-qid="${q.id}">${formatTime(Math.round((Date.now() - session.questionStart[q.id]) / 1000))}</span>`
+    : '';
 
   return `
     <div class="question ${stateClass}" data-qid="${q.id}" id="q-${q.id}">
@@ -3109,6 +3521,7 @@ function renderQuestion(q, index, session) {
           <div class="q-prompt">${esc(q.prompt)}</div>
         </div>
         <div class="q-tools">
+          ${timerChip}
           ${q.hint ? `<button class="hint-btn ${hintShown ? 'on' : ''}" data-qid="${q.id}" title="${esc(t('showHint'))}">${icon('bulb', 15)}</button>` : ''}
           <button class="flag-btn ${flagged ? 'on' : ''}" data-qid="${q.id}" title="${esc(t('flagForReview'))}">${icon('flag', 15)}</button>
         </div>
@@ -3205,7 +3618,14 @@ function renderShort(q, answer, showFeedback) {
   `;
 }
 
-function renderFeedback(result) {
+function renderFeedback(result, q) {
+  if (result.aiPending) {
+    return `<div class="feedback"><div class="coach-loading" style="padding: 8px;">
+      <div class="coach-dot"></div><div class="coach-dot"></div><div class="coach-dot"></div>
+      <span>${esc(t('grading'))}</span>
+    </div></div>`;
+  }
+
   const tone = result.correct === true ? 'good' : result.correct === 'close' ? 'close' : result.correct === false ? 'bad' : '';
   let inner = '';
 
@@ -3219,12 +3639,20 @@ function renderFeedback(result) {
     inner += `<div class="row"><span class="label">${esc(t('selfCheck'))}</span>${esc(t('selfCheckMsg'))}</div>`;
   }
 
+  if (result.aiReason) inner += `<div class="row"><span class="label">${esc(t('aiFeedback'))}</span>${esc(result.aiReason)}</div>`;
   if (result.correctAnswer) inner += `<div class="row"><span class="label">${esc(t('correctAnswer'))}</span>${esc(result.correctAnswer)}</div>`;
   if (result.sampleAnswer) inner += `<div class="row"><span class="label">${esc(t('modelAnswer'))}</span>${esc(result.sampleAnswer)}</div>`;
   if (result.rubric?.length) inner += `<div class="row"><span class="label">${esc(t('lookFor'))}</span><ul>${result.rubric.map(r => `<li>${esc(r)}</li>`).join('')}</ul></div>`;
   if (result.explanation) inner += `<div class="row"><span class="label">${esc(t('why'))}</span>${esc(result.explanation)}</div>`;
 
-  return `<div class="feedback ${tone}">${inner}</div>`;
+  const explainRow = q ? `<div class="explain-row">
+    <button class="btn btn-xs explain-btn" data-qid="${q.id}">
+      <span class="ico">${icon('message', 12)}</span>
+      <span>${esc(t('explainThis'))}</span>
+    </button>
+  </div>` : '';
+
+  return `<div class="feedback ${tone}">${inner}${explainRow}</div>`;
 }
 
 function renderResultBar(exam, session) {
@@ -3262,6 +3690,12 @@ function renderResults(exam, session) {
       selfCheck.push({ q, r });
     }
   });
+
+  const missedQuestions = exam.questions.filter(q => {
+    const r = results[q.id];
+    return r && (r.correct === false || r.correct === 'close');
+  });
+  const hasMissed = missedQuestions.length > 0;
 
   const earned = autoCorrect + autoClose * 0.5;
   const autoPct = autoTotal > 0 ? Math.round((earned / autoTotal) * 100) : 0;
@@ -3313,7 +3747,13 @@ function renderResults(exam, session) {
     ${renderCoachSection()}
 
     <div class="exam-actions" style="margin-top: 20px; margin-bottom: 22px;">
-      <button class="btn" id="retakeBtn">
+      ${hasMissed ? `
+        <button class="btn btn-primary" id="retryMissedBtn">
+          <span class="ico">${icon('redo', 14)}</span>
+          <span>${esc(t('retryMissed', { n: missedQuestions.length }))}</span>
+        </button>
+      ` : ''}
+      <button class="btn ${hasMissed ? '' : 'btn-primary'}" id="retakeBtn">
         <span class="ico">${icon('reset', 14)}</span>
         <span>${esc(t('retake'))}</span>
       </button>
@@ -3321,7 +3761,11 @@ function renderResults(exam, session) {
         <span class="ico">${icon('cards', 14)}</span>
         <span>${esc(t('studyAsFlashcards'))}</span>
       </button>
-      <button class="btn btn-primary" id="newExamBtn">
+      <button class="btn" id="shareExamBtn">
+        <span class="ico">${icon('external', 14)}</span>
+        <span>${esc(t('shareExam'))}</span>
+      </button>
+      <button class="btn ${hasMissed ? '' : 'btn-primary'}" id="newExamBtn">
         <span class="ico">${icon('sparkle', 15)}</span>
         <span>${esc(t('createNewExam'))}</span>
       </button>
@@ -3448,7 +3892,7 @@ function renderReviewQuestion(q, index, session) {
         ${timeBadge}
       </div>
       ${body}
-      ${result ? renderFeedback(result) : ''}
+      ${result ? renderFeedback(result, q) : ''}
     </div>
   `;
 }
@@ -3470,12 +3914,32 @@ function bindResults() {
   const flash = document.getElementById('flashFromResults');
   if (flash) flash.addEventListener('click', toFlash);
 
+  const shareBtn = document.getElementById('shareExamBtn');
+  if (shareBtn) shareBtn.addEventListener('click', () => shareExam(state.exam));
+
+  // swap in a trimmed exam with just the wrong/close questions. the original
+  // is still in the library so this is a drill, not a new document
+  const retryMissedBtn = document.getElementById('retryMissedBtn');
+  if (retryMissedBtn) retryMissedBtn.addEventListener('click', () => {
+    const results = state.session?.results || {};
+    const missed = state.exam.questions.filter(q => {
+      const r = results[q.id];
+      return r && (r.correct === false || r.correct === 'close');
+    });
+    if (!missed.length) return;
+    const retryExam = { ...state.exam, id: uid(), questions: missed };
+    delete retryExam.shareCode;
+    state.exam = retryExam;
+    state.session = createSession(retryExam, { mode: 'test' });
+    state.coachReport = null;
+    renderExam();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
   const getCoach = document.getElementById('getCoachReportBtn');
   if (getCoach) getCoach.addEventListener('click', generateCoachReport);
-
   const rerun = document.getElementById('coachRerunBtn');
   if (rerun) rerun.addEventListener('click', generateCoachReport);
-
   const coachChat = document.getElementById('coachChatBtn');
   if (coachChat) coachChat.addEventListener('click', () => navigate('coach'));
 
@@ -3535,6 +3999,7 @@ async function generateCoachReport() {
       lines.push(`Student: ${String(ua || '(none)').slice(0, 500)}`);
     }
     lines.push(`Result: ${r?.correct === true ? 'CORRECT' : r?.correct === 'close' ? 'CLOSE' : r?.correct === false ? 'INCORRECT' : 'SELF-CHECK'}`);
+    if (r?.aiReason) lines.push(`Grader note: ${r.aiReason}`);
     if (time) lines.push(`Time: ${time}s`);
     lines.push('---');
   });
@@ -3567,8 +4032,8 @@ async function generateCoachReport() {
       pace: String(data.pace || '')
     };
   } catch (err) {
-    console.error(err);
-    toast(t('coachReportFailed') + err.message, 'error');
+    console.error('[examforge] coach report failed', err);
+    toast(t('serviceUnavailable'), 'error');
     state.coachReport = null;
   } finally {
     state.coachBusy = false;
@@ -3635,6 +4100,81 @@ function bindExamToolbar() {
   });
   const printBtn = document.getElementById('printBtn');
   if (printBtn) printBtn.addEventListener('click', () => window.print());
+}
+
+// A/B/C/D picks an mcq option, T/F answers true-false, F flags, H shows the
+// hint. note F does double duty: on a true/false question it means "False",
+// everything else it means "flag this". small piece of ambiguity but the
+// alternative was worse
+function bindExamKeyboard() {
+  if (examKeyHandler) { document.removeEventListener('keydown', examKeyHandler); examKeyHandler = null; }
+  if (typeof flashKeyHandler !== 'undefined' && flashKeyHandler) {
+    document.removeEventListener('keydown', flashKeyHandler);
+    flashKeyHandler = null;
+  }
+
+  examKeyHandler = e => {
+    if (state.view !== 'exam' || !state.session || state.session.submitted) return;
+    if (state.session.mode !== 'test' && state.session.mode !== 'practice') return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+    const key = e.key.toLowerCase();
+    const focused = document.querySelector('.question:focus-within');
+    let qid = focused?.dataset.qid;
+
+    // nothing focused? jump to whatever's unanswered next, or the first
+    // question if they somehow cleared every one
+    if (!qid) {
+      const q = state.exam.questions.find(x => {
+        const a = state.session.answers[x.id];
+        return a === undefined || a === null || (typeof a === 'string' && !a.trim()) || (Array.isArray(a) && !a.some(v => v));
+      });
+      qid = (q || state.exam.questions[0])?.id;
+    }
+    if (!qid) return;
+    const q = state.exam.questions.find(x => x.id === qid);
+    if (!q) return;
+
+    if (q.type === 'mcq') {
+      const idx = 'abcd'.indexOf(key);
+      if (idx >= 0 && idx < q.options.length) {
+        e.preventDefault();
+        recordInteractionStart(qid);
+        state.session.answers[qid] = idx;
+        recordInteractionEnd(qid);
+        updateResultBar();
+        if (state.session.mode === 'practice') gradeSingle(qid);
+        renderExam();
+        return;
+      }
+    } else if (q.type === 'tf') {
+      if (key === 't' || key === 'f') {
+        e.preventDefault();
+        recordInteractionStart(qid);
+        state.session.answers[qid] = key === 't' ? 'true' : 'false';
+        recordInteractionEnd(qid);
+        updateResultBar();
+        if (state.session.mode === 'practice') gradeSingle(qid);
+        renderExam();
+        return;
+      }
+    }
+
+    if (key === 'h' && q.hint) {
+      e.preventDefault();
+      state.session.hintsShown[qid] = !state.session.hintsShown[qid];
+      renderExam();
+      return;
+    }
+
+    if (key === 'f' && q.type !== 'tf') {
+      e.preventDefault();
+      state.session.flags[qid] = !state.session.flags[qid];
+      renderExam();
+    }
+  };
+  document.addEventListener('keydown', examKeyHandler);
 }
 
 function autoSizeFib(input) {
@@ -3742,11 +4282,108 @@ function submitExam() {
   session.submitted = true;
   session.endTime = now;
   recordHistory(exam, session);
+  updateReviewQueue(exam, session);
   renderExam();
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // short answers land on the results screen as self-check first, then the
+  // ai call comes back a second or two later and patches real grades in
+  aiGradeShortAnswers(exam, session);
 }
 
-// flashcards
+// grades every short answer in one request. failure here is fine, the
+// student just stays on self-check and we lose nothing
+async function aiGradeShortAnswers(exam, session) {
+  const shortQs = exam.questions.filter(q => q.type === 'short');
+  if (!shortQs.length) return;
+
+  const toGrade = shortQs.filter(q => {
+    const a = session.answers[q.id];
+    return a && String(a).trim().length >= 3;
+  });
+  if (!toGrade.length) return;
+
+  toGrade.forEach(q => {
+    if (session.results[q.id]) session.results[q.id].aiPending = true;
+  });
+  if (state.session === session) renderExam();
+
+  try {
+    const lang = currentLanguageName();
+    const items = toGrade.map((q, i) => ({
+      id: i,
+      prompt: q.prompt,
+      sample: q.sampleAnswer || '',
+      rubric: q.rubric || [],
+      answer: String(session.answers[q.id] || '').slice(0, 800)
+    }));
+
+    const promptText = `Grade these short-answer exam responses. For each, compare the student's answer to the sample and rubric and return a score from 0 to 1:
+- 1.0 = fully correct and complete
+- 0.7-0.9 = correct but missing some detail
+- 0.4-0.6 = partial understanding, key points missing
+- 0.1-0.3 = mostly wrong but some correct ideas
+- 0.0 = wrong or blank
+
+Also give a one-sentence reason in ${lang}.
+
+Return ONLY JSON: { "grades": [ { "id": 0, "score": 0.8, "reason": "..." } ] }
+
+Responses:
+${JSON.stringify(items, null, 2)}`;
+
+    const raw = await askAI([
+      { role: 'system', content: 'You are a fair, precise exam grader. Return valid JSON only.' },
+      { role: 'user', content: promptText }
+    ]);
+    const data = parseJsonResponse(raw);
+    const grades = Array.isArray(data.grades) ? data.grades : [];
+
+    grades.forEach(g => {
+      const q = toGrade[Number(g.id)];
+      if (!q) return;
+      const r = session.results[q.id];
+      if (!r) return;
+      const score = typeof g.score === 'number' ? Math.max(0, Math.min(1, g.score)) : 0.5;
+      r.aiScore = score;
+      r.aiReason = String(g.reason || '');
+      r.aiPending = false;
+      r.correct = score >= 0.7 ? true : score >= 0.4 ? 'close' : false;
+    });
+
+    toGrade.forEach(q => {
+      const r = session.results[q.id];
+      if (r && r.aiPending) r.aiPending = false;
+    });
+
+    // history was recorded before the ai grades landed, so if we're still
+    // looking at this session, re-record the score to reflect them
+    if (session.historyId) {
+      const h = state.history.find(x => x.id === session.historyId);
+      if (h) {
+        const all = Object.values(session.results || {});
+        const auto = all.filter(x => x.correct === true || x.correct === 'close' || x.correct === false);
+        const correct = auto.filter(x => x.correct === true).length;
+        const close = auto.filter(x => x.correct === 'close').length;
+        const total = auto.length || exam.questions.length;
+        h.score = Math.round(((correct + close * 0.5) / total) * 100);
+        h.correct = correct;
+        h.total = total;
+        store.write(HISTORY_STORAGE, state.history);
+      }
+    }
+
+    if (state.session === session) renderExam();
+  } catch (err) {
+    console.error('[examforge] ai grading failed', err);
+    toGrade.forEach(q => {
+      const r = session.results[q.id];
+      if (r) r.aiPending = false;
+    });
+    if (state.session === session) renderExam();
+  }
+}
+
 let flashKeyHandler = null;
 let flashSwipeStart = null;
 
@@ -3874,6 +4511,11 @@ function bindFlashcards() {
   const card = exam.questions[session.currentCard];
   if (!card) return;
 
+  // clear the exam key handler so mode switches don't leave two handlers
+  // fighting over the same keystrokes
+  if (examKeyHandler) { document.removeEventListener('keydown', examKeyHandler); examKeyHandler = null; }
+  if (flashKeyHandler) { document.removeEventListener('keydown', flashKeyHandler); flashKeyHandler = null; }
+
   const cardEl = document.getElementById('flashCard');
   function flip() { session.revealed[card.id] = !session.revealed[card.id]; renderExam(); }
   function goPrev() { if (session.currentCard > 0) { session.currentCard--; renderExam(); } }
@@ -3959,7 +4601,6 @@ function bindFlashcards() {
     renderExam();
   });
 
-  if (flashKeyHandler) document.removeEventListener('keydown', flashKeyHandler);
   flashKeyHandler = e => {
     if (state.session?.mode !== 'flash') return;
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -3971,7 +4612,6 @@ function bindFlashcards() {
   document.addEventListener('keydown', flashKeyHandler);
 }
 
-// coach chat
 function renderChat() {
   const area = $('#chatMessages');
   if (!state.chat.length) {
@@ -4016,6 +4656,8 @@ function renderChat() {
   window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 }
 
+// lazy markdown. bold, code, bullets. no need for a parser, three regexes
+// cover everything the model actually emits
 function formatChatContent(text) {
   let html = esc(text);
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
@@ -4077,9 +4719,9 @@ async function sendChatMessage(text) {
     state.chat.push({ role: 'assistant', content: raw });
     renderChat();
   } catch (err) {
-    console.error(err);
+    console.error('[examforge] chat failed', err);
     document.getElementById(typingId)?.remove();
-    state.chat.push({ role: 'assistant', content: 'Error: ' + err.message });
+    state.chat.push({ role: 'assistant', content: t('serviceUnavailable') });
     renderChat();
   } finally {
     state.chatBusy = false;
@@ -4116,7 +4758,50 @@ if (chatNewBtn) chatNewBtn.addEventListener('click', () => {
   toast(t('newChatStarted'));
 });
 
-// history, library, stats
+// "explain this" hops into the coach with the whole question as context.
+// delegated at document level so it works from both live feedback panels
+// and the results review without rebinding every render
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.explain-btn');
+  if (!btn) return;
+  const qid = btn.dataset.qid;
+  const exam = state.exam;
+  const session = state.session;
+  if (!exam || !session) return;
+  const q = exam.questions.find(x => x.id === qid);
+  if (!q) return;
+
+  const parts = [
+    "I just answered this question and want you to explain it.",
+    '',
+    `Question: ${q.prompt}`
+  ];
+  const ua = session.answers[qid];
+  if (q.type === 'mcq') {
+    const ci = q.options.findIndex(o => o.correct);
+    parts.push(`Correct answer: ${q.options[ci]?.text || ''}`);
+    parts.push(`My answer: ${typeof ua === 'number' ? (q.options[ua]?.text || '(none)') : '(none)'}`);
+  } else if (q.type === 'tf') {
+    parts.push(`Correct answer: ${q.answer ? 'True' : 'False'}`);
+    parts.push(`My answer: ${ua === 'true' ? 'True' : ua === 'false' ? 'False' : '(none)'}`);
+  } else if (q.type === 'fib') {
+    parts.push(`Correct answers: ${q.blanks.map(b => b.answer).join(', ')}`);
+    parts.push(`My answer: ${Array.isArray(ua) ? (ua.filter(Boolean).join(', ') || '(none)') : '(none)'}`);
+  } else if (q.type === 'short') {
+    parts.push(`Sample answer: ${q.sampleAnswer || ''}`);
+    if (q.rubric?.length) parts.push(`Rubric: ${q.rubric.join('; ')}`);
+    parts.push(`My answer: ${ua || '(none)'}`);
+    const r = session.results?.[qid];
+    if (r?.aiReason) parts.push(`Grader's note: ${r.aiReason}`);
+  }
+  if (q.explanation) parts.push(`Provided explanation: ${q.explanation}`);
+  parts.push('');
+  parts.push("Walk me through why the correct answer is right, and where my thinking likely went wrong. Teach me the concept, don't just restate the answer.");
+
+  navigate('coach');
+  sendChatMessage(parts.join('\n'));
+});
+
 function recordHistory(exam, session) {
   const results = Object.values(session.results || {});
   const autoResults = results.filter(r => r.correct === true || r.correct === 'close' || r.correct === false);
@@ -4125,7 +4810,7 @@ function recordHistory(exam, session) {
   const total = autoResults.length || exam.questions.length;
   const score = Math.round(((correct + close * 0.5) / total) * 100);
 
-  state.history.unshift({
+  const entry = {
     id: uid(),
     examId: exam.id,
     examTitle: exam.title,
@@ -4133,24 +4818,41 @@ function recordHistory(exam, session) {
     score, correct, total,
     timeSpent: Math.round((Date.now() - session.startTime) / 1000),
     completedAt: Date.now()
-  });
+  };
+  session.historyId = entry.id;
+  state.history.unshift(entry);
   state.history = state.history.slice(0, 200);
   store.write(HISTORY_STORAGE, state.history);
 }
 
 function renderLibrary() {
   const area = $('#libraryArea');
+  const due = dueReviewItems();
+
+  const reviewBlock = due.length ? `
+    <div class="card" style="margin-bottom: 20px;">
+      <h3 style="margin: 0 0 10px; font-size: 17px; font-weight: 600;">${esc(t('reviewDue', { n: due.length }))}</h3>
+      <p style="margin: 0 0 16px; color: var(--ink-3); font-size: 14px; line-height: 1.5;">${esc(t('reviewDueDesc'))}</p>
+      <button class="btn btn-primary" id="startReviewLibBtn">
+        <span class="ico">${icon('redo', 14)}</span>
+        <span>${esc(t('startReview'))}</span>
+      </button>
+    </div>
+  ` : '';
+
   if (!state.library.length) {
-    area.innerHTML = `
+    area.innerHTML = reviewBlock + `
       <div class="empty">
         <div class="empty-icon">${icon('book', 32)}</div>
         <p class="empty-title">${esc(t('nothingSaved'))}</p>
         <p class="empty-text">${esc(t('nothingSavedText'))}</p>
       </div>
     `;
+    document.getElementById('startReviewLibBtn')?.addEventListener('click', startReviewSession);
     return;
   }
-  area.innerHTML = `
+
+  area.innerHTML = reviewBlock + `
     <div class="library-grid">
       ${state.library.map(exam => `
         <div class="lib-card" data-id="${exam.id}">
@@ -4161,6 +4863,10 @@ function renderLibrary() {
             <button class="btn btn-xs" data-action="flash">
               <span class="ico">${icon('cards', 12)}</span>
               <span>${esc(t('cards'))}</span>
+            </button>
+            <button class="btn btn-xs" data-action="share">
+              <span class="ico">${icon('external', 12)}</span>
+              <span>${esc(t('shareExam'))}</span>
             </button>
             <button class="btn btn-xs" data-action="export">
               <span class="ico">${icon('download', 12)}</span>
@@ -4175,11 +4881,16 @@ function renderLibrary() {
       `).join('')}
     </div>
   `;
+  document.getElementById('startReviewLibBtn')?.addEventListener('click', startReviewSession);
   $$('.lib-card').forEach(card => {
     card.addEventListener('click', e => {
       const action = e.target.closest('[data-action]')?.dataset.action;
       const id = card.dataset.id;
       if (action === 'flash') openFromLibrary(id, 'flash');
+      else if (action === 'share') {
+        const exam = state.library.find(x => x.id === id);
+        if (exam) shareExam(exam);
+      }
       else if (action === 'open' || !action) openFromLibrary(id);
       else if (action === 'export') exportExam(id);
       else if (action === 'delete') deleteExam(id);
@@ -4281,10 +4992,138 @@ function renderStats() {
   `;
 }
 
+// share links. the whole exam gets gzipped and stuffed into the url hash.
+// no backend, no expiry, no kv - the link IS the exam. 20 questions fits in
+// around 3kb which every chat app handles fine
+async function compressShare(obj) {
+  const json = JSON.stringify(obj);
+  const bytes = new TextEncoder().encode(json);
+  const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'));
+  const compressed = new Uint8Array(await new Response(stream).arrayBuffer());
+  // btoa needs a string. loop one char at a time, the payload is small enough
+  // that chunking doesn't buy anything
+  let binary = '';
+  for (let i = 0; i < compressed.length; i++) binary += String.fromCharCode(compressed[i]);
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+async function decompressShare(b64) {
+  const padded = b64.replace(/-/g, '+').replace(/_/g, '/');
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  const json = await new Response(stream).text();
+  return JSON.parse(json);
+}
+
+// clipboard api needs https + a user gesture. when it fails (safari focus,
+// old browsers) fall back to the old execCommand trick, then to a prompt
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (ok) return true;
+    } catch {}
+    prompt(t('copyManually'), text);
+    return false;
+  }
+}
+
+async function shareExam(exam) {
+  if (!exam) return;
+  try {
+    // strip per-question ids before compressing. they get regenerated on
+    // import anyway and keeping them just pads the payload
+    const payload = {
+      title: exam.title,
+      description: exam.description,
+      topic: exam.topic,
+      difficulty: exam.difficulty,
+      passingScore: exam.passingScore,
+      questions: exam.questions.map(({ id, ...rest }) => rest)
+    };
+    const code = await compressShare(payload);
+    const url = location.origin + location.pathname + '#share=' + code;
+
+    const copied = await copyText(url);
+    if (!copied) return;
+
+    if (url.length > 4000) toast(t('shareLinkTooLong'), 'warn');
+    else toast(t('shareLinkCopied'), 'success');
+  } catch (err) {
+    console.error('[examforge] share failed', err);
+    toast(t('shareFailed'), 'error');
+  }
+}
+
+async function loadSharedExam() {
+  const hash = location.hash;
+  if (!hash.startsWith('#share=')) return false;
+
+  const code = hash.slice(7);
+  // drop the hash right away so a refresh doesn't re-add a duplicate exam.
+  // share button is the way to re-copy the link, not the address bar
+  history.replaceState(null, '', location.pathname + location.search);
+
+  try {
+    const data = await decompressShare(code);
+    if (!data || !Array.isArray(data.questions) || !data.questions.length) {
+      throw new Error('empty share payload');
+    }
+
+    const exam = normalizeExam(data, {
+      difficulty: data.difficulty || 'medium',
+      passingScore: data.passingScore || 70
+    });
+    exam.shareCode = code;
+
+    // opening the same link twice shouldn't pile up duplicates. shareCode
+    // is the dedupe key
+    const existing = state.library.find(e => e.shareCode === code);
+    if (existing) {
+      state.exam = existing;
+      state.session = createSession(existing, { mode: 'test' });
+    } else {
+      state.exam = exam;
+      state.session = createSession(exam, { mode: 'test' });
+      saveToLibrary(exam);
+    }
+    state.coachReport = null;
+
+    renderExam();
+    navigate('exam');
+    toast(t('sharedExamLoaded'), 'success');
+    return true;
+  } catch (err) {
+    console.error('[examforge] share load failed', err);
+    toast(t('shareFailed'), 'error');
+    return false;
+  }
+}
+
+// pasting a share link into an open tab doesn't reload the page, only the
+// hash changes. this catches that case
+window.addEventListener('hashchange', () => {
+  if (location.hash.startsWith('#share=')) loadSharedExam();
+});
+
 // boot
 document.addEventListener('input', updateResultBar);
 applyLanguage(currentLang);
 updateTotalBadge();
+renderReviewBanner();
+loadSharedExam();
 </script>
 </body>
 </html>
