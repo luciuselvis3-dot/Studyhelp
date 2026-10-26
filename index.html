@@ -771,7 +771,8 @@
   .tf-row .option { flex: 1; min-width: 150px; justify-content: center; }
 
   .fib-wrap {
-    font-size: 16.5px;
+    margin-inline-start: 46px;
+    font-size: 16px;
     line-height: 2;
     display: block;
     width: 100%;
@@ -1361,7 +1362,7 @@
     .exam-head h2 { font-size: 26px; }
     .q-prompt { font-size: 15.5px; }
     .option { padding: 13px 15px; }
-    .options, .tf-row, .written-wrap, .feedback, .hint { margin-inline-start: 0; }
+    .options, .tf-row, .fib-wrap, .written-wrap, .feedback, .hint { margin-inline-start: 0; }
     .flash-card { height: 400px; }
     .flash-face { padding: 30px 26px 26px; }
     .flash-content { font-size: 21px; }
@@ -2402,6 +2403,10 @@ const API = {
   baseUrl: 'https://green-math-c5df.luciuselvis3.workers.dev',
   model: 'deepseek-v4.1-flash:free'
 };
+
+
+const UPSTASH_URL = 'https://viable-hookworm-182140.upstash.io';
+const UPSTASH_TOKEN = 'gQAAAAAAAsd8AAIgcDE2NjE2MjRkNmQ4MTU0MzE5ODBiN2RkZTVjNjkyYjY5NA';
 
 const LIBRARY_STORAGE = 'examforge.library';
 const HISTORY_STORAGE = 'examforge.history';
@@ -3512,16 +3517,12 @@ function renderQuestion(q, index, session) {
     ? `<span class="q-timer chip" data-qid="${q.id}">${formatTime(Math.round((Date.now() - session.questionStart[q.id]) / 1000))}</span>`
     : '';
 
-  // THE BUG FIX: Only render the prompt in the head if it's NOT a fib question.
-  // Fib questions render their prompt inline inside the input boxes.
-  const promptHtml = q.type === 'fib' ? '' : `<div class="q-prompt">${esc(q.prompt)}</div>`;
-
   return `
     <div class="question ${stateClass}" data-qid="${q.id}" id="q-${q.id}">
       <div class="q-head">
         <div class="q-num">${index + 1}</div>
         <div class="q-content">
-          ${promptHtml}
+          <div class="q-prompt">${esc(q.prompt)}</div>
         </div>
         <div class="q-tools">
           ${timerChip}
@@ -3588,15 +3589,7 @@ function renderTf(q, answer, showFeedback) {
 function renderFib(q, answer, showFeedback) {
   const parts = q.prompt.split(/_{2,}/);
   const given = Array.isArray(answer) ? answer : [];
-  
   let html = '<div class="fib-wrap"><span class="fib-line">';
-  
-  // THE BUG FIX: If the prompt didn't have any "___" in it, force a blank at the end
-  // so the student at least has somewhere to type.
-  if (parts.length === 1) {
-    parts.push(`<span style="display:inline-block; margin-inline-start:12px; font-size:15px; color:var(--ink-3);">${esc(t('answered'))}: </span>`);
-  }
-
   parts.forEach((part, i) => {
     html += esc(part);
     if (i < parts.length - 1) {
@@ -3893,14 +3886,12 @@ function renderReviewQuestion(q, index, session) {
     ? `<span class="chip" style="margin-inline-start: 8px; font-size: 11.5px; padding: 3px 10px;"><span class="ico">${icon('clock', 11)}</span>${timeSpent}s</span>`
     : '';
 
-  const promptHtml = q.type === 'fib' ? '' : `<div class="q-prompt">${esc(q.prompt)}</div>`;
-
   return `
     <div class="question ${stateClass}">
       <div class="q-head">
         <div class="q-num">${index + 1}</div>
         <div class="q-content">
-          ${promptHtml}
+          <div class="q-prompt">${esc(q.prompt)}</div>
         </div>
         ${timeBadge}
       </div>
@@ -3930,6 +3921,8 @@ function bindResults() {
   const shareBtn = document.getElementById('shareExamBtn');
   if (shareBtn) shareBtn.addEventListener('click', () => shareExam(state.exam));
 
+  // swap in a trimmed exam with just the wrong/close questions. the original
+  // is still in the library so this is a drill, not a new document
   const retryMissedBtn = document.getElementById('retryMissedBtn');
   if (retryMissedBtn) retryMissedBtn.addEventListener('click', () => {
     const results = state.session?.results || {};
@@ -4134,6 +4127,8 @@ function bindExamKeyboard() {
     const focused = document.querySelector('.question:focus-within');
     let qid = focused?.dataset.qid;
 
+    // nothing focused? jump to whatever's unanswered next, or the first
+    // question if they somehow cleared every one
     if (!qid) {
       const q = state.exam.questions.find(x => {
         const a = state.session.answers[x.id];
@@ -4295,9 +4290,13 @@ function submitExam() {
   renderExam();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
+  // short answers land on the results screen as self-check first, then the
+  // ai call comes back a second or two later and patches real grades in
   aiGradeShortAnswers(exam, session);
 }
 
+// grades every short answer in one request. failure here is fine, the
+// student just stays on self-check and we lose nothing
 async function aiGradeShortAnswers(exam, session) {
   const shortQs = exam.questions.filter(q => q.type === 'short');
   if (!shortQs.length) return;
@@ -4361,6 +4360,8 @@ ${JSON.stringify(items, null, 2)}`;
       if (r && r.aiPending) r.aiPending = false;
     });
 
+    // history was recorded before the ai grades landed, so if we're still
+    // looking at this session, re-record the score to reflect them
     if (session.historyId) {
       const h = state.history.find(x => x.id === session.historyId);
       if (h) {
@@ -4514,6 +4515,8 @@ function bindFlashcards() {
   const card = exam.questions[session.currentCard];
   if (!card) return;
 
+  // clear the exam key handler so mode switches don't leave two handlers
+  // fighting over the same keystrokes
   if (examKeyHandler) { document.removeEventListener('keydown', examKeyHandler); examKeyHandler = null; }
   if (flashKeyHandler) { document.removeEventListener('keydown', flashKeyHandler); flashKeyHandler = null; }
 
@@ -4657,6 +4660,8 @@ function renderChat() {
   window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 }
 
+// lazy markdown. bold, code, bullets. no need for a parser, three regexes
+// cover everything the model actually emits
 function formatChatContent(text) {
   let html = esc(text);
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
@@ -4758,6 +4763,8 @@ if (chatNewBtn) chatNewBtn.addEventListener('click', () => {
 });
 
 // "explain this" hops into the coach with the whole question as context.
+// delegated at document level so it works from both live feedback panels
+// and the results review without rebinding every render
 document.addEventListener('click', e => {
   const btn = e.target.closest('.explain-btn');
   if (!btn) return;
@@ -4990,13 +4997,15 @@ function renderStats() {
 }
 
 // share links. the whole exam gets gzipped and stuffed into the url hash.
-// then we send it to 1pt.co to get a short URL. if the shortener fails, we
-// fall back to the long url so it never completely breaks.
+// no backend, no expiry, no kv - the link IS the exam. 20 questions fits in
+// around 3kb which every chat app handles fine
 async function compressShare(obj) {
   const json = JSON.stringify(obj);
   const bytes = new TextEncoder().encode(json);
   const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'));
   const compressed = new Uint8Array(await new Response(stream).arrayBuffer());
+  // btoa needs a string. loop one char at a time, the payload is small enough
+  // that chunking doesn't buy anything
   let binary = '';
   for (let i = 0; i < compressed.length; i++) binary += String.fromCharCode(compressed[i]);
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -5012,6 +5021,8 @@ async function decompressShare(b64) {
   return JSON.parse(json);
 }
 
+// clipboard api needs https + a user gesture. when it fails (safari focus,
+// old browsers) fall back to the old execCommand trick, then to a prompt
 async function copyText(text) {
   try {
     await navigator.clipboard.writeText(text);
@@ -5036,60 +5047,73 @@ async function copyText(text) {
 async function shareExam(exam) {
   if (!exam) return;
   try {
+    // 1. Strip out bulky stuff (hints/explanations) to keep the payload tiny
     const payload = {
       title: exam.title,
-      description: exam.description,
       topic: exam.topic,
       difficulty: exam.difficulty,
       passingScore: exam.passingScore,
-      questions: exam.questions.map(({ id, ...rest }) => rest)
-    };
-    const code = await compressShare(payload);
-    const longUrl = location.origin + location.pathname + '#share=' + code;
-
-    let finalUrl = longUrl;
-    let usedShortener = false;
-
-    try {
-      // 1pt.co takes the raw URL as the body
-      const res = await fetch('https://1pt.co/', {
-        method: 'POST',
-        body: longUrl
-      });
-      if (res.ok) {
-        const shortUrl = await res.text();
-        if (shortUrl.startsWith('http')) {
-          finalUrl = shortUrl;
-          usedShortener = true;
+      questions: exam.questions.map(q => {
+        const base = { type: q.type, prompt: q.prompt };
+        if (q.type === 'mcq') base.options = q.options.map(o => ({ text: o.text, correct: o.correct }));
+        if (q.type === 'tf') base.answer = q.answer;
+        if (q.type === 'fib') base.blanks = q.blanks;
+        if (q.type === 'short') {
+          base.sampleAnswer = q.sampleAnswer;
+          base.rubric = q.rubric;
         }
-      }
-    } catch (e) {
-      console.warn('Shortener failed, falling back to long URL', e);
-    }
+        return base;
+      })
+    };
+    
+    const code = await compressShare(payload);
+    
+    // 2. Generate a 6-character random ID (e.g., "x8f2k1")
+    const id = Math.random().toString(36).slice(2, 8);
 
-    const copied = await copyText(finalUrl);
-    if (!copied) return;
+    // 3. Save to Upstash. EX=2592000 means it auto-deletes after 30 days.
+    const res = await fetch(`${UPSTASH_URL}/set/${id}?EX=2592000`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` },
+      body: code
+    });
 
-    if (usedShortener) {
-      toast(t('shareLinkCopied'), 'success');
-    } else {
-      if (finalUrl.length > 2000) toast(t('shareLinkTooLong'), 'warn');
-      else toast(t('shareLinkCopied'), 'success');
-    }
+    if (!res.ok) throw new Error('Database save failed');
+
+    // 4. Create the short URL
+    const shortUrl = `${location.origin}${location.pathname}#id=${id}`;
+    
+    await copyText(shortUrl);
+    toast(t('shareLinkCopied'), 'success');
+
   } catch (err) {
     console.error('[examforge] share failed', err);
     toast(t('shareFailed'), 'error');
   }
 }
-
 async function loadSharedExam() {
   const hash = location.hash;
-  if (!hash.startsWith('#share=')) return false;
+  
+  // Look for the new #id= format
+  if (!hash.startsWith('#id=')) return false;
 
-  const code = hash.slice(7);
+  const id = hash.slice(4);
+  // Clean the URL so a refresh doesn't re-trigger it
   history.replaceState(null, '', location.pathname + location.search);
 
   try {
+    // 1. Fetch the compressed data from Upstash
+    const res = await fetch(`${UPSTASH_URL}/get/${id}`, {
+      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
+    });
+    
+    if (!res.ok) throw new Error('Exam not found');
+    const json = await res.json();
+    const code = json.result;
+
+    if (!code) throw new Error('Exam not found or expired');
+
+    // 2. Decompress and load
     const data = await decompressShare(code);
     if (!data || !Array.isArray(data.questions) || !data.questions.length) {
       throw new Error('empty share payload');
@@ -5099,9 +5123,9 @@ async function loadSharedExam() {
       difficulty: data.difficulty || 'medium',
       passingScore: data.passingScore || 70
     });
-    exam.shareCode = code;
+    exam.shareCode = id;
 
-    const existing = state.library.find(e => e.shareCode === code);
+    const existing = state.library.find(e => e.shareCode === id);
     if (existing) {
       state.exam = existing;
       state.session = createSession(existing, { mode: 'test' });
@@ -5124,7 +5148,7 @@ async function loadSharedExam() {
 }
 
 window.addEventListener('hashchange', () => {
-  if (location.hash.startsWith('#share=')) loadSharedExam();
+  if (location.hash.startsWith('#id=')) loadSharedExam();
 });
 
 // boot
