@@ -1,15 +1,15 @@
 <!doctype html>
-<!-- examforge. built over a bunch of months  fib matcher still haunts me -->
-<html lang="en" dir="ltr" data-theme="light">
+<!-- examforge. built over a bunch of weekends  fib matcher still haunts me -->
+<html lang="en" dir="ltr" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#eef2f8">
+<meta name="theme-color" content="#04060f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Exam Forge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg-base: #eef2f8;
@@ -213,7 +213,7 @@
   }
   .intro .skip:hover { color: var(--ink); }
 
-  .app { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+  .app { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; position: relative; z-index: 1; }
 
   header {
     position: sticky;
@@ -1331,6 +1331,7 @@
   .url-row { display: flex; gap: 8px; align-items: stretch; }
   .url-row input { flex: 1; }
   .url-row .btn { flex: 0 0 auto; }
+  .field-hint { display: block; margin-top: 8px; font-size: 12.5px; line-height: 1.55; color: var(--ink-3); }
 
   .review-banner {
     margin-bottom: 16px;
@@ -1379,11 +1380,60 @@
     .q-progress-bar { top: 64px; }
   }
 
+  /* constellation backdrop. fixed, behind every panel, and never clickable.
+     the canvas paints itself, css only has to keep it out of the way */
+  #stars { position: fixed; inset: 0; z-index: 0; display: block; pointer-events: none; }
+
+  /* coach: attach photo + the /analyze exam picker */
+  .chat-attach {
+    width: 42px; height: 42px; border-radius: 50%;
+    border: .5px solid var(--glass-border-lo);
+    background: var(--glass-bg-lo);
+    color: var(--ink-3); cursor: pointer;
+    display: grid; place-items: center;
+    flex: 0 0 auto;
+    transition: all .2s var(--ease);
+  }
+  .chat-attach:hover { color: var(--blue); border-color: color-mix(in srgb, var(--blue) 40%, transparent); }
+  .chat-attach:disabled { opacity: .45; cursor: progress; }
+  .attach-preview {
+    display: block; max-width: 240px; width: 100%;
+    border-radius: var(--r-sm); margin-bottom: 10px;
+    border: .5px solid var(--glass-border);
+  }
+  .ocr-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11.5px; font-weight: 600; letter-spacing: .01em;
+    color: var(--ink-3); text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .analyze-picker { display: flex; flex-direction: column; gap: 8px; margin: 10px 0 12px; }
+  .analyze-item {
+    display: flex; flex-direction: column; gap: 3px;
+    text-align: start; width: 100%;
+    padding: 12px 14px; border-radius: var(--r-md);
+    border: .5px solid var(--glass-border-lo);
+    background: var(--glass-bg-lo);
+    color: var(--ink); cursor: pointer;
+    font: inherit;
+    transition: all .2s var(--ease);
+  }
+  .analyze-item:hover { border-color: color-mix(in srgb, var(--blue) 45%, transparent); background: color-mix(in srgb, var(--blue) 8%, var(--glass-bg-lo)); transform: translateY(-1px); }
+  .analyze-item .t { font-weight: 600; font-size: 14.5px; }
+  .analyze-item .m { font-size: 12px; color: var(--ink-3); }
+  .analyze-cancel {
+    align-self: flex-start;
+    border: 0; background: transparent;
+    color: var(--ink-3); font: inherit; font-size: 13px;
+    cursor: pointer; padding: 4px 2px;
+  }
+  .analyze-cancel:hover { color: var(--ink); text-decoration: underline; }
+
   @media print {
     body { background: white; color: black; }
     header, nav.tabs, .icon-btn, .result-actions, .toast, .exam-actions,
     .q-tools, .result-bar, .intro, .flash-controls, .flash-topbar, .chat-input-wrap,
-    .q-progress-bar, .lang-wrap, .mode-banner, .review-banner, .url-row {
+    .q-progress-bar, .lang-wrap, .mode-banner, .review-banner, .url-row, #stars {
       display: none !important;
     }
     main { padding: 0; max-width: none; }
@@ -1391,9 +1441,1062 @@
     .question::before, .card::before { display: none; }
     .question { page-break-inside: avoid; }
   }
+
+  /* ===================================================================
+     space theme.
+
+     everything below re-skins the app on top of the original component
+     css instead of rewriting it: the layout selectors stay untouched and
+     only the palette, the type and a handful of surface treatments get
+     replaced. deep field background, one display face for headings, and
+     glass that reads as a viewport into it rather than frosted plastic.
+     =================================================================== */
+
+  :root {
+    /* "daylight orbit" - the light mode. cool paper, faint violet sky */
+    --bg-base: #eef1f8;
+    --bg-tint-1: #dfe6fb;
+    --bg-tint-2: #f0e4f8;
+    --bg-tint-3: #dff0f4;
+    --ink: #131a2c;
+    --ink-2: #38415a;
+    --ink-3: #6b7690;
+    --ink-4: #b6bdcd;
+    --blue: #2563eb;
+    --blue-hi: #1d4ed8;
+    --green: #0f9d63;
+    --red: #e0413f;
+    --orange: #d97706;
+    --purple: #7c3aed;
+    --pink: #db2777;
+    --glass-bg: rgba(255,255,255,0.58);
+    --glass-bg-hi: rgba(255,255,255,0.78);
+    --glass-bg-lo: rgba(255,255,255,0.4);
+    --glass-border: rgba(255,255,255,0.75);
+    --glass-border-lo: rgba(255,255,255,0.4);
+    --glass-line: rgba(24,32,60,0.09);
+    --glass-inner-glow: inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 2px rgba(20,30,60,0.04);
+    --glass-shadow-sm: 0 1px 2px rgba(24,36,70,0.05), 0 6px 20px rgba(24,36,70,0.06);
+    --glass-shadow-md: 0 2px 6px rgba(24,36,70,0.06), 0 14px 36px rgba(24,36,70,0.09), 0 34px 68px rgba(24,36,70,0.05);
+    --glass-shadow-lg: 0 6px 14px rgba(24,36,70,0.08), 0 24px 54px rgba(24,36,70,0.12), 0 50px 100px rgba(24,36,70,0.07);
+    --font-display: "Space Grotesk", "Inter", var(--font-latin);
+    --glow: 0 0 0 1px rgba(76,201,255,0.16), 0 8px 30px rgba(76,201,255,0.10);
+  }
+
+  [data-theme="dark"] {
+    --bg-base: #04060f;
+    --bg-tint-1: #14103a;
+    --bg-tint-2: #250c33;
+    --bg-tint-3: #062230;
+    --ink: #e8eeff;
+    --ink-2: #b6c2de;
+    --ink-3: #7f8aab;
+    --ink-4: #39415e;
+    --blue: #4cc9ff;
+    --blue-hi: #86ddff;
+    --green: #35e3a4;
+    --red: #ff6178;
+    --orange: #ffb454;
+    --purple: #a98bff;
+    --pink: #ff70c8;
+    --glass-bg: rgba(11,15,30,0.55);
+    --glass-bg-hi: rgba(20,26,48,0.74);
+    --glass-bg-lo: rgba(8,11,24,0.42);
+    --glass-border: rgba(150,180,255,0.15);
+    --glass-border-lo: rgba(150,180,255,0.08);
+    --glass-line: rgba(160,190,255,0.09);
+    --glass-inner-glow: inset 0 1px 0 rgba(180,210,255,0.08), inset 0 -1px 2px rgba(0,0,0,0.5);
+    --glass-shadow-sm: 0 1px 2px rgba(0,0,0,0.5), 0 8px 22px rgba(0,0,0,0.35);
+    --glass-shadow-md: 0 2px 6px rgba(0,0,0,0.5), 0 16px 40px rgba(0,0,0,0.45), 0 36px 72px rgba(0,0,0,0.3);
+    --glass-shadow-lg: 0 6px 14px rgba(0,0,0,0.55), 0 26px 56px rgba(0,0,0,0.5), 0 54px 108px rgba(0,0,0,0.35);
+    --glow: 0 0 0 1px rgba(76,201,255,0.22), 0 10px 34px rgba(76,201,255,0.14);
+  }
+
+  /* the field itself. canvas paints stars over this, so the gradients stay
+     wide and dim - they are gas, not decoration */
+  html { background: var(--bg-base); }
+  body {
+    background:
+      radial-gradient(1100px 780px at 8% -12%, color-mix(in srgb, var(--bg-tint-1) 92%, transparent) 0%, transparent 58%),
+      radial-gradient(980px 720px at 94% 4%, color-mix(in srgb, var(--bg-tint-2) 78%, transparent) 0%, transparent 55%),
+      radial-gradient(1000px 760px at 46% 108%, color-mix(in srgb, var(--bg-tint-3) 88%, transparent) 0%, transparent 62%),
+      var(--bg-base);
+    background-attachment: fixed;
+  }
+  /* faint grain so the gradients don't band on big screens */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: .035;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>");
+  }
+
+  /* headings get the display face. body copy keeps Inter - mixing a
+     geometric face into paragraphs is what makes things read generated */
+  .hero h1, .exam-head h2, .card-title, .empty-title, .intro .hello,
+  .brand, .progress-title, .result-score, .stat-num, .stat-val, .score-num,
+  .score-main, .result-stat .val, .streak-num,
+  .flash-topbar .count, .analyze-title, .review-banner-title {
+    font-family: var(--font-display);
+    font-feature-settings: "ss01", "cv01", "calt", "kern";
+  }
+
+  .hero h1 {
+    font-weight: 700;
+    letter-spacing: -.045em;
+    background: linear-gradient(96deg, var(--ink) 8%, var(--blue) 46%, var(--purple) 88%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+  [data-theme="dark"] .hero h1 { filter: drop-shadow(0 2px 26px rgba(76,201,255,0.22)); }
+  .hero p { color: var(--ink-3); letter-spacing: -.01em; }
+
+  /* viewport glass: thinner, darker, with a cold rim instead of a white one */
+  .glass-panel {
+    background: linear-gradient(168deg, var(--glass-bg-hi) 0%, var(--glass-bg) 46%, var(--glass-bg-lo) 100%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-inner-glow), var(--glass-shadow-md);
+  }
+  .glass-panel::before {
+    background:
+      radial-gradient(130% 100% at 0% 0%, rgba(255,255,255,0.34) 0%, transparent 42%),
+      radial-gradient(70% 60% at 100% 0%, color-mix(in srgb, var(--blue) 16%, transparent) 0%, transparent 55%);
+    opacity: .6;
+  }
+  [data-theme="dark"] .glass-panel::before {
+    background:
+      radial-gradient(130% 100% at 0% 0%, rgba(190,220,255,0.09) 0%, transparent 44%),
+      radial-gradient(70% 60% at 100% 0%, rgba(120,180,255,0.07) 0%, transparent 55%);
+    opacity: .9;
+  }
+  [data-theme="dark"] .glass-panel, [data-theme="dark"] .card {
+    box-shadow: var(--glass-inner-glow), var(--glass-shadow-md), 0 0 42px rgba(60,120,255,0.05);
+  }
+
+  .card {
+    background: linear-gradient(168deg, var(--glass-bg-hi) 0%, var(--glass-bg) 44%, var(--glass-bg-lo) 100%);
+    border: 1px solid var(--glass-border);
+  }
+
+  header {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--bg-base) 78%, transparent) 0%, transparent 100%);
+    border-bottom: 1px solid transparent;
+  }
+  header.scrolled, header:not(:empty) {
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    border-bottom: 1px solid var(--glass-line);
+  }
+  .brand { letter-spacing: -.03em; font-weight: 600; }
+  .brand-mark {
+    background: linear-gradient(140deg, var(--blue), var(--purple));
+    color: #fff;
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--blue) 40%, transparent);
+  }
+  [data-theme="dark"] .brand-mark { box-shadow: 0 0 18px rgba(76,201,255,0.35); }
+
+  nav.tabs button {
+    border-radius: var(--pill);
+    letter-spacing: -.012em;
+    transition: color .22s var(--ease), background .22s var(--ease), box-shadow .22s var(--ease);
+  }
+  nav.tabs button.active {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--blue) 20%, transparent), color-mix(in srgb, var(--purple) 16%, transparent));
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--blue) 26%, transparent), 0 4px 18px color-mix(in srgb, var(--blue) 14%, transparent);
+  }
+  [data-theme="dark"] nav.tabs button.active {
+    background: linear-gradient(135deg, rgba(76,201,255,0.18), rgba(169,139,255,0.16));
+    box-shadow: inset 0 0 0 1px rgba(76,201,255,0.28), 0 4px 22px rgba(76,201,255,0.14);
+  }
+
+  .btn { border-radius: var(--pill); letter-spacing: -.012em; transition: all .2s var(--ease); }
+  .btn:hover { box-shadow: var(--glass-shadow-sm); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--blue) 32%, transparent), 0 1px 0 rgba(255,255,255,0.18) inset;
+  }
+  .btn-primary:hover { filter: none; box-shadow: 0 8px 26px color-mix(in srgb, var(--blue) 42%, transparent); transform: translateY(-1px); }
+  [data-theme="dark"] .btn-primary { color: #06101c; font-weight: 600; }
+  [data-theme="dark"] .btn-primary:hover { box-shadow: 0 8px 30px rgba(76,201,255,0.32); }
+
+  .chip {
+    border-radius: var(--pill);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg-lo);
+    letter-spacing: -.008em;
+  }
+  .q-progress-fill { background: linear-gradient(90deg, var(--blue), var(--purple) 70%, var(--pink)); box-shadow: 0 0 12px color-mix(in srgb, var(--blue) 45%, transparent); }
+  .q-mini-dot.answered { background: linear-gradient(135deg, var(--blue), var(--purple)); box-shadow: 0 0 8px color-mix(in srgb, var(--blue) 50%, transparent); }
+
+  /* a hairline of colour down the edge of a graded question reads faster
+     than a full border tint */
+  .question { border-radius: var(--r-lg); }
+  .question.correct::after,
+  .question.wrong::after,
+  .question.partial::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    border-radius: var(--r-lg) 0 0 var(--r-lg);
+    pointer-events: none;
+  }
+  .question.correct::after { background: linear-gradient(180deg, var(--green), transparent); }
+  .question.wrong::after { background: linear-gradient(180deg, var(--red), transparent); }
+  .question.partial::after { background: linear-gradient(180deg, var(--orange), transparent); }
+
+  .option:hover { border-color: color-mix(in srgb, var(--blue) 45%, var(--glass-border)); }
+  .option.picked { box-shadow: 0 0 0 1px color-mix(in srgb, var(--blue) 60%, transparent), 0 6px 22px color-mix(in srgb, var(--blue) 18%, transparent); }
+
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  ::selection { background: color-mix(in srgb, var(--blue) 34%, transparent); color: var(--ink); }
+
+  .score-ring .arc, .progress-ring .arc { filter: drop-shadow(0 0 10px color-mix(in srgb, var(--blue) 55%, transparent)); }
+  .empty-icon { color: color-mix(in srgb, var(--blue) 60%, var(--ink-4)); }
+  [data-theme="dark"] .empty-icon { filter: drop-shadow(0 0 22px rgba(76,201,255,0.28)); }
+
+  .chat-msg .bubble { border: 1px solid var(--glass-border); }
+  .chat-msg.coach .bubble { background: linear-gradient(160deg, var(--glass-bg-hi), var(--glass-bg-lo)); }
+
+  .drop { border-radius: var(--r-lg); }
+  .drop:hover, .drop.over { border-color: color-mix(in srgb, var(--blue) 55%, transparent); box-shadow: var(--glow); }
+
+  .stat-num, .result-score, .score-num { letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--ink-4) 60%, transparent);
+    border-radius: 99px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--blue) 45%, transparent); background-clip: content-box; }
+
+  /* new bits this pass ------------------------------------------------- */
+  .streak-card {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    padding: 16px 18px; border-radius: var(--r-md);
+    border: 1px solid var(--glass-border); background: var(--glass-bg-lo);
+    margin-bottom: 18px;
+  }
+  .streak-flame {
+    width: 40px; height: 40px; border-radius: 50%; flex: 0 0 auto;
+    display: grid; place-items: center;
+    background: linear-gradient(140deg, var(--orange), var(--pink));
+    color: #fff; box-shadow: 0 4px 16px color-mix(in srgb, var(--orange) 34%, transparent);
+  }
+  .streak-num { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: -.03em; }
+  .streak-sub { font-size: 12.5px; color: var(--ink-3); }
+  .streak-goal { margin-inline-start: auto; text-align: end; }
+  .goal-track { width: 120px; height: 5px; border-radius: 99px; background: var(--glass-bg-lo); overflow: hidden; margin-top: 6px; }
+  .goal-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--blue), var(--purple)); transition: width .5s var(--ease); }
+
+  .countdown-chip {
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600; font-size: 12.5px; letter-spacing: -.01em;
+    padding: 5px 12px; border-radius: var(--pill);
+    border: 1px solid var(--glass-border); background: var(--glass-bg-lo);
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .countdown-chip.warn { color: var(--orange); border-color: color-mix(in srgb, var(--orange) 45%, transparent); }
+  .countdown-chip.over { color: var(--red); border-color: color-mix(in srgb, var(--red) 50%, transparent); animation: pulseSoft 1.2s var(--ease) infinite; }
+  @keyframes pulseSoft { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
+  .countdown-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
+
+  .unsure-btn.on { color: var(--orange); background: color-mix(in srgb, var(--orange) 18%, transparent); }
+  .speak-btn.on { color: var(--blue); background: color-mix(in srgb, var(--blue) 16%, transparent); }
+
+  .confidence-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .confidence-pill {
+    font-size: 12.5px; padding: 6px 12px; border-radius: var(--pill);
+    border: 1px solid var(--glass-border); background: var(--glass-bg-lo);
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .confidence-pill b { font-family: var(--font-display); font-variant-numeric: tabular-nums; }
+  .confidence-pill.solid b { color: var(--green); }
+  .confidence-pill.shaky b { color: var(--orange); }
+  .confidence-pill.miss b { color: var(--red); }
+  .confidence-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  /* api key prompt. only ever shown when there is no usable key, so most
+     people never see it */
+  .key-modal {
+    position: fixed; inset: 0; z-index: 400;
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+    background: rgba(3, 5, 12, .72);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    animation: keyFade .22s ease both;
+  }
+  .key-modal[hidden] { display: none; }
+  @keyframes keyFade { from { opacity: 0 } to { opacity: 1 } }
+
+  .key-card {
+    position: relative; overflow: hidden;
+    width: 100%; max-width: 430px; padding: 30px 28px 26px;
+    border-radius: 22px;
+    background: linear-gradient(158deg, rgba(20, 28, 52, .96), rgba(9, 13, 26, .97));
+    border: 1px solid rgba(120, 170, 255, .22);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 255, 255, .07);
+  }
+  .key-glow {
+    position: absolute; top: -60%; left: 50%; width: 320px; height: 320px;
+    transform: translateX(-50%); pointer-events: none;
+    background: radial-gradient(circle, rgba(76, 201, 255, .18), transparent 68%);
+  }
+  .key-icon {
+    width: 46px; height: 46px; border-radius: 14px; margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent, #4cc9ff);
+    background: rgba(76, 201, 255, .1);
+    border: 1px solid rgba(76, 201, 255, .28);
+  }
+  .key-card h3 {
+    position: relative; margin: 0 0 8px;
+    font-family: var(--font-display, 'Space Grotesk', sans-serif);
+    font-size: 19px; font-weight: 600; letter-spacing: -.01em; color: #eaf1ff;
+  }
+  .key-card p {
+    position: relative; margin: 0 0 18px;
+    font-size: 13.5px; line-height: 1.6; color: rgba(214, 226, 250, .68);
+  }
+  .key-input {
+    position: relative; width: 100%; padding: 13px 15px;
+    border-radius: 12px; font-size: 14px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: #eaf1ff; background: rgba(6, 10, 22, .8);
+    border: 1px solid rgba(120, 170, 255, .22); outline: none;
+    box-sizing: border-box; transition: border-color .18s, box-shadow .18s;
+  }
+  .key-input:focus {
+    border-color: rgba(76, 201, 255, .6);
+    box-shadow: 0 0 0 3px rgba(76, 201, 255, .14);
+  }
+  .key-actions {
+    position: relative; display: flex; align-items: center; gap: 14px; margin-top: 16px;
+  }
+  .key-link {
+    font-size: 12.5px; font-weight: 600; color: rgba(160, 200, 255, .8);
+    text-decoration: none; transition: color .18s;
+  }
+  .key-link:hover { color: var(--accent, #4cc9ff); }
+  .key-warn {
+    position: relative; margin: 0 0 14px; padding: 10px 13px;
+    border-radius: 10px; font-size: 12.5px; line-height: 1.5;
+    color: #ffd9a8; background: rgba(255, 170, 60, .1);
+    border: 1px solid rgba(255, 170, 60, .28);
+  }
+  .key-warn[hidden] { display: none; }
+
+  /* ===================================================================
+     v3 pass - question mix controls, print sheets, focus mode, keys
+     =================================================================== */
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11.5px; font-weight: 600; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-3);
+    padding: 5px 13px; border-radius: var(--pill);
+    border: 1px solid var(--glass-border); background: var(--glass-bg-lo);
+  }
+  .eyebrow-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--blue); box-shadow: 0 0 9px var(--blue);
+  }
+  .hero .eyebrow { margin-bottom: 18px; }
+
+  /* question mix ------------------------------------------------------ */
+  .preset-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
+  .preset {
+    display: flex; flex-direction: column; align-items: center; gap: 1px;
+    padding: 10px 6px; cursor: pointer;
+    border-radius: var(--r-md);
+    border: 1px solid var(--glass-border-lo);
+    background: var(--glass-bg-lo);
+    color: var(--ink-2);
+    transition: all .2s var(--ease);
+    font-family: inherit;
+  }
+  .preset:hover { border-color: color-mix(in srgb, var(--blue) 45%, transparent); background: color-mix(in srgb, var(--blue) 8%, var(--glass-bg-lo)); transform: translateY(-1px); }
+  .preset b { font-family: var(--font-display); font-size: 17px; font-weight: 700; letter-spacing: -.03em; color: var(--ink); }
+  .preset span { font-size: 11px; color: var(--ink-3); letter-spacing: -.005em; }
+  .preset.on {
+    border-color: color-mix(in srgb, var(--blue) 55%, transparent);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--blue) 18%, transparent), color-mix(in srgb, var(--purple) 14%, transparent));
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--blue) 14%, transparent);
+  }
+
+  .cap-meter { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .cap-track { flex: 1; height: 6px; border-radius: 99px; background: var(--glass-bg-lo); overflow: hidden; border: 1px solid var(--glass-border-lo); }
+  .cap-fill {
+    height: 100%; width: 20%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--blue), var(--purple));
+    transition: width .35s var(--ease), background .35s var(--ease);
+  }
+  .cap-fill.warn { background: linear-gradient(90deg, var(--orange), var(--pink)); }
+  .cap-fill.full { background: linear-gradient(90deg, var(--green), var(--blue)); }
+  .cap-count { font-family: var(--font-display); font-size: 12.5px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-3); white-space: nowrap; }
+
+  .qmix { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+  .qmix-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 14px; border-radius: var(--r-md);
+    border: 1px solid var(--glass-border-lo); background: var(--glass-bg-lo);
+    transition: border-color .2s var(--ease), background .2s var(--ease);
+  }
+  .qmix-row:hover { border-color: var(--glass-border); background: var(--glass-bg); }
+  .qmix-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+  .qmix-name { font-size: 14.5px; font-weight: 500; color: var(--ink); letter-spacing: -.012em; }
+  .qmix-tag { font-size: 11.5px; color: var(--ink-3); }
+  .stepper {
+    display: flex; align-items: center; gap: 4px; flex: 0 0 auto;
+    padding: 3px; border-radius: var(--pill);
+    background: var(--glass-bg-hi); border: 1px solid var(--glass-border-lo);
+  }
+  .step-btn {
+    width: 30px; height: 30px; border-radius: 50%; border: 0;
+    background: transparent; color: var(--ink-3); cursor: pointer;
+    display: grid; place-items: center; transition: all .16s var(--ease);
+  }
+  .step-btn:hover { background: var(--glass-bg-lo); color: var(--blue); }
+  .step-btn:active { transform: scale(.9); }
+  .stepper input {
+    width: 48px; padding: 4px 0 !important; text-align: center;
+    background: transparent !important; border: 0 !important; box-shadow: none !important;
+    font-family: var(--font-display); font-size: 16px; font-weight: 700;
+    font-variant-numeric: tabular-nums; letter-spacing: -.03em;
+  }
+  .qmix-row.zero .qmix-name, .qmix-row.zero .qmix-tag { color: var(--ink-4); }
+
+  /* keyboard hints ---------------------------------------------------- */
+  .kbd-hints {
+    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+    margin: 0 auto 20px; font-size: 12px; color: var(--ink-3);
+  }
+  .kbd-hints span { display: inline-flex; align-items: center; gap: 5px; }
+  kbd {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px; line-height: 1; padding: 3px 6px; border-radius: 6px;
+    border: 1px solid var(--glass-border); background: var(--glass-bg-lo);
+    color: var(--ink-2); box-shadow: 0 1px 0 rgba(255,255,255,.35) inset;
+  }
+
+  /* focus mode -------------------------------------------------------- */
+  header { transition: transform .38s var(--ease), opacity .3s var(--ease); }
+  body.focus-mode header { transform: translateY(-130%); opacity: 0; pointer-events: none; }
+  body.focus-mode .exam-head .desc,
+  body.focus-mode .exam-meta { display: none; }
+  body.focus-mode main { padding-top: 24px; }
+  .focus-exit {
+    position: fixed; z-index: 120; bottom: calc(22px + env(safe-area-inset-bottom));
+    left: 50%; transform: translateX(-50%);
+  }
+
+  /* results extras ---------------------------------------------------- */
+  .grade-pill {
+    display: inline-flex; align-items: baseline; gap: 6px;
+    font-family: var(--font-display); font-size: 30px; font-weight: 700;
+    letter-spacing: -.04em; margin-top: 14px;
+  }
+  .grade-pill small { font-size: 12px; font-weight: 500; letter-spacing: .02em; color: var(--ink-3); font-family: var(--font-body); }
+  .pace-card { margin-top: 18px; padding: 20px 22px; border-radius: var(--r-lg); border: 1px solid var(--glass-border); background: var(--glass-bg-lo); }
+  .pace-card h4 { margin: 0 0 4px; font-family: var(--font-display); font-size: 15px; font-weight: 600; letter-spacing: -.02em; }
+  .pace-card p.sub { margin: 0 0 14px; font-size: 12.5px; color: var(--ink-3); }
+  .pace-row { display: flex; align-items: center; gap: 12px; padding: 7px 0; border-top: 1px solid var(--glass-line); font-size: 13.5px; }
+  .pace-row:first-of-type { border-top: 0; }
+  .pace-row .n { font-family: var(--font-display); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-3); width: 26px; flex: 0 0 auto; }
+  .pace-row .p { flex: 1; min-width: 0; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pace-row .t { font-family: var(--font-display); font-variant-numeric: tabular-nums; font-weight: 600; color: var(--orange); flex: 0 0 auto; }
+
+  /* mixed exam button ------------------------------------------------- */
+  .mixed-card {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    padding: 18px 20px; margin-bottom: 20px; border-radius: var(--r-lg);
+    border: 1px solid color-mix(in srgb, var(--purple) 30%, var(--glass-border));
+    background: linear-gradient(135deg, color-mix(in srgb, var(--purple) 10%, transparent), color-mix(in srgb, var(--blue) 8%, transparent));
+  }
+  .mixed-card .txt { flex: 1; min-width: 200px; }
+  .mixed-card h3 { margin: 0 0 3px; font-family: var(--font-display); font-size: 16px; font-weight: 600; letter-spacing: -.02em; }
+  .mixed-card p { margin: 0; font-size: 13px; color: var(--ink-3); line-height: 1.5; }
+
+  /* print ------------------------------------------------------------- */
+  #printArea { display: none; }
+  body.printing .app, body.printing .toast, body.printing .intro, body.printing .key-modal { display: none !important; }
+  body.printing #printArea { display: block !important; padding: 0 4mm; }
+  #printArea { color: #111; font-size: 12pt; line-height: 1.5; }
+  #printArea h1 { font-size: 19pt; margin: 0 0 4pt; letter-spacing: -.02em; }
+  #printArea .p-meta { font-size: 10pt; color: #555; margin-bottom: 14pt; }
+  #printArea .p-field { display: flex; gap: 18pt; margin-bottom: 14pt; font-size: 10.5pt; }
+  #printArea .p-field span { border-bottom: 1px solid #333; min-width: 160pt; display: inline-block; height: 14pt; }
+  #printArea .p-q { margin-bottom: 11pt; break-inside: avoid; }
+  #printArea .p-q .p-p { font-weight: 600; margin-bottom: 4pt; }
+  #printArea .p-opt { margin-inline-start: 14pt; }
+  #printArea .p-line { border-bottom: 1px solid #666; display: block; height: 15pt; margin-top: 5pt; }
+  #printArea .p-key { margin-top: 18pt; padding-top: 10pt; border-top: 2px solid #111; break-before: page; }
+  #printArea .p-key h2 { font-size: 14pt; margin: 0 0 8pt; }
+  #printArea .p-key li { margin-bottom: 3pt; font-size: 10.5pt; }
+  @media print {
+    @page { margin: 16mm; }
+    html, body { background: #fff !important; }
+    body::before, #stars, .toast, .key-modal, header, .intro { display: none !important; }
+    .app, main { display: block; padding: 0 !important; max-width: none !important; }
+    .view { display: none !important; }
+    body.printing #printArea { display: block !important; }
+  }
+
+  @media (max-width: 640px) {
+    .preset-row { grid-template-columns: repeat(2, 1fr); }
+    .qmix-row { padding: 10px 12px; gap: 10px; }
+    .qmix-tag { display: none; }
+  }
+
+  /* option rows -------------------------------------------------------- */
+  /* the native radio and the letter chip were saying the same thing twice.
+     the radio stays in the markup for the form and for screen readers, the
+     letter becomes the marker and fills in when the option is picked */
+  .option { padding: 13px 16px; gap: 14px; align-items: center; }
+  .option input[type="radio"] {
+    position: absolute; opacity: 0; width: 1px; height: 1px;
+    margin: 0; pointer-events: none;
+  }
+  .option:focus-within { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .option .letter {
+    width: 28px; height: 28px; min-width: 28px; padding: 0;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: var(--font-display); font-size: 12.5px; font-weight: 700;
+    letter-spacing: -.01em;
+    background: var(--glass-bg-hi);
+    border: 1px solid var(--glass-border-lo);
+    color: var(--ink-3);
+    transition: all .18s var(--ease);
+  }
+  .option:hover:not(.disabled) .letter { color: var(--blue); border-color: color-mix(in srgb, var(--blue) 50%, transparent); }
+  .option.picked {
+    border-color: color-mix(in srgb, var(--blue) 60%, transparent);
+    background: color-mix(in srgb, var(--blue) 10%, var(--glass-bg-lo));
+  }
+  .option.picked .letter {
+    background: linear-gradient(140deg, var(--blue), var(--purple));
+    color: #fff; border-color: transparent;
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--blue) 40%, transparent);
+  }
+  [data-theme="dark"] .option.picked .letter { color: #06101c; }
+  .option.correct-option .letter { background: var(--green); color: #fff; border-color: transparent; }
+  .option.wrong-option .letter { background: var(--red); color: #fff; border-color: transparent; }
+  .tf-row .option { padding: 15px 18px; }
+
+  /* wordmark ----------------------------------------------------------- */
+  .brand-name {
+    font-family: var(--font-display);
+    font-size: 15.5px; font-weight: 600; letter-spacing: -.032em;
+    color: var(--ink);
+  }
+  .brand-sub {
+    font-size: 10.5px; font-weight: 600; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-4);
+    padding-inline-start: 10px; margin-inline-start: 2px;
+    border-inline-start: 1px solid var(--glass-line);
+  }
+  @media (max-width: 860px) { .brand-sub { display: none; } }
+  @media (max-width: 560px) { .brand-name { display: none; } }
+
+  /* surfaces ----------------------------------------------------------- */
+  .card { transition: transform .35s var(--ease), box-shadow .35s var(--ease); }
+  .card:hover { box-shadow: var(--glass-inner-glow), var(--glass-shadow-md); }
+  .question { border-radius: var(--r-lg); }
+  .question:hover { border-color: color-mix(in srgb, var(--blue) 22%, var(--glass-border)); }
+  .q-num {
+    font-family: var(--font-display); font-weight: 700; font-size: 13px;
+    background: linear-gradient(150deg, var(--glass-bg-hi), var(--glass-bg-lo));
+  }
+  .exam-head h2 { font-size: 36px; }
+  /* ==========================================================================
+     polish pass: depth, motion and the pieces added for chat history +
+     delete-my-info. everything here is an override, so the original layout
+     still governs the page and this only layers on top
+     ========================================================================== */
+
+  /* slow ambient glow behind the starfield so the page isn't flat */
+  body::after {
+    content: "";
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(560px 420px at 8% 4%, color-mix(in srgb, var(--blue) 12%, transparent), transparent 70%),
+      radial-gradient(520px 400px at 92% 16%, color-mix(in srgb, var(--purple) 12%, transparent), transparent 72%),
+      radial-gradient(680px 520px at 50% 108%, color-mix(in srgb, var(--blue) 8%, transparent), transparent 70%);
+    animation: drift 26s var(--ease) infinite alternate;
+  }
+  @keyframes drift {
+    from { transform: translate3d(-1.5%, -1%, 0) scale(1); }
+    to   { transform: translate3d(2%, 1.5%, 0) scale(1.06); }
+  }
+  @media (prefers-reduced-motion: reduce) { body::after { animation: none; } }
+
+  /* ---------- chrome ------------------------------------------------------ */
+  header {
+    padding-inline: 24px;
+    background: color-mix(in srgb, var(--glass-bg-hi) 86%, transparent);
+    border-bottom: 1px solid var(--glass-line);
+    box-shadow: 0 1px 0 var(--glass-border-lo) inset, 0 12px 34px rgba(20, 30, 60, .07);
+  }
+  .brand-mark {
+    border-radius: 12px;
+    transition: transform .5s var(--ease-spring), box-shadow .35s var(--ease);
+  }
+  .brand:hover .brand-mark {
+    transform: rotate(-7deg) scale(1.07);
+    box-shadow: 0 1px 1px rgba(255,255,255,.35) inset, 0 -1px 2px rgba(0,0,0,.15) inset, 0 6px 18px rgba(0,113,227,.45);
+  }
+  .brand-sub {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .15em;
+    padding: 3px 9px;
+    border-radius: var(--pill);
+    background: color-mix(in srgb, var(--blue) 12%, transparent);
+    border: .5px solid color-mix(in srgb, var(--blue) 26%, transparent);
+    color: color-mix(in srgb, var(--blue) 82%, var(--ink));
+    font-weight: 600;
+  }
+
+  nav.tabs {
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--glass-border-lo);
+    box-shadow: inset 0 1px 3px rgba(20, 30, 60, .07), 0 1px 0 rgba(255,255,255,.5) inset;
+  }
+  nav.tabs button { padding: 8px 16px; letter-spacing: -.012em; }
+  nav.tabs button svg { opacity: .7; transition: opacity .25s var(--ease), transform .4s var(--ease-spring); }
+  nav.tabs button:hover { background: color-mix(in srgb, var(--glass-bg-hi) 70%, transparent); }
+  nav.tabs button:hover svg { opacity: 1; transform: translateY(-1px); }
+  nav.tabs button.active {
+    color: #fff;
+    background: linear-gradient(135deg, var(--blue-hi), color-mix(in srgb, var(--purple) 60%, var(--blue)));
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--blue) 38%, transparent), inset 0 1px 0 rgba(255,255,255,.32);
+  }
+  nav.tabs button.active svg { opacity: 1; }
+  nav.tabs button.active:hover { background: linear-gradient(135deg, var(--blue-hi), color-mix(in srgb, var(--purple) 60%, var(--blue))); }
+
+  /* ---------- cards ------------------------------------------------------ */
+  .card {
+    overflow: hidden;
+    transition: transform .45s var(--ease), box-shadow .45s var(--ease), border-color .45s var(--ease);
+  }
+  .card::after {
+    content: ""; position: absolute; inset: 0 0 auto; height: 1px; z-index: 2;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--blue) 55%, transparent), transparent);
+    opacity: .45;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--blue) 22%, var(--glass-border));
+    box-shadow: var(--glass-inner-glow), var(--glass-shadow-lg);
+  }
+  .card-head { margin-bottom: 20px; }
+  .card-title { font-size: 19.5px; letter-spacing: -.026em; }
+  .card-title .step {
+    background: linear-gradient(140deg, var(--blue), color-mix(in srgb, var(--purple) 55%, var(--blue)));
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 2px 6px color-mix(in srgb, var(--blue) 30%, transparent);
+  }
+  .card-sub { line-height: 1.55; }
+
+  /* staggered entrance makes a view feel assembled rather than dumped */
+  .view.active > .hero { animation: riseIn .55s var(--ease-out) both; }
+  .view.active .card:nth-child(1) { animation: riseIn .55s var(--ease-out) .04s both; }
+  .view.active .card:nth-child(2) { animation: riseIn .55s var(--ease-out) .09s both; }
+  .view.active .card:nth-child(3) { animation: riseIn .55s var(--ease-out) .14s both; }
+  .view.active .card:nth-child(n+4) { animation: riseIn .55s var(--ease-out) .18s both; }
+  @keyframes riseIn { from { opacity: 0; transform: translateY(14px) scale(.995); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .view.active > .hero, .view.active .card { animation: none; }
+  }
+
+  .hero h1 {
+    background: linear-gradient(180deg, var(--ink) 10%, color-mix(in srgb, var(--blue) 42%, var(--ink-3)) 130%);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  .hero .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 5px 13px; border-radius: var(--pill);
+    background: color-mix(in srgb, var(--blue) 10%, var(--glass-bg));
+    border: .5px solid color-mix(in srgb, var(--blue) 24%, transparent);
+    color: color-mix(in srgb, var(--blue) 85%, var(--ink));
+    font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+  }
+
+  /* ---------- buttons ---------------------------------------------------- */
+  .btn { letter-spacing: -.014em; }
+  .btn:hover { transform: translateY(-1.5px); box-shadow: var(--glass-inner-glow), var(--glass-shadow-md); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--blue-hi), color-mix(in srgb, var(--purple) 58%, var(--blue)));
+    box-shadow: 0 1px 0 rgba(255,255,255,.35) inset, 0 -1px 2px rgba(0,0,0,.14) inset, 0 3px 12px color-mix(in srgb, var(--blue) 34%, transparent), 0 10px 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  }
+  .btn-primary:hover {
+    filter: none;
+    box-shadow: 0 1px 0 rgba(255,255,255,.4) inset, 0 6px 18px color-mix(in srgb, var(--blue) 42%, transparent), 0 16px 40px color-mix(in srgb, var(--blue) 26%, transparent);
+  }
+  .btn-danger-solid {
+    background: linear-gradient(135deg, var(--red), color-mix(in srgb, var(--pink) 60%, var(--red)));
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 1px 0 rgba(255,255,255,.3) inset, 0 3px 12px color-mix(in srgb, var(--red) 34%, transparent);
+  }
+  .btn-danger-solid:hover {
+    filter: none;
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--red) 40%, transparent);
+  }
+
+  /* ---------- stats ------------------------------------------------------ */
+  .stat-card {
+    overflow: hidden;
+    transition: transform .4s var(--ease), box-shadow .4s var(--ease);
+  }
+  .stat-card:hover { transform: translateY(-3px); box-shadow: var(--glass-inner-glow), var(--glass-shadow-md); }
+  .stat-val {
+    background: linear-gradient(180deg, var(--ink), color-mix(in srgb, var(--ink) 62%, var(--blue)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .bar-track { overflow: hidden; }
+  .bar-fill {
+    background: linear-gradient(90deg, var(--blue), color-mix(in srgb, var(--purple) 60%, var(--blue)));
+    box-shadow: 0 0 12px color-mix(in srgb, var(--blue) 30%, transparent);
+  }
+
+  /* ---------- coach ------------------------------------------------------ */
+  .chat-head-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 4px; }
+  .chat-hist-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 7px 14px;
+    border-radius: var(--pill);
+    border: .5px solid var(--glass-border-lo);
+    background: var(--glass-bg);
+    color: var(--ink-2);
+    font-size: 13px; font-weight: 500;
+    cursor: pointer;
+    transition: all .22s var(--ease);
+    box-shadow: 0 1px 0 rgba(255,255,255,.5) inset;
+  }
+  .chat-hist-btn:hover { background: var(--glass-bg-hi); color: var(--ink); transform: translateY(-1px); }
+  .chat-hist-count {
+    min-width: 18px; height: 18px; padding: 0 5px;
+    border-radius: var(--pill);
+    display: inline-grid; place-items: center;
+    font-size: 11px; font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, var(--blue-hi), var(--purple));
+  }
+  .chat-msg .bubble {
+    border-radius: 20px;
+    padding: 15px 19px;
+    box-shadow: var(--glass-inner-glow), var(--glass-shadow-sm);
+    transition: box-shadow .35s var(--ease);
+  }
+  .chat-msg .bubble:hover { box-shadow: var(--glass-inner-glow), var(--glass-shadow-md); }
+  .chat-msg .avatar {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--glass-bg-hi) 70%, transparent), 0 3px 10px rgba(20,30,60,.18);
+  }
+  .chat-msg.user .avatar { box-shadow: 0 0 0 3px color-mix(in srgb, var(--glass-bg-hi) 70%, transparent), 0 3px 10px rgba(0,113,227,.28); }
+  .bubble-copy {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 10px; padding: 5px 11px;
+    border-radius: var(--pill);
+    border: .5px solid var(--glass-border-lo);
+    background: var(--glass-bg-lo);
+    color: var(--ink-3);
+    font-size: 12px; font-weight: 500;
+    cursor: pointer;
+    opacity: .75;
+    transition: all .2s var(--ease);
+  }
+  .bubble-copy span { font-size: 12px; }
+  .bubble-copy:hover { opacity: 1; color: var(--blue); border-color: color-mix(in srgb, var(--blue) 35%, transparent); transform: translateY(-1px); }
+  .chat-input-wrap {
+    border-radius: 26px;
+    box-shadow: var(--glass-inner-glow), var(--glass-shadow-lg), 0 0 0 0 color-mix(in srgb, var(--blue) 0%, transparent);
+    transition: box-shadow .3s var(--ease);
+  }
+  .chat-input-wrap:focus-within {
+    box-shadow: var(--glass-inner-glow), var(--glass-shadow-lg), 0 0 0 3px color-mix(in srgb, var(--blue) 22%, transparent);
+  }
+  .chat-send { background: linear-gradient(135deg, var(--blue-hi), color-mix(in srgb, var(--purple) 55%, var(--blue))); }
+  .chat-empty .big { filter: drop-shadow(0 6px 18px color-mix(in srgb, var(--purple) 26%, transparent)); }
+
+  /* ---------- chat history drawer ---------------------------------------- */
+  .chat-scrim {
+    position: fixed; inset: 0; z-index: 60;
+    background: rgba(4, 6, 14, .42);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    animation: keyFade .2s ease both;
+  }
+  .chat-scrim[hidden] { display: none; }
+  .chat-history {
+    position: fixed;
+    z-index: 61;
+    top: 84px;
+    inset-inline-end: 22px;
+    width: 340px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+    padding: 16px 14px 12px;
+    border-radius: 22px;
+    background: var(--glass-bg-hi);
+    backdrop-filter: blur(34px) saturate(200%);
+    -webkit-backdrop-filter: blur(34px) saturate(200%);
+    border: .5px solid var(--glass-border);
+    box-shadow: var(--glass-inner-glow), var(--glass-shadow-lg);
+    opacity: 0;
+    transform: translateY(-8px) scale(.98);
+    transition: opacity .22s var(--ease), transform .28s var(--ease-out);
+  }
+  .chat-history[hidden] { display: none; }
+  .chat-history.open { opacity: 1; transform: none; }
+  .ch-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+  .ch-head h3 {
+    margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -.02em;
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--ink);
+  }
+  .ch-head h3 .ico { color: var(--purple); }
+  .ch-close {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center;
+    border: .5px solid var(--glass-border-lo);
+    background: var(--glass-bg-lo);
+    color: var(--ink-3);
+    cursor: pointer;
+    transition: all .2s var(--ease);
+  }
+  .ch-close:hover { color: var(--ink); background: var(--glass-bg-hi); transform: rotate(90deg); }
+  .ch-search-wrap {
+    position: relative; display: flex; align-items: center; gap: 8px;
+    padding: 0 12px; margin-bottom: 10px;
+    border-radius: var(--pill);
+    background: var(--glass-bg-lo);
+    border: .5px solid var(--glass-border-lo);
+    color: var(--ink-3);
+  }
+  .ch-search {
+    flex: 1; border: 0; background: transparent; outline: none;
+    padding: 9px 0; font-size: 13.5px; color: var(--ink); font-family: inherit;
+  }
+  .ch-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding-inline-end: 2px; }
+  .ch-item {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 10px 11px;
+    border: 0; border-radius: 14px;
+    background: transparent;
+    color: var(--ink-2);
+    text-align: start;
+    cursor: pointer;
+    transition: background .2s var(--ease), transform .2s var(--ease), color .2s var(--ease);
+  }
+  .ch-item:hover { background: var(--glass-bg); transform: translateX(2px); color: var(--ink); }
+  .ch-item.active {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--blue) 14%, var(--glass-bg)), var(--glass-bg));
+    color: var(--ink);
+    box-shadow: inset 0 0 0 .5px color-mix(in srgb, var(--blue) 26%, transparent);
+  }
+  .ch-ic {
+    width: 28px; height: 28px; border-radius: 9px; flex: 0 0 auto;
+    display: grid; place-items: center;
+    background: color-mix(in srgb, var(--purple) 14%, var(--glass-bg-lo));
+    color: var(--purple);
+  }
+  .ch-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .ch-title {
+    font-size: 13.5px; font-weight: 500;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .ch-meta { font-size: 11.5px; color: var(--ink-3); }
+  .ch-del {
+    width: 26px; height: 26px; border-radius: 8px; flex: 0 0 auto;
+    display: grid; place-items: center;
+    color: var(--ink-4);
+    opacity: 0;
+    transition: all .2s var(--ease);
+  }
+  .ch-item:hover .ch-del { opacity: 1; }
+  .ch-del:hover { color: var(--red); background: color-mix(in srgb, var(--red) 12%, transparent); }
+  .ch-empty { padding: 26px 14px; text-align: center; font-size: 13px; color: var(--ink-3); line-height: 1.5; }
+  .ch-foot { padding-top: 10px; border-top: .5px solid var(--glass-line); margin-top: 8px; }
+  .ch-clear-all { width: 100%; color: var(--red); }
+  .ch-clear-all:hover { background: color-mix(in srgb, var(--red) 10%, var(--glass-bg)); }
+  @media (max-width: 640px) {
+    .chat-history {
+      top: auto; bottom: 0; inset-inline: 0;
+      width: 100%; max-width: 100%;
+      max-height: 74vh;
+      border-radius: 22px 22px 0 0;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    }
+    .chat-history:not(.open) { transform: translateY(14px) scale(.99); }
+  }
+
+  /* ---------- delete my info -------------------------------------------- */
+  .danger-zone {
+    margin-top: 22px;
+    padding: 18px;
+    border-radius: var(--r-lg);
+    border: .5px solid color-mix(in srgb, var(--red) 26%, var(--glass-border-lo));
+    background: color-mix(in srgb, var(--red) 6%, transparent);
+  }
+  .dz-head {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14.5px; font-weight: 600; letter-spacing: -.015em;
+    color: color-mix(in srgb, var(--red) 78%, var(--ink));
+    margin-bottom: 6px;
+  }
+  .dz-hint { margin: 0 0 14px; font-size: 13px; line-height: 1.55; color: var(--ink-3); }
+  .dz-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .dz-btn { color: color-mix(in srgb, var(--red) 80%, var(--ink)); }
+  .dz-btn:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--red) 12%, var(--glass-bg));
+    border-color: color-mix(in srgb, var(--red) 34%, transparent);
+    color: var(--red);
+  }
+  .dz-btn-solid { color: var(--red); border-color: color-mix(in srgb, var(--red) 32%, transparent); font-weight: 600; }
+
+  /* ---------- confirm dialog -------------------------------------------- */
+  .confirm-modal {
+    position: fixed; inset: 0; z-index: 420;
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+    background: rgba(3, 5, 12, .66);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    opacity: 0;
+    transition: opacity .2s var(--ease);
+  }
+  .confirm-modal[hidden] { display: none; }
+  .confirm-modal.show { opacity: 1; }
+  .confirm-card {
+    width: 100%; max-width: 420px;
+    padding: 28px 26px 22px;
+    border-radius: 22px;
+    background: var(--glass-bg-hi);
+    backdrop-filter: blur(30px) saturate(200%);
+    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    border: .5px solid var(--glass-border);
+    box-shadow: var(--glass-inner-glow), var(--glass-shadow-lg);
+    transform: translateY(10px) scale(.98);
+    transition: transform .28s var(--ease-out);
+  }
+  .confirm-modal.show .confirm-card { transform: none; }
+  .confirm-icon {
+    width: 44px; height: 44px; border-radius: 13px; margin-bottom: 15px;
+    display: grid; place-items: center;
+    background: color-mix(in srgb, var(--red) 13%, transparent);
+    border: .5px solid color-mix(in srgb, var(--red) 30%, transparent);
+    color: var(--red);
+  }
+  .confirm-modal:not(.is-danger) .confirm-icon {
+    background: color-mix(in srgb, var(--blue) 13%, transparent);
+    border-color: color-mix(in srgb, var(--blue) 30%, transparent);
+    color: var(--blue);
+  }
+  .confirm-card h3 { margin: 0 0 8px; font-size: 19px; font-weight: 600; letter-spacing: -.022em; }
+  .confirm-card p { margin: 0 0 20px; font-size: 13.5px; line-height: 1.6; color: var(--ink-3); }
+  .confirm-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+
+  /* ---------- exam screen ------------------------------------------------ */
+  .exam-head h2 {
+    background: linear-gradient(180deg, var(--ink), color-mix(in srgb, var(--blue) 30%, var(--ink-3)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .question {
+    transition: transform .35s var(--ease), box-shadow .35s var(--ease), border-color .35s var(--ease);
+  }
+  .question:hover { transform: translateY(-2px); }
+  .q-num {
+    background: linear-gradient(140deg, var(--glass-bg-hi), var(--glass-bg-lo));
+    box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 2px 6px rgba(20,30,60,.08);
+  }
+  .option {
+    padding: 16px 19px;
+    border-radius: 16px;
+    transition: background .2s var(--ease), border-color .2s var(--ease), transform .2s var(--ease), box-shadow .2s var(--ease);
+  }
+  .option .letter {
+    width: 24px; height: 24px; border-radius: 8px;
+    display: grid; place-items: center;
+    font-size: 12.5px;
+    background: var(--glass-bg-lo);
+    border: .5px solid var(--glass-border-lo);
+    transition: all .2s var(--ease);
+  }
+  .option:hover:not(.disabled) .letter { background: var(--glass-bg-hi); color: var(--ink); }
+  .option.picked .letter { background: var(--blue); color: #fff; border-color: transparent; }
+  [data-theme="dark"] .option.picked .letter { color: #06101c; }
+  .result-bar {
+    border-radius: var(--r-xl);
+    box-shadow: var(--glass-inner-glow), var(--glass-shadow-lg);
+  }
+
+  /* ---------- small things ---------------------------------------------- */
+  ::-webkit-scrollbar { width: 11px; height: 11px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    border-radius: var(--pill);
+    background: color-mix(in srgb, var(--ink-3) 26%, transparent);
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--ink-3) 45%, transparent); background-clip: content-box; }
+  .empty { padding: 76px 24px; }
+  .empty-icon { filter: drop-shadow(0 8px 20px rgba(20,30,60,.12)); }
+
+  @media (max-width: 860px) {
+    header { padding-inline: 14px; gap: 10px; }
+    .hero h1 { font-size: 34px; }
+    .card { padding: 22px; border-radius: 22px; }
+  }
+  /* on a phone the five tabs plus the buttons don't fit side by side, so the
+     tab strip scrolls instead of shoving the theme switcher off screen */
+  @media (max-width: 640px) {
+    header { gap: 8px; }
+    .brand { flex: 0 0 auto; }
+    .header-actions { flex: 0 0 auto; }
+    nav.tabs {
+      min-width: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      justify-content: flex-start;
+    }
+    nav.tabs::-webkit-scrollbar { display: none; }
+    nav.tabs button { padding: 8px 12px; }
+    .hero h1 { font-size: 30px; }
+    .card { padding: 18px; }
+    .card-title { font-size: 18px; }
+    .confirm-actions { justify-content: stretch; }
+    .confirm-actions .btn { flex: 1; }
+  }
+  #stars { max-width: 100%; }
+  /* the splash scales up as it fades, which can poke a scrollbar into view */
+  .intro { overflow: hidden; }
 </style>
 </head>
 <body>
+
+<canvas id="stars" aria-hidden="true"></canvas>
 
 <div class="intro" id="intro">
   <div class="intro-inner">
@@ -1414,6 +2517,8 @@
           <path d="M22 9v6"/>
         </svg>
       </div>
+      <span class="brand-name">Exam Forge</span>
+      <span class="brand-sub">Student</span>
     </div>
 
     <nav class="tabs" id="nav">
@@ -1452,7 +2557,7 @@
           <button data-lang="en"><span>English</span><span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span></button>
           <button data-lang="fa"><span>فارسی</span><span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span></button>
           <button data-lang="ar"><span>العربية</span><span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span></button>
-          <button data-lang="ckb"><span>کوردی</span><span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span></button>
+          <button data-lang="ckb"><span>کوردی (سۆرانی)</span><span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span></button>
           <button data-lang="pl"><span>Polski</span><span class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span></button>
         </div>
       </div>
@@ -1463,6 +2568,7 @@
   <main>
     <section class="view active" id="view-create">
       <div class="hero">
+        <span class="eyebrow"><span class="eyebrow-dot"></span><span id="createEyebrow">Notes in · exam out</span></span>
         <h1 id="createHero">Turn anything into an exam.</h1>
         <p id="createHeroSub">Paste your notes, drop in photos, and get an exam.</p>
       </div>
@@ -1503,6 +2609,7 @@
               <span data-i18n="importBtn">Import</span>
             </button>
           </div>
+          <small class="field-hint" data-i18n="youtubeHint">Works on most videos. If it refuses, open the video, click ⋯ then "Show transcript", and paste the text above.</small>
         </div>
       </div>
 
@@ -1515,22 +2622,78 @@
           <span class="total-badge" id="totalBadge">12 total</span>
         </div>
 
-        <div class="grid grid-4">
-          <div class="field">
-            <label data-i18n="multipleChoice">Multiple choice</label>
-            <input type="number" id="countMcq" value="4" min="0" max="30">
+        <div class="preset-row" id="presetRow">
+          <button class="preset" type="button" data-preset="10"><b>10</b><span>Quick</span></button>
+          <button class="preset" type="button" data-preset="20"><b>20</b><span>Standard</span></button>
+          <button class="preset" type="button" data-preset="40"><b>40</b><span>Deep</span></button>
+          <button class="preset" type="button" data-preset="60"><b>60</b><span>Full set</span></button>
+        </div>
+
+        <div class="cap-meter">
+          <div class="cap-track"><div class="cap-fill" id="capFill"></div></div>
+          <span class="cap-count" id="capCount">12 / 60</span>
+        </div>
+
+        <div class="qmix" id="qmix">
+          <div class="qmix-row">
+            <div class="qmix-info">
+              <span class="qmix-name" data-i18n="multipleChoice">Multiple choice</span>
+              <span class="qmix-tag">A · B · C · D</span>
+            </div>
+            <div class="stepper">
+              <button class="step-btn" type="button" data-target="countMcq" data-step="-1" aria-label="Fewer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg>
+              </button>
+              <input type="number" id="countMcq" value="4" min="0" max="60" inputmode="numeric">
+              <button class="step-btn" type="button" data-target="countMcq" data-step="1" aria-label="More">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              </button>
+            </div>
           </div>
-          <div class="field">
-            <label data-i18n="trueFalse">True / False</label>
-            <input type="number" id="countTf" value="3" min="0" max="30">
+          <div class="qmix-row">
+            <div class="qmix-info">
+              <span class="qmix-name" data-i18n="trueFalse">True / False</span>
+              <span class="qmix-tag">2 ways</span>
+            </div>
+            <div class="stepper">
+              <button class="step-btn" type="button" data-target="countTf" data-step="-1" aria-label="Fewer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg>
+              </button>
+              <input type="number" id="countTf" value="3" min="0" max="60" inputmode="numeric">
+              <button class="step-btn" type="button" data-target="countTf" data-step="1" aria-label="More">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              </button>
+            </div>
           </div>
-          <div class="field">
-            <label data-i18n="fillInBlank">Fill in blank</label>
-            <input type="number" id="countFib" value="3" min="0" max="30">
+          <div class="qmix-row">
+            <div class="qmix-info">
+              <span class="qmix-name" data-i18n="fillInBlank">Fill in blank</span>
+              <span class="qmix-tag">one word</span>
+            </div>
+            <div class="stepper">
+              <button class="step-btn" type="button" data-target="countFib" data-step="-1" aria-label="Fewer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg>
+              </button>
+              <input type="number" id="countFib" value="3" min="0" max="60" inputmode="numeric">
+              <button class="step-btn" type="button" data-target="countFib" data-step="1" aria-label="More">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              </button>
+            </div>
           </div>
-          <div class="field">
-            <label data-i18n="shortAnswer">Short answer</label>
-            <input type="number" id="countShort" value="2" min="0" max="20">
+          <div class="qmix-row">
+            <div class="qmix-info">
+              <span class="qmix-name" data-i18n="shortAnswer">Short answer</span>
+              <span class="qmix-tag">graded later</span>
+            </div>
+            <div class="stepper">
+              <button class="step-btn" type="button" data-target="countShort" data-step="-1" aria-label="Fewer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg>
+              </button>
+              <input type="number" id="countShort" value="2" min="0" max="60" inputmode="numeric">
+              <button class="step-btn" type="button" data-target="countShort" data-step="1" aria-label="More">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1581,13 +2744,24 @@
             <span data-i18n="coachTitle">Your AI coach</span>
           </h2>
           <p data-i18n="coachSubtitle">Ask anything. Get taught the whole concept, step by step.</p>
-          <button class="chat-new-btn" id="chatNew">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-            <span data-i18n="newChat">New chat</span>
-          </button>
+          <div class="chat-head-actions">
+            <button class="chat-hist-btn" id="chatHistoryBtn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+              <span data-i18n="chatHistory">History</span>
+              <span class="chat-hist-count" id="chatHistoryCount" hidden>0</span>
+            </button>
+            <button class="chat-new-btn" id="chatNew">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              <span data-i18n="newChat">New chat</span>
+            </button>
+          </div>
         </div>
         <div id="chatMessages" class="chat-messages"></div>
         <div class="chat-input-wrap">
+          <button class="chat-attach" id="chatAttach" title="Add a photo">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          </button>
+          <input type="file" id="chatImageInput" accept="image/*" hidden>
           <button class="chat-clear" id="chatClear" title="Clear">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
@@ -1601,6 +2775,30 @@
         </div>
       </div>
     </section>
+
+    <div class="chat-scrim" id="chatScrim" hidden></div>
+    <aside class="chat-history" id="chatHistory" hidden>
+      <div class="ch-head">
+        <h3>
+          <span class="ico" id="chHeadIcon"></span>
+          <span data-i18n="chatHistory">History</span>
+        </h3>
+        <button class="ch-close" id="chatHistoryClose" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="ch-search-wrap">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="chatSearch" class="ch-search" type="search" placeholder="Search chats" autocomplete="off">
+      </div>
+      <div class="ch-list" id="chatHistoryList"></div>
+      <div class="ch-foot">
+        <button class="btn btn-sm ch-clear-all" id="chatHistoryClearAll">
+          <span class="ico" id="chTrashIcon"></span>
+          <span data-i18n="deleteAllChats">Delete all chats</span>
+        </button>
+      </div>
+    </aside>
 
     <section class="view" id="view-library">
       <div class="hero" style="padding-bottom: 26px;">
@@ -1620,7 +2818,40 @@
   </main>
 </div>
 
+<div id="printArea"></div>
+
 <div class="toast" id="toast"></div>
+
+<div class="confirm-modal" id="confirmModal" hidden>
+  <div class="confirm-card">
+    <div class="confirm-icon" id="confirmIcon"></div>
+    <h3 id="confirmTitle"></h3>
+    <p id="confirmText"></p>
+    <div class="confirm-actions">
+      <button class="btn" id="confirmNo"><span data-i18n="cancel">Cancel</span></button>
+      <button class="btn btn-danger-solid" id="confirmYes"></button>
+    </div>
+  </div>
+</div>
+
+<div class="key-modal" id="keyModal" hidden>
+  <div class="key-card">
+    <div class="key-glow"></div>
+    <div class="key-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3 20 3"/><path d="M17 6l3 3"/><path d="M14 9l2 2"/>
+      </svg>
+    </div>
+    <h3 id="keyTitle" data-i18n="keyTitle">Connect your Token Harbor key</h3>
+    <p id="keyDesc" data-i18n="keyDesc">Exam Forge needs a key to generate questions. Paste yours below - it stays in this browser and only ever goes to tokenharbor.ai.</p>
+    <div class="key-warn" id="keyWarn" hidden></div>
+    <input class="key-input" id="keyInput" type="password" spellcheck="false" autocomplete="off" placeholder="sk-...">
+    <div class="key-actions">
+      <button class="btn btn-primary" id="keySaveBtn" data-i18n="keySave">Save key</button>
+      <a class="key-link" href="https://tokenharbor.ai/dashboard" target="_blank" rel="noopener" data-i18n="keyGetOne">Get a key</a>
+    </div>
+  </div>
+</div>
 
 <script>
 // stroke icons, 24 grid, all inlined so nothing loads externally. if you add
@@ -1664,6 +2895,10 @@ const ICONS = {
   external: '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>',
   file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
   youtube: '<path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/>',
+  speaker: '<path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>',
+  flame: '<path d="M12 2s5 4.5 5 9a5 5 0 0 1-10 0c0-1.5.7-2.8 1.5-3.8C9.3 8.6 10 9.6 10 11a2 2 0 0 0 4 0c0-3-2-6-2-9z"/>',
+  eye: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+  layers: '<path d="M12 2l10 5-10 5L2 7z"/><path d="M2 12l10 5 10-5M2 17l10 5 10-5"/>',
 };
 
 function icon(name, size = 16) {
@@ -1674,6 +2909,16 @@ function icon(name, size = 16) {
 
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
+
+// how many questions one exam can ever hold. 60 is a deliberate ceiling:
+// past that the model starts repeating itself and the thing takes minutes to
+// build. the inputs clamp to this and generation trims anything above it
+const MAX_QUESTIONS = 60;
+// questions per api call. small batches finish inside one response instead of
+// getting cut off, and a shortfall gets topped up rather than dropped
+const BATCH_SIZE = 10;
+// ceiling on a single response. the worker guards its own copy of this
+const MAX_OUTPUT_TOKENS = 16384;
 
 // every string the UI shows. the plural keys use _one/_other, and the t()
 // helper picks whichever matches. the polish block is the shakiest of these
@@ -1699,6 +2944,9 @@ const T = {
     questions_one: "1 question", questions_other: "{n} questions",
     points_one: "1 point", points_other: "{n} points",
     passAt: "Pass at {n}%", practiceMode: "Practice mode", testMode: "Test mode",
+    nameLabel: "Name", dateLabel: "Date",
+    shuffleQuestions: "Shuffle order",
+    examResumed: "Picked your in-progress exam back up",
     studyAsFlashcards: "Study as flashcards", print: "Print",
     answered: "answered", submitForGrading: "Submit for grading",
     noExamYet: "No exam yet",
@@ -1764,7 +3012,21 @@ const T = {
     byTopic: "By topic", recentAttempts: "Recent attempts",
     needSource: "Add some text or an image first.",
     needOneQuestion: "Request at least one question.",
-    tooMany: "Keep it under 80 total questions.",
+    tooMany: "Keep it under 60 total questions.",
+    cappedAt: "Capped at {n} questions - that's the ceiling for one exam.",
+    printSheet: "Print / PDF", printKey: "Answer key",
+    focusMode: "Focus mode", exitFocus: "Exit focus",
+    shortcutHint: "Shortcuts",
+    kbdPick: "pick option", kbdFlag: "flag it", kbdNext: "next / previous", kbdHint: "show hint", kbdSubmit: "submit",
+    mixedTitle: "Mixed review exam",
+    mixedSub: "Pulls questions from every exam in your library and shuffles them into one session.",
+    mixedBuild: "Build mixed exam",
+    mixedEmpty: "Save at least one exam first.",
+    mixedReady: "Mixed exam ready",
+    gradeLabel: "Grade",
+    paceTitle: "Where your time went",
+    paceSub: "The five questions that cost you the most.",
+    paceUnit: "{n}s",
     buildingExam: "Building your exam",
     buildingExamPart: "Building your exam (part {n} of {total})",
     examReady: "Exam ready",
@@ -1791,6 +3053,12 @@ const T = {
     transcriptImported: "Transcript added to source",
     transcriptFailed: "Couldn't fetch the transcript. Paste the video text manually.",
     notYoutube: "That doesn't look like a YouTube link.",
+    youtubeHint: "Works on most videos. If it refuses, open the video, click the three dots then \"Show transcript\", and paste the text above.",
+    transcriptGot: "Got {n} characters from {title}",
+    thisVideo: "that video",
+    ytBlocked: "YouTube blocked the request. Open the video, click the three dots then \"Show transcript\", copy it, and paste it in the box above.",
+    ytNoCaptions: "That video has no captions, so there's nothing to read.",
+    transcriptLong: "That transcript is about {n}k characters - generation will take a while.",
     grading: "Grading…",
     aiFeedback: "Grader's note",
     reviewDue_one: "{n} question due for review",
@@ -1805,6 +3073,119 @@ const T = {
     shareFailed: "Couldn't build that share link",
     copyManually: "Copy this link:",
     sharedBadge: "Shared",
+    timedOff: "Timer: off",
+    timedLabel: "Timer: {n} min",
+    timedSet: "{n} minute timer started",
+    timedCleared: "Timer off",
+    timeUp: "Time's up - submitting",
+    countdownLeft: "left",
+    notSure: "Not sure",
+    notSureHint: "Mark this one as a guess",
+    speakQuestion: "Read this aloud",
+    stopSpeaking: "Stop reading",
+    speakUnavailable: "This browser can't read aloud",
+    solidCount: "knew it",
+    shakyCount: "guessed right",
+    missCount2: "missed",
+    confidenceLine: "You flagged {n} as guesses. Solid answers: {s}.",
+
+    keyTitle: "Connect your Token Harbor key",
+    keyDesc: "Exam Forge needs a key to generate questions. Paste yours below - it stays in this browser and only ever goes to tokenharbor.ai.",
+    keySave: "Save key",
+    keyGetOne: "Get a key",
+    needApiKey: "Add your Token Harbor key to generate anything.",
+    gotHtml: "The API sent back a web page instead of JSON. Check the worker's upstream URL.",
+    keyRejected: "That key was rejected. Check it and try again.",
+    keySaved: "Key saved",
+
+    streakLabel: "{n} day streak",
+    streakStart: "Study today to start a streak",
+    streakKeep: "Keep it alive with one exam today",
+    streakWhy: "One exam a day is all it takes",
+    weakSpots: "Where you're losing points",
+    goalLabel: "Today",
+    goalOf: "{n} of {g} questions",
+    goalDone: "Daily goal hit",
+    weakDrill: "Drill my weakest topics",
+    weakDrillBusy: "Building a drill…",
+    weakDrillNone: "Take a few more exams first",
+    studyGuide: "Study guide",
+    studyGuideSent: "Study guide request sent to the coach",
+    readingPhoto: "Reading {name}…",
+    requestTimeout: "That took too long - the provider didn't answer in time.",
+    networkError: "Couldn't reach the provider. Check your connection.",
+    upstreamError: "The provider returned an error (HTTP {status}).",
+    retry: "Try again",
+    exportAll: "Export all my data",
+    importAll: "Import data",
+    exportAllDone: "Backup downloaded",
+    importAllDone: "Restored {n} exams and {h} attempts",
+    importAllBad: "That file isn't an Exam Forge backup",
+    dataSection: "Your data",
+    dataHint: "Everything lives in this browser. Export a backup before you clear your browsing data.",
+    connTitle: "AI connection",
+    connHint: "If exams won't generate, run this. It asks the backend two questions and prints exactly what came back.",
+    connCheck: "Check connection",
+    connWorking: "Checking…",
+    chatHistory: "History",
+    chatUntitled: "Untitled chat",
+    chatHistoryEmpty: "No saved chats yet. Start one and it lands here.",
+    chatHistoryNoMatch: "No chat matches that search",
+    deleteAllChats: "Delete all chats",
+    messagesUnit_one: "{n} message",
+    messagesUnit_other: "{n} messages",
+    justNow: "just now",
+    minutesAgo_one: "{n} min ago",
+    minutesAgo_other: "{n} min ago",
+    hoursAgo_one: "{n} hour ago",
+    hoursAgo_other: "{n} hours ago",
+    daysAgo_one: "{n} day ago",
+    daysAgo_other: "{n} days ago",
+    copy: "Copy",
+    copied: "Copied",
+    copyFailed: "Couldn't copy that",
+    chatThreadDeleted: "Chat deleted",
+    deleteSection: "Delete my information",
+    deleteHint: "Everything is stored in this browser only. Deleting is permanent - there is nothing on a server to restore from.",
+    deleteChats: "Delete chats",
+    deleteResults: "Delete results",
+    deleteSavedExams: "Delete saved exams",
+    deleteKey: "Forget API key",
+    deleteEverything: "Delete everything",
+    nothingToDelete: "Nothing to delete",
+    confirmDeleteChat: "Delete this chat? \"{name}\" is gone for good.",
+    confirmDeleteChats: "Delete {n} saved chats? This can't be undone.",
+    confirmDeleteResults: "Delete {n} results and your weak-topic list? This can't be undone.",
+    confirmDeleteExams: "Delete {n} saved exams? This can't be undone.",
+    confirmDeleteKey: "Remove the stored API key from this browser?",
+    confirmWipeTitle: "Delete everything?",
+    confirmWipeText: "This removes every saved exam, all results and progress, every saved chat, and any API key. Your theme and language stay as they are.",
+    confirmWipeTitle2: "Last check",
+    confirmWipeText2: "There is no undo and no backup unless you exported one first. Delete it all?",
+    yesDeleteAll: "Yes, delete everything",
+    cancel: "Cancel",
+    confirm: "Confirm",
+    chatsDeleted: "All chats deleted",
+    resultsDeleted: "Results deleted",
+    examsDeleted: "Saved exams deleted",
+    keyDeleted: "API key removed",
+    allDataDeleted: "Everything deleted",
+    photoRead: "Read {n} characters out of that photo",
+    photoNoText: "No text in that photo - it'll be sent as an image instead.",
+    photoOcrFailed: "Couldn't read that photo. It'll be sent as an image instead.",
+    readingImage: "Reading your photo…",
+    ocrBusy: "Still reading that photo",
+    ocrNoText: "No readable text in that photo. Try a straighter, brighter shot.",
+    ocrFailed: "Couldn't read that photo. Check your connection and try again.",
+    photoAttached: "Photo read - {n} characters",
+    photoTag: "Photo",
+    photoFromLabel: "I took this photo of my notes. Here's the text that was read out of it:",
+    examTag: "Exam",
+    analyzePick: "Pick one and I'll read the whole thing - every question, every answer, and how you did.",
+    analyzeNoExams: "You haven't saved any exams yet. Generate one and I'll be able to go through it with you.",
+    analyzeCancel: "Never mind",
+    analyzeExamLabel: "Analyze my exam: {title}",
+    noAttemptsForExam: "no attempts yet",
     progressMessages: [
       "Reading your material…", "Picking out the key ideas…", "Drafting questions…",
       "Writing plausible distractors…", "Checking the answers…", "Polishing the wording…"
@@ -1896,7 +3277,7 @@ const T = {
     byTopic: "بر اساس موضوع", recentAttempts: "تلاش‌های اخیر",
     needSource: "اول متن یا تصویری اضافه کنید.",
     needOneQuestion: "حداقل یک سوال بخواهید.",
-    tooMany: "زیر ۸۰ سوال نگه دارید.",
+    tooMany: "زیر ۶۰ سوال نگه دارید.",
     buildingExam: "در حال ساخت آزمون", buildingExamPart: "در حال ساخت آزمون (بخش {n} از {total})",
     examReady: "آزمون آماده است", generatedSome: "{n} از {total} سوال ساخته شد",
     somethingWrong: "مشکلی پیش آمد: ",
@@ -2018,7 +3399,7 @@ const T = {
     byTopic: "حسب الموضوع", recentAttempts: "المحاولات الأخيرة",
     needSource: "أضف نصًا أو صورة أولًا.",
     needOneQuestion: "اطلب سؤالًا واحدًا على الأقل.",
-    tooMany: "أبقِ على أقل من ٨٠ سؤالًا.",
+    tooMany: "أبقِ على أقل من ٦٠ سؤالًا.",
     buildingExam: "جاري بناء الامتحان", buildingExamPart: "جاري بناء الامتحان (الجزء {n} من {total})",
     examReady: "الامتحان جاهز", generatedSome: "تم إنشاء {n} من {total} سؤالًا",
     somethingWrong: "حدث خطأ: ",
@@ -2139,7 +3520,7 @@ const T = {
     byTopic: "بەپێی بابەت", recentAttempts: "هەوڵەکانی نوێ",
     needSource: "سەرەتا دەق یان وێنەیەک زیاد بکە.",
     needOneQuestion: "لانیکەم یەک پرسیار داوابکە.",
-    tooMany: "کەمتر لە ٨٠ پرسیار بهێڵەوە.",
+    tooMany: "کەمتر لە ٦٠ پرسیار بهێڵەوە.",
     buildingExam: "دروستکردنی تاقیکردنەوە", buildingExamPart: "دروستکردنی تاقیکردنەوە (بەشی {n} لە {total})",
     examReady: "تاقیکردنەوە ئامادەیە", generatedSome: "{n} لە {total} پرسیار دروستکرا",
     somethingWrong: "کێشەیەک ڕوویدا: ",
@@ -2260,7 +3641,7 @@ const T = {
     byTopic: "Według tematu", recentAttempts: "Ostatnie próby",
     needSource: "Najpierw dodaj tekst lub obraz.",
     needOneQuestion: "Poproś o co najmniej jedno pytanie.",
-    tooMany: "Zatrzymaj się poniżej 80 pytań.",
+    tooMany: "Zatrzymaj się poniżej 60 pytań.",
     buildingExam: "Buduję egzamin", buildingExamPart: "Buduję egzamin (część {n} z {total})",
     examReady: "Egzamin gotowy", generatedSome: "Wygenerowano {n} z {total} pytań",
     somethingWrong: "Coś poszło nie tak: ",
@@ -2399,10 +3780,38 @@ const store = {
   }
 };
 
+// text only. photos never reach the model as images - tesseract reads them in
+// the page first (see runOcr) and they go out as plain text.
+//
+// this talks to YOUR cloudflare worker, not to token harbor directly. the
+// worker holds the token harbor key, so the key never reaches the browser -
+// anyone can view source on this file and the key still isn't in it. the
+// worker forwards to https://tokenharbor.ai/v1/chat/completions upstream.
+//
+// the model is the free tier one. the ":free" suffix is part of the id, not
+// a tag - drop it and you get billed.
+//
+// to call token harbor straight from the browser instead, set
+// baseUrl: 'https://tokenharbor.ai/v1' and put your key in API.key. it
+// returns access-control-allow-origin: * so it works, but the key is then
+// visible to anyone who opens devtools.
 const API = {
   baseUrl: 'https://green-math-c5df.luciuselvis3.workers.dev',
-  model: 'nvidia/nemotron-3.5-super-vl:free'
+  model: 'deepseek-v4.1-flash:free',
+  key: '' // only needed if baseUrl points at token harbor itself
 };
+
+const APIKEY_STORAGE = 'examforge.apiKey';
+
+// resolved fresh on every call so a key pasted mid-session is picked up
+// without a reload
+function getApiKey() {
+  return (store.read(APIKEY_STORAGE, '') || API.key || '').trim();
+}
+
+// the worker's /transcript route is the one endpoint that isn't a chat
+// completion, so it stays pinned here instead of following API.baseUrl
+const TRANSCRIPT_URL = 'https://green-math-c5df.luciuselvis3.workers.dev';
 
 
 const UPSTASH_URL = 'https://viable-hookworm-182140.upstash.io';
@@ -2414,6 +3823,30 @@ const THEME_STORAGE = 'examforge.theme';
 const INTRO_STORAGE = 'examforge.introSeen';
 const DRAFT_STORAGE = 'examforge.draft';
 const REVIEW_STORAGE = 'examforge.review';
+const CHAT_STORAGE = 'examforge.chat';
+const CHAT_THREADS_STORAGE = 'examforge.chatThreads';
+// the live exam. refresh on a phone and lose half an hour of answers because
+// nothing was written down, so the session gets saved as they work
+const SESSION_STORAGE = 'examforge.session';
+
+function persistSession() {
+  if (!state.exam || !state.session || state.session.submitted) return;
+  store.write(SESSION_STORAGE, { exam: state.exam, session: state.session });
+}
+
+function clearPersistedSession() {
+  store.write(SESSION_STORAGE, null);
+}
+
+function restoreSession() {
+  const d = store.read(SESSION_STORAGE, null);
+  if (!d || !d.exam || !d.session || d.session.submitted) return false;
+  if (!Array.isArray(d.exam.questions) || !d.exam.questions.length) return false;
+  state.exam = d.exam;
+  state.session = d.session;
+  state.coachReport = null;
+  return true;
+}
 
 let toastTimer;
 function toast(message, kind = 'info') {
@@ -2426,6 +3859,38 @@ function toast(message, kind = 'info') {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
 }
 
+// only reachable when there's no usable key: never opened on load, so if you
+// bake a key into API.key this whole thing is dead code
+function openKeyModal(warn) {
+  const modal = $('#keyModal');
+  if (!modal) return;
+  const warnEl = $('#keyWarn');
+  if (warnEl) {
+    warnEl.textContent = warn || '';
+    warnEl.hidden = !warn;
+  }
+  modal.hidden = false;
+  const input = $('#keyInput');
+  if (input) {
+    input.value = getApiKey();
+    setTimeout(() => { input.focus(); input.select(); }, 60);
+  }
+}
+
+function closeKeyModal() {
+  const modal = $('#keyModal');
+  if (modal) modal.hidden = true;
+}
+
+function saveKeyFromModal() {
+  const input = $('#keyInput');
+  const value = (input?.value || '').trim();
+  if (!value) { input?.focus(); return; }
+  store.write(APIKEY_STORAGE, value);
+  closeKeyModal();
+  toast(t('keySaved'), 'success');
+}
+
 // cycle light > dark > auto. the auto mode follows the OS setting and re-runs
 // whenever the OS flips, which is why the media query listener is a bit below
 function applyTheme(mode) {
@@ -2435,18 +3900,19 @@ function applyTheme(mode) {
   }
   document.documentElement.setAttribute('data-theme', effective);
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', effective === 'dark' ? '#050608' : '#eef2f8');
+  if (meta) meta.setAttribute('content', effective === 'dark' ? '#04060f' : '#eef1f8');
 
   const iconMap = { light: 'moon', dark: 'sun', auto: 'halfCircle' };
   $('#themeBtn').innerHTML = icon(iconMap[mode] || 'moon', 16);
   store.write(THEME_STORAGE, mode);
 }
 
-const savedTheme = store.read(THEME_STORAGE, 'light');
+// space is the house style, so an untouched install opens on the dark field
+const savedTheme = store.read(THEME_STORAGE, 'dark');
 applyTheme(savedTheme);
 
 $('#themeBtn').addEventListener('click', () => {
-  const cur = store.read(THEME_STORAGE, 'light');
+  const cur = store.read(THEME_STORAGE, 'dark');
   const next = cur === 'light' ? 'dark' : cur === 'dark' ? 'auto' : 'light';
   applyTheme(next);
   toast(next === 'auto' ? 'Auto theme' : next === 'dark' ? 'Dark theme' : 'Light theme');
@@ -2503,7 +3969,69 @@ function startExamTimers() {
       const start = session.questionStart[qid];
       if (start) el.textContent = formatTime(Math.round((Date.now() - start) / 1000));
     });
+
+    // countdown. it lives outside the question chips because it belongs to
+    // the attempt, not to one answer
+    if (session.deadline) {
+      const left = Math.round((session.deadline - Date.now()) / 1000);
+      const text = document.getElementById('countdownText');
+      const chip = document.getElementById('countdownChip');
+      if (text) text.textContent = formatTime(Math.max(0, left));
+      if (chip) {
+        chip.classList.toggle('warn', left <= 60 && left > 0);
+        chip.classList.toggle('over', left <= 0);
+      }
+      if (left <= 0) {
+        toast(t('timeUp'), 'warn');
+        submitExam();
+      }
+    }
   }, 500);
+}
+
+// read-aloud. fires only from a click (never on load) because browsers block
+// unprompted speech anyway, and the button flips to a stop control while the
+// question is being spoken
+function speakQuestion(qid, btn) {
+  const synth = window.speechSynthesis;
+  if (!synth) { toast(t('speakUnavailable'), 'warn'); return; }
+  const q = state.exam?.questions.find(x => x.id === qid);
+  if (!q) return;
+
+  if (synth.speaking) {
+    synth.cancel();
+    document.querySelectorAll('.speak-btn.on').forEach(b => b.classList.remove('on'));
+    return;
+  }
+
+  const parts = [q.prompt];
+  if (q.options) parts.push(...q.options.map(o => o.text));
+  const utter = new SpeechSynthesisUtterance(parts.join('. '));
+  const langMap = { en: 'en-US', fa: 'fa-IR', ar: 'ar-SA', ckb: 'ckb', pl: 'pl-PL' };
+  utter.lang = langMap[currentLang] || 'en-US';
+  utter.rate = 0.98;
+  utter.onend = () => {
+    btn?.classList.remove('on');
+    document.querySelectorAll('.speak-btn.on').forEach(b => b.classList.remove('on'));
+  };
+  utter.onerror = () => { btn?.classList.remove('on'); };
+  btn?.classList.add('on');
+  synth.speak(utter);
+}
+
+// 0 means untimed. picking a limit restarts the clock from now, which is the
+// only thing that makes sense mid-attempt
+const TIME_LIMITS = [0, 5, 10, 20, 30, 45, 60];
+function cycleTimeLimit() {
+  const session = state.session;
+  if (!session || session.submitted) return;
+  const mins = session.timeLimit ? Math.round(session.timeLimit / 60) : 0;
+  const next = TIME_LIMITS[(TIME_LIMITS.indexOf(mins) + 1) % TIME_LIMITS.length];
+  session.timeLimit = next * 60;
+  session.deadline = next ? Date.now() + next * 60 * 1000 : 0;
+  if (next) toast(t('timedSet', { n: next }), 'success');
+  else toast(t('timedCleared'));
+  renderExam();
 }
 
 function navigate(view) {
@@ -2529,10 +4057,205 @@ const state = {
   library: store.read(LIBRARY_STORAGE, []),
   history: store.read(HISTORY_STORAGE, []),
   review: store.read(REVIEW_STORAGE, []),
-  chat: [],
+  chat: loadChat(),
+  chatThreads: loadChatThreads(),
+  chatId: null,
   chatBusy: false,
   coachReport: null
 };
+
+// a reload restores the last conversation from storage. if that conversation
+// is already a saved thread, keep pointing at it instead of filing a second
+// copy of the same chat on every refresh
+if (state.chat.length && !state.chatId && state.chatThreads.length) {
+  const top = state.chatThreads[0];
+  const same = top.msgs.length === state.chat.length
+    && top.msgs.every((m, i) => m.content === state.chat[i].content);
+  if (same) state.chatId = top.id;
+}
+
+// coach transcripts survive a refresh. photos get stripped on the way out -
+// one base64 image would eat most of the localStorage quota by itself
+function loadChat() {
+  const raw = store.read(CHAT_STORAGE, []);
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+    .map(m => ({ role: m.role, content: m.content, label: typeof m.label === 'string' ? m.label : '' }))
+    .slice(-60);
+}
+function saveChat() {
+  const slim = state.chat.slice(-60).map(({ role, content, label, tag }) => ({ role, content, label: label || '', tag: tag || '' }));
+  store.write(CHAT_STORAGE, slim.length ? slim : null);
+  syncActiveThread(slim);
+}
+
+// every conversation is also kept as a thread so "new chat" doesn't erase the
+// last one. 40 threads, 60 messages each - past that localStorage starts
+// complaining and nobody scrolls that far back anyway
+function loadChatThreads() {
+  const raw = store.read(CHAT_THREADS_STORAGE, []);
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter(x => x && Array.isArray(x.msgs))
+    .map(x => ({
+      id: x.id || uid(),
+      title: typeof x.title === 'string' ? x.title : '',
+      msgs: x.msgs
+        .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+        .map(m => ({ role: m.role, content: m.content, label: m.label || '', tag: m.tag || '' }))
+        .slice(-60),
+      createdAt: Number(x.createdAt) || Date.now(),
+      updatedAt: Number(x.updatedAt) || Number(x.createdAt) || Date.now()
+    }))
+    .filter(x => x.msgs.length)
+    .sort((a, b) => b.updatedAt - a.updatedAt)
+    .slice(0, 40);
+}
+
+function saveChatThreads() {
+  store.write(CHAT_THREADS_STORAGE, state.chatThreads.length ? state.chatThreads : null);
+}
+
+function chatTitleFrom(slim) {
+  const first = slim.find(m => m.role === 'user' && String(m.label || m.content || '').trim());
+  const raw = String(first?.label || first?.content || '').replace(/\s+/g, ' ').trim();
+  if (!raw) return '';
+  return raw.length > 52 ? raw.slice(0, 52).trimEnd() + '...' : raw;
+}
+
+// keeps the open conversation mirrored into its thread. empty means the
+// thread is gone, which is what clearing a chat should do
+function syncActiveThread(slim) {
+  if (!slim.length) {
+    if (state.chatId) {
+      state.chatThreads = state.chatThreads.filter(x => x.id !== state.chatId);
+      state.chatId = null;
+      saveChatThreads();
+      renderChatHistory();
+    }
+    return;
+  }
+  const now = Date.now();
+  const title = chatTitleFrom(slim);
+  let thread = state.chatId ? state.chatThreads.find(x => x.id === state.chatId) : null;
+  if (thread) {
+    thread.msgs = slim;
+    thread.updatedAt = now;
+    if (!thread.title) thread.title = title;
+  } else {
+    state.chatId = state.chatId || uid();
+    thread = { id: state.chatId, title, msgs: slim, createdAt: now, updatedAt: now };
+    state.chatThreads.unshift(thread);
+  }
+  state.chatThreads.sort((a, b) => b.updatedAt - a.updatedAt);
+  state.chatThreads = state.chatThreads.slice(0, 40);
+  saveChatThreads();
+  renderChatHistory();
+}
+
+function timeAgo(ms) {
+  const diff = Date.now() - Number(ms || 0);
+  if (!isFinite(diff)) return '';
+  const min = Math.round(diff / 60000);
+  if (min < 1) return t('justNow');
+  if (min < 60) return t('minutesAgo', { n: min });
+  const hrs = Math.round(min / 60);
+  if (hrs < 24) return t('hoursAgo', { n: hrs });
+  const days = Math.round(hrs / 24);
+  if (days < 7) return t('daysAgo', { n: days });
+  return new Date(ms).toLocaleDateString();
+}
+
+function renderChatHistory() {
+  const list = document.getElementById('chatHistoryList');
+  const count = document.getElementById('chatHistoryCount');
+  if (count) {
+    const n = state.chatThreads.length;
+    count.textContent = n > 99 ? '99+' : String(n);
+    count.hidden = !n;
+  }
+  if (!list) return;
+  const q = String(document.getElementById('chatSearch')?.value || '').trim().toLowerCase();
+  const threads = state.chatThreads.filter(x => {
+    if (!q) return true;
+    const hay = (x.title + ' ' + x.msgs.map(m => m.label || m.content).join(' ')).toLowerCase();
+    return hay.includes(q);
+  });
+  if (!threads.length) {
+    list.innerHTML = `<div class="ch-empty">${esc(q ? t('chatHistoryNoMatch') : t('chatHistoryEmpty'))}</div>`;
+    return;
+  }
+  list.innerHTML = threads.map(x => `
+    <button class="ch-item${x.id === state.chatId ? ' active' : ''}" data-thread="${esc(x.id)}">
+      <span class="ch-ic">${icon('message', 15)}</span>
+      <span class="ch-body">
+        <span class="ch-title">${esc(x.title || t('chatUntitled'))}</span>
+        <span class="ch-meta">${esc(t('messagesUnit', { n: x.msgs.length }))} &middot; ${esc(timeAgo(x.updatedAt))}</span>
+      </span>
+      <span class="ch-del" data-del="${esc(x.id)}" title="${esc(t('delete'))}" aria-label="${esc(t('delete'))}">${icon('trash', 14)}</span>
+    </button>
+  `).join('');
+  list.querySelectorAll('.ch-item').forEach(el => {
+    el.addEventListener('click', e => {
+      const del = e.target.closest('.ch-del');
+      if (del) {
+        e.stopPropagation();
+        deleteChatThread(del.dataset.del);
+        return;
+      }
+      openChatThread(el.dataset.thread);
+    });
+  });
+}
+
+function openChatThread(id) {
+  const thread = state.chatThreads.find(x => x.id === id);
+  if (!thread) return;
+  if (state.chatBusy) { toast(t('holdOnThinking')); return; }
+  state.chatId = thread.id;
+  state.chat = thread.msgs.map(m => ({ ...m }));
+  saveChat();
+  renderChat();
+  closeChatHistory();
+  setTimeout(() => document.getElementById('chatInput')?.focus(), 150);
+}
+
+function deleteChatThread(id) {
+  const thread = state.chatThreads.find(x => x.id === id);
+  const label = thread?.title || t('chatUntitled');
+  if (!confirm(t('confirmDeleteChat', { name: label }))) return;
+  state.chatThreads = state.chatThreads.filter(x => x.id !== id);
+  saveChatThreads();
+  if (state.chatId === id) {
+    state.chatId = null;
+    state.chat = [];
+    store.write(CHAT_STORAGE, null);
+    renderChat();
+  }
+  renderChatHistory();
+  toast(t('chatThreadDeleted'));
+}
+
+function openChatHistory() {
+  const panel = document.getElementById('chatHistory');
+  const scrim = document.getElementById('chatScrim');
+  if (!panel) return;
+  renderChatHistory();
+  panel.hidden = false;
+  scrim && (scrim.hidden = false);
+  requestAnimationFrame(() => panel.classList.add('open'));
+  setTimeout(() => document.getElementById('chatSearch')?.focus(), 120);
+}
+
+function closeChatHistory() {
+  const panel = document.getElementById('chatHistory');
+  const scrim = document.getElementById('chatScrim');
+  if (!panel) return;
+  panel.classList.remove('open');
+  scrim && (scrim.hidden = true);
+  setTimeout(() => { panel.hidden = true; }, 220);
+}
 
 // pdf.js only loads once. the first pdf dropped pulls in the wasm-adjacent
 // worker from CDN, subsequent ones reuse the module
@@ -2610,14 +4333,29 @@ function extractYouTubeId(url) {
 
 async function importYouTube(url) {
   const id = extractYouTubeId(url);
-  if (!id) throw new Error('not youtube');
+  if (!id) { const e = new Error('notYoutube'); throw e; }
   setStatus(t('fetchingTranscript'), '');
-  const res = await fetch(API.baseUrl + '/transcript?id=' + encodeURIComponent(id));
-  if (!res.ok) throw new Error('transcript unavailable');
-  const data = await res.json();
-  const text = data.transcript || data.text || '';
-  if (!String(text).trim()) throw new Error('empty');
-  return text;
+
+  const res = await fetch(TRANSCRIPT_URL + '/transcript?id=' + encodeURIComponent(id));
+  let data = {};
+  try { data = await res.json(); } catch { /* html or empty body */ }
+
+  const text = String(data.text || data.transcript || '').trim();
+  if (!res.ok || !text) {
+    const msg = String(data.error || '');
+    // the worker says why. pass the useful cases through instead of a generic
+    // "couldn't fetch" so people know whether to retry or paste it manually
+    if (/blocked|bot|login/i.test(msg)) throw new Error('blocked');
+    if (/no captions|empty/i.test(msg)) throw new Error('noCaptions');
+    throw new Error('failed');
+  }
+
+  return {
+    text,
+    title: String(data.title || ''),
+    channel: String(data.channel || ''),
+    seconds: Number(data.seconds) || 0
+  };
 }
 
 $('#youtubeBtn').addEventListener('click', async () => {
@@ -2629,15 +4367,24 @@ $('#youtubeBtn').addEventListener('click', async () => {
   btn.disabled = true;
   btn.innerHTML = `<span class="ico">${icon('youtube', 14)}</span><span class="btn-loading">…</span>`;
   try {
-    const text = await importYouTube(url);
+    const got = await importYouTube(url);
+    const header = got.title
+      ? `Source: YouTube video "${got.title}"${got.channel ? ' by ' + got.channel : ''}`
+      : 'Source: YouTube video';
+    const block = header + '\n' + got.text;
     const existing = $('#sourceText').value.trim();
-    $('#sourceText').value = existing ? existing + '\n\n' + text : text;
+    $('#sourceText').value = existing ? existing + '\n\n' + block : block;
     input.value = '';
     scheduleDraftSave();
-    setStatus(t('transcriptImported'), 'success');
+    setStatus(t('transcriptGot', { n: got.text.length, title: got.title || t('thisVideo') }), 'success');
+    // a two hour lecture is far more than the model can chew on in one go.
+    // say so up front rather than letting them wonder why it takes a minute
+    if (got.text.length > 30000) toast(t('transcriptLong', { n: Math.round(got.text.length / 1000) }), 'warn');
   } catch (err) {
     console.error('[examforge] transcript failed', err);
-    if (String(err.message) === 'not youtube') setStatus(t('notYoutube'), 'error');
+    if (err.message === 'notYoutube') setStatus(t('notYoutube'), 'error');
+    else if (err.message === 'blocked') setStatus(t('ytBlocked'), 'error');
+    else if (err.message === 'noCaptions') setStatus(t('ytNoCaptions'), 'error');
     else setStatus(t('transcriptFailed'), 'error');
   } finally {
     btn.disabled = false;
@@ -2683,6 +4430,77 @@ function compressImage(file) {
   });
 }
 
+// tesseract runs in the page, not in the model. the endpoint is text only, so
+// a photo of a textbook page has to turn into text before it goes anywhere.
+// loaded lazily - the worker plus wasm is a few MB and plenty of sessions
+// never drop an image at all
+const TESS_VERSION = '5.1.1';
+let tesseractLoad = null;
+function loadTesseract() {
+  if (window.Tesseract) return Promise.resolve(window.Tesseract);
+  if (tesseractLoad) return tesseractLoad;
+  tesseractLoad = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = `https://cdn.jsdelivr.net/npm/tesseract.js@${TESS_VERSION}/dist/tesseract.min.js`;
+    s.onload = () => window.Tesseract ? resolve(window.Tesseract) : reject(new Error('no tesseract on window'));
+    s.onerror = () => reject(new Error('tesseract download failed'));
+    document.head.appendChild(s);
+  });
+  // let a failed download be retried on the next photo instead of caching the reject
+  tesseractLoad.catch(() => { tesseractLoad = null; });
+  return tesseractLoad;
+}
+
+async function runOcr(dataUrl, onProgress) {
+  const Tess = await loadTesseract();
+  const worker = await Tess.createWorker('eng', 1, {
+    workerPath: `https://cdn.jsdelivr.net/npm/tesseract.js@${TESS_VERSION}/dist/worker.min.js`,
+    corePath: `https://cdn.jsdelivr.net/npm/tesseract.js-core@${TESS_VERSION}/`,
+    langPath: 'https://tessdata.projectnaptha.com/4.0.0',
+    logger: m => { if (onProgress && m.status) onProgress(m); }
+  });
+  try {
+    const out = await worker.recognize(dataUrl);
+    return String(out?.data?.text || '')
+      .replace(/[ \t]+\n/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  } finally {
+    try { await worker.terminate(); } catch {}
+  }
+}
+
+// dropped photos get read locally and the text lands in the source box. if the
+// read comes back with real content the image is kept out of the vision
+// payload - sending both is how you blow the token budget and get a truncated
+// json blob back
+async function ocrImageIntoSource(img) {
+  if (img.ocrState === 'running' || img.ocrState === 'done') return;
+  img.ocrState = 'running';
+  try {
+    setStatus(t('readingPhoto', { name: img.name || 'photo' }), '');
+    const text = await runOcr(img.dataUrl);
+    img.ocrText = text;
+    if (text.length >= 40) {
+      img.ocrState = 'done';
+      const box = $('#sourceText');
+      const existing = box.value.trim();
+      const block = `[from photo: ${img.name || 'photo'}]\n${text}`;
+      box.value = existing ? existing + '\n\n' + block : block;
+      scheduleDraftSave();
+      setStatus(t('photoRead', { n: text.length }), 'success');
+    } else {
+      // nothing readable - leave it for the vision path and say so
+      img.ocrState = 'empty';
+      setStatus(t('photoNoText'), 'warn');
+    }
+  } catch (err) {
+    console.error('[examforge] ocr failed', err);
+    img.ocrState = 'error';
+    setStatus(t('photoOcrFailed'), 'warn');
+  }
+}
+
 function handleFiles(files) {
   const list = [...files];
   const pdfs = list.filter(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name || ''));
@@ -2698,6 +4516,7 @@ function handleFiles(files) {
         const compressed = await compressImage(file);
         state.images.push(compressed);
         renderThumbs();
+        ocrImageIntoSource(compressed);
       } catch (err) {
         console.error(err);
         toast(t('couldNotLoadImage'), 'error');
@@ -2730,16 +4549,112 @@ function setStatus(html, kind = '') {
   el.className = 'status' + (kind ? ' ' + kind : '');
 }
 
-function updateTotalBadge() {
-  const sum = ['countMcq', 'countTf', 'countFib', 'countShort']
-    .reduce((acc, id) => acc + (Number($('#' + id)?.value) || 0), 0);
-  const badge = $('#totalBadge');
-  if (!badge) return;
-  badge.textContent = t('total', { n: sum });
-  badge.classList.toggle('over', sum > 80);
+const COUNT_INPUTS = ['countMcq', 'countTf', 'countFib', 'countShort'];
+
+function readCounts() {
+  const out = {};
+  COUNT_INPUTS.forEach(id => {
+    out[id] = Math.max(0, Math.min(MAX_QUESTIONS, Number($('#' + id)?.value) || 0));
+  });
+  return out;
 }
-['countMcq', 'countTf', 'countFib', 'countShort'].forEach(id => {
-  $('#' + id).addEventListener('input', updateTotalBadge);
+function countSum() { return Object.values(readCounts()).reduce((a, b) => a + b, 0); }
+
+// the cap is on the TOTAL, not on each box - four boxes capped at 60 each
+// would still add up to 240. so whatever box is being edited gets trimmed to
+// whatever room is left over, which is why typing 90 into a full set gives 0
+function clampCounts(editedId) {
+  const values = {};
+  COUNT_INPUTS.forEach(id => {
+    values[id] = Math.max(0, Math.round(Number($('#' + id)?.value) || 0));
+  });
+  if (editedId) {
+    const others = COUNT_INPUTS.filter(id => id !== editedId)
+      .reduce((a, id) => a + values[id], 0);
+    const room = Math.max(0, MAX_QUESTIONS - others);
+    if (values[editedId] > room) {
+      values[editedId] = room;
+      const el = $('#' + editedId);
+      if (el) el.value = String(room);
+    }
+  }
+  COUNT_INPUTS.forEach(id => {
+    const el = $('#' + id);
+    if (el && Number(el.value) > MAX_QUESTIONS) el.value = String(MAX_QUESTIONS);
+  });
+  return values;
+}
+
+// enforced as they type rather than at submit time. the numbers can never add
+// up past the ceiling, so the generate button never dies on a red line
+function updateTotalBadge(editedId) {
+  const values = clampCounts(editedId);
+  let sum = 0;
+  COUNT_INPUTS.forEach(id => {
+    const v = values[id];
+    $('#' + id)?.closest('.qmix-row')?.classList.toggle('zero', v === 0);
+    sum += v;
+  });
+
+  const badge = $('#totalBadge');
+  if (badge) {
+    badge.textContent = t('total', { n: sum });
+    badge.classList.toggle('over', sum > MAX_QUESTIONS);
+  }
+
+  const fill = $('#capFill');
+  if (fill) {
+    const pct = Math.min(100, (sum / MAX_QUESTIONS) * 100);
+    fill.style.width = pct + '%';
+    fill.classList.toggle('warn', sum > MAX_QUESTIONS * 0.75 && sum < MAX_QUESTIONS);
+    fill.classList.toggle('full', sum >= MAX_QUESTIONS);
+  }
+  const capCount = $('#capCount');
+  if (capCount) capCount.textContent = `${sum} / ${MAX_QUESTIONS}`;
+
+  // highlight a preset when the numbers happen to match it
+  const sum2 = sum;
+  $$('#presetRow .preset').forEach(b => {
+    b.classList.toggle('on', Number(b.dataset.preset) === sum2);
+  });
+}
+
+COUNT_INPUTS.forEach(id => {
+  const handler = () => updateTotalBadge(id);
+  $('#' + id).addEventListener('input', handler);
+  $('#' + id).addEventListener('change', handler);
+});
+
+// -/+ buttons. they do the clamping too, so the stepper can never push the
+// running total past the ceiling - it just stops
+$$('#qmix .step-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const el = document.getElementById(btn.dataset.target);
+    if (!el) return;
+    const step = Number(btn.dataset.step);
+    const room = MAX_QUESTIONS - (countSum() - (Number(el.value) || 0));
+    let v = (Number(el.value) || 0) + step;
+    if (step > 0) v = Math.min(v, Math.max(0, room));
+    el.value = String(Math.max(0, Math.min(MAX_QUESTIONS, v)));
+    updateTotalBadge();
+    scheduleDraftSave();
+  });
+});
+
+// 10 / 20 / 40 / 60. spread roughly 40/20/20/20 which is what most people
+// actually want, with the remainder landing on short answer
+$$('#presetRow .preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const total = Math.min(MAX_QUESTIONS, Number(btn.dataset.preset) || 0);
+    const mcq = Math.round(total * 0.4);
+    const tf = Math.round(total * 0.2);
+    const fib = Math.round(total * 0.2);
+    const short = total - mcq - tf - fib;
+    const vals = [mcq, tf, fib, short];
+    COUNT_INPUTS.forEach((id, i) => { const el = $('#' + id); if (el) el.value = String(vals[i]); });
+    updateTotalBadge();
+    scheduleDraftSave();
+  });
 });
 
 // typing into the source box autosaves after half a second. anything longer
@@ -2819,23 +4734,104 @@ function hideProgress() { const el = $('#progress'); if (el) el.remove(); }
 
 // every api call funnels through here. on error the upstream body goes to
 // console and the student gets a generic string - upstream messages sometimes
-// echo the model id back and that's not something they should see
-async function askAI(messages) {
-  const url = API.baseUrl + '/chat/completions';
+// echo the model id back and that's not something they should see.
+//
+// two things happen on top of the old behaviour: the request is given a
+// deadline so a hung provider can't leave the button spinning forever, and
+// if the provider says "no such model" the next name in the fallback list is
+// tried before giving up
+// tried in order. if a name 404s we drop to the next one and remember
+// whichever answered, so a renamed model costs one slow request once
+const MODEL_FALLBACKS = [
+  API.model,
+  'deepseek-v4.1-flash',
+  'deepseek-v4-flash'
+].filter(Boolean);
+
+// there is no single fixed output length any more. a 6 question exam and a
+// 60 question exam do not need the same budget, and pinning one number either
+// truncates the long ones or wastes the short ones. callers pass the size of
+// the batch and this works out what that needs:
+//   ~1800 tokens of scaffolding (title, description, per-question wrapper)
+//   ~700 tokens per question for options, explanation and hint
+// then a hard ceiling so a broken request can't ask for a million tokens
+function tokenBudget(questionCount) {
+  const n = Math.max(1, Number(questionCount) || 1);
+  return Math.min(MAX_OUTPUT_TOKENS, Math.max(4096, Math.round(1800 + n * 700)));
+}
+
+async function askAI(messages, { timeoutMs = 90000, maxTokens = null } = {}) {
+  // accepts a base url with or without the trailing /v1 and with or without
+  // a trailing slash - people paste it both ways
+  const base = String(API.baseUrl || '').replace(/\/+$/, '');
+  const url = base + '/chat/completions';
+
+  // the key is optional. through the worker there isn't one - the worker
+  // attaches it upstream - so we only send the header when we actually have
+  // something to send
+  const key = getApiKey();
   const headers = { 'Content-Type': 'application/json' };
-  const payload = { model: API.model, messages, temperature: 0.5, max_tokens: 32000 };
-  const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(payload) });
-  const raw = await res.text();
-  if (!res.ok) {
-    console.error('[examforge] upstream error', res.status, raw.slice(0, 500));
-    throw new Error(t('serviceUnavailable'));
+  if (key) headers['Authorization'] = 'Bearer ' + key;
+  const payload = {
+    model: API.model,
+    messages,
+    temperature: 0.5,
+    max_tokens: maxTokens || tokenBudget(10)
+  };
+
+  let lastErr = null;
+  const names = [...new Set(MODEL_FALLBACKS)];
+
+  for (let i = 0; i < names.length; i++) {
+    payload.model = names[i];
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    let res;
+    try {
+      res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(payload), signal: controller.signal });
+    } catch (err) {
+      clearTimeout(timer);
+      if (err && err.name === 'AbortError') {
+        throw new Error(t('requestTimeout'));
+      }
+      throw new Error(t('networkError'));
+    }
+    clearTimeout(timer);
+
+    const raw = await res.text();
+    if (!res.ok) {
+      console.error('[examforge] upstream error', res.status, names[i], raw.slice(0, 500));
+      // 401/403 means the key is wrong, revoked or out of credit. no point
+      // trying other models - ask for a new key instead
+      if (res.status === 401 || res.status === 403) {
+        openKeyModal(t('keyRejected'));
+        throw new Error(t('keyRejected'));
+      }
+      lastErr = new Error(t('upstreamError', { status: res.status }));
+      // a 404 usually means this model name is gone. try the next one before
+      // giving up on the whole request
+      if (res.status === 404 && i < names.length - 1) continue;
+      throw lastErr;
+    }
+
+    let data;
+    try { data = JSON.parse(raw); }
+    catch {
+      // the classic misconfigured-proxy symptom: a 200 full of html means the
+      // request landed on a website instead of an api route
+      if (/^\s*<(!doctype|html)/i.test(raw)) throw new Error(t('gotHtml'));
+      throw new Error('unreadable response');
+    }
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) throw new Error('empty response');
+    // remember whichever model actually answered so the next call leads with it
+    if (names[i] !== API.model) {
+      API.model = names[i];
+      MODEL_FALLBACKS[0] = names[i];
+    }
+    return content;
   }
-  let data;
-  try { data = JSON.parse(raw); }
-  catch { throw new Error('unreadable response'); }
-  const content = data.choices?.[0]?.message?.content;
-  if (!content) throw new Error('empty response');
-  return content;
+  throw lastErr || new Error(t('serviceUnavailable'));
 }
 
 // the model cuts off mid-json sometimes. try a clean parse first, then
@@ -2948,12 +4944,17 @@ function createSession(exam, { mode = 'test' } = {}) {
     hintsShown: {},
     revealed: {},
     known: {},
+    // unsure is the student's own confidence call, made before they know the
+    // answer. it isn't a grade, it's what separates a real 80% from a lucky one
+    unsure: {},
     currentCard: 0,
     startTime: Date.now(),
     submitted: false,
     results: null,
     questionStart: {},
-    questionTime: {}
+    questionTime: {},
+    timeLimit: 0,
+    deadline: 0
   };
 }
 
@@ -3014,24 +5015,28 @@ function dueReviewItems() {
   return state.review.filter(r => r.dueAt <= now);
 }
 
+// one banner, two places: the create tab and, since this pass, right under the
+// score on the results screen - finishing a quiz is exactly when the queue
+// matters and it used to be easy to miss
 function renderReviewBanner() {
-  const el = document.querySelector('#reviewBanner');
-  if (!el) return;
+  const slots = [...document.querySelectorAll('#reviewBanner, [data-review-slot]')];
+  if (!slots.length) return;
   const due = dueReviewItems();
-  if (!due.length) { el.innerHTML = ''; return; }
-  el.innerHTML = `
+  if (!due.length) { slots.forEach(s => { s.innerHTML = ''; }); return; }
+  const html = `
     <div class="review-banner">
       <div style="flex: 1; min-width: 200px;">
         <div class="review-banner-title">${esc(t('reviewDue', { n: due.length }))}</div>
         <div class="review-banner-desc">${esc(t('reviewDueDesc'))}</div>
       </div>
-      <button class="btn btn-primary" id="startReviewBannerBtn">
+      <button class="btn btn-primary review-start">
         <span class="ico">${icon('redo', 14)}</span>
         <span>${esc(t('startReview'))}</span>
       </button>
     </div>
   `;
-  document.getElementById('startReviewBannerBtn')?.addEventListener('click', startReviewSession);
+  slots.forEach(s => { s.innerHTML = html; });
+  slots.forEach(s => s.querySelector('.review-start')?.addEventListener('click', startReviewSession));
 }
 
 function startReviewSession() {
@@ -3258,19 +5263,40 @@ function buildExamPrompt({ text, counts, difficulty, focus, hasImages, isFirstBa
 
 async function generateExam() {
   const text = $('#sourceText').value.trim();
-  const hasImages = state.images.length > 0;
+  // photos whose ocr came back with real text already pushed that text into
+  // the source box, so they stay out of the image payload. sending both is
+  // the fastest way to overflow the context and get a truncated json back
+  const visionImages = state.images.filter(img => !(img.ocrText && img.ocrText.length >= 40));
+  const hasImages = visionImages.length > 0;
 
   if (!text && !hasImages) { setStatus(t('needSource'), 'error'); return; }
 
+  const rawCounts = readCounts();
   const counts = {
-    mcq: Math.max(0, Number($('#countMcq').value) || 0),
-    tf: Math.max(0, Number($('#countTf').value) || 0),
-    fib: Math.max(0, Number($('#countFib').value) || 0),
-    short: Math.max(0, Number($('#countShort').value) || 0)
+    mcq: rawCounts.countMcq,
+    tf: rawCounts.countTf,
+    fib: rawCounts.countFib,
+    short: rawCounts.countShort
   };
-  const total = counts.mcq + counts.tf + counts.fib + counts.short;
+  let total = counts.mcq + counts.tf + counts.fib + counts.short;
   if (total === 0) { setStatus(t('needOneQuestion'), 'error'); return; }
-  if (total > 80) { setStatus(t('tooMany'), 'error'); return; }
+
+  // 60 is a hard ceiling, but hitting it shouldn't dead-end the button. trim
+  // from the slowest-to-grade end and tell them what happened
+  if (total > MAX_QUESTIONS) {
+    let cut = total - MAX_QUESTIONS;
+    for (const key of ['short', 'fib', 'tf', 'mcq']) {
+      if (cut <= 0) break;
+      const take = Math.min(cut, counts[key]);
+      counts[key] -= take;
+      cut -= take;
+    }
+    total = MAX_QUESTIONS;
+    const map = { mcq: 'countMcq', tf: 'countTf', fib: 'countFib', short: 'countShort' };
+    Object.keys(map).forEach(k => { const el = $(`#${map[k]}`); if (el) el.value = String(counts[k]); });
+    updateTotalBadge();
+    toast(t('cappedAt', { n: MAX_QUESTIONS }), 'warn');
+  }
 
   const difficulty = $('#difficulty').value;
   const focus = $('#focus').value.trim();
@@ -3283,9 +5309,6 @@ async function generateExam() {
   setStatus('');
   const progressTicker = showProgress();
 
-  // eight questions per call. anything more and the model starts truncating
-  // its output, so instead of one huge request it's several small ones
-  const BATCH_SIZE = 8;
   const batches = [];
   const remaining = { ...counts };
   while (remaining.mcq + remaining.tf + remaining.fib + remaining.short > 0) {
@@ -3305,10 +5328,42 @@ async function generateExam() {
   const allQuestions = [];
   let examMeta = null;
 
+  // once the model runs out of material it starts rephrasing questions it
+  // already wrote. across six batches that shows up as visible repeats, so
+  // anything that reads almost identically to something we have gets dropped
+  function isDuplicate(q) {
+    const norm = normalizeText(q.prompt);
+    // short prompts collide on accident ("Define osmosis?" vs "Define ATP?"),
+    // so only the longer ones get the fuzzy test
+    if (norm.length < 24) return allQuestions.some(x => normalizeText(x.prompt) === norm);
+    return allQuestions.some(x =>
+      x.type === q.type && similarity(normalizeText(x.prompt), norm) > 0.93
+    );
+  }
+
+  // returns how many of each type actually landed, so a short response can be
+  // topped up with a follow-up call for just the difference
+  function collectQuestions(data) {
+    const got = { mcq: 0, tf: 0, fib: 0, short: 0 };
+    const list = (data.questions || []).map(normalizeQuestion).filter(Boolean);
+    for (const q of list) {
+      if (isDuplicate(q)) continue;
+      allQuestions.push(q);
+      if (got[q.type] !== undefined) got[q.type]++;
+    }
+    return got;
+  }
+
   try {
     for (let i = 0; i < batches.length; i++) {
+      // short breather between batches so a free tier doesn't throttle us
+      if (i > 0) await new Promise(r => setTimeout(r, 1200));
+
       const batch = batches[i];
       const isFirst = i === 0;
+      const got = { mcq: 0, tf: 0, fib: 0, short: 0 };
+      let attempt = 0;
+
       const titleEl = document.getElementById('progressTitle');
       if (titleEl) {
         titleEl.textContent = batches.length > 1
@@ -3316,46 +5371,66 @@ async function generateExam() {
           : t('buildingExam');
       }
 
-      const prompt = buildExamPrompt({
-        text, counts: batch, difficulty, focus, hasImages,
-        isFirstBatch: isFirst,
-        existingQuestions: allQuestions.map(q => q.prompt)
-      });
+      // ask for the batch, see what came back, and if the answer was short
+      // ask again for only what's missing. three tries, then take what we have
+      // rather than hanging on a model that won't finish
+      while (attempt < 3) {
+        const missing = {
+          mcq: Math.max(0, batch.mcq - got.mcq),
+          tf: Math.max(0, batch.tf - got.tf),
+          fib: Math.max(0, batch.fib - got.fib),
+          short: Math.max(0, batch.short - got.short)
+        };
+        const missingTotal = missing.mcq + missing.tf + missing.fib + missing.short;
+        if (missingTotal === 0) break;
+        attempt++;
+        if (attempt > 1) await new Promise(r => setTimeout(r, 1500));
 
-      let userContent;
-      if (hasImages) {
-        userContent = [{ type: 'text', text: prompt }];
-        state.images.forEach(img => userContent.push({ type: 'image_url', image_url: { url: img.dataUrl } }));
-      } else {
-        userContent = prompt;
-      }
+        const prompt = buildExamPrompt({
+          text, counts: missing, difficulty, focus, hasImages,
+          isFirstBatch: isFirst && attempt === 1,
+          existingQuestions: allQuestions.map(q => q.prompt)
+        });
 
-      const messages = [
-        { role: 'system', content: 'You are an expert exam author. Respond with valid JSON only - no prose, no markdown fences.' },
-        { role: 'user', content: userContent }
-      ];
-
-      try {
-        const raw = await askAI(messages);
-        const data = parseJsonResponse(raw);
-
-        if (isFirst && !examMeta) {
-          examMeta = {
-            title: data.title,
-            description: data.description,
-            instructions: data.instructions,
-            topic: data.topic
-          };
+        let userContent;
+        if (hasImages) {
+          userContent = [{ type: 'text', text: prompt }];
+          visionImages.forEach(img => userContent.push({ type: 'image_url', image_url: { url: img.dataUrl } }));
+        } else {
+          userContent = prompt;
         }
 
-        const batchQuestions = (data.questions || []).map(normalizeQuestion).filter(Boolean);
-        allQuestions.push(...batchQuestions);
-      } catch (batchErr) {
-        console.error('batch ' + (i + 1) + ' failed', batchErr);
-        // if the first batch dies there's nothing to salvage, bail entirely.
-        // later batches can fail without killing the whole run
-        if (allQuestions.length === 0) throw batchErr;
-        toast(t('partFailed', { n: i + 1 }), 'warn');
+        const messages = [
+          { role: 'system', content: 'You are an expert exam author. Respond with valid JSON only - no prose, no markdown fences.' },
+          { role: 'user', content: userContent }
+        ];
+
+        try {
+          // the budget scales with what we're asking for. this is the bit that
+          // used to be a flat 8192 and quietly chopped long exams in half
+          const raw = await askAI(messages, { maxTokens: tokenBudget(missingTotal) });
+          const data = parseJsonResponse(raw);
+
+          if (isFirst && !examMeta) {
+            examMeta = {
+              title: data.title,
+              description: data.description,
+              instructions: data.instructions,
+              topic: data.topic
+            };
+          }
+
+          const added = collectQuestions(data);
+          Object.keys(got).forEach(k => { got[k] += added[k]; });
+          if (added.mcq + added.tf + added.fib + added.short === 0) break;
+        } catch (batchErr) {
+          console.error('batch ' + (i + 1) + ' attempt ' + attempt + ' failed', batchErr);
+          // nothing gathered at all on the very first call means the provider
+          // is broken - surface it instead of pretending the exam is empty
+          if (allQuestions.length === 0 && attempt === 1) throw batchErr;
+          if (attempt === 1) toast(t('partFailed', { n: i + 1 }), 'warn');
+          break;
+        }
       }
     }
 
@@ -3379,7 +5454,16 @@ async function generateExam() {
     else toast(t('examReady'), 'success');
   } catch (err) {
     console.error('[examforge] generate failed', err);
-    setStatus(t('serviceUnavailable'), 'error');
+    // show what actually went wrong and hand them a button. a dead provider
+    // used to end in a red line of text and no way forward
+    const msg = err && err.message && err.message.length < 160 ? err.message : t('serviceUnavailable');
+    setStatus(
+      `${esc(msg)} <button class="btn btn-sm" id="retryGenerateBtn" style="margin-inline-start: 8px; vertical-align: middle;">
+        <span class="ico">${icon('redo', 13)}</span><span>${esc(t('retry'))}</span>
+      </button>`,
+      'error'
+    );
+    document.getElementById('retryGenerateBtn')?.addEventListener('click', generateExam);
   } finally {
     clearInterval(progressTicker);
     hideProgress();
@@ -3409,6 +5493,7 @@ function renderExam() {
   if (session.submitted) {
     $('#examArea').innerHTML = renderResults(exam, session);
     bindResults();
+    renderReviewBanner();
     return;
   }
   if (session.mode === 'flash') {
@@ -3460,14 +5545,39 @@ function renderExam() {
         </button>
         <button class="btn btn-sm" id="printBtn">
           <span class="ico">${icon('printer', 14)}</span>
-          <span>${esc(t('print'))}</span>
+          <span>${esc(t('printSheet'))}</span>
         </button>
+        <button class="btn btn-sm" id="timedBtn">
+          <span class="ico">${icon('clock', 14)}</span>
+          <span>${session.timeLimit ? esc(t('timedLabel', { n: Math.round(session.timeLimit / 60) })) : esc(t('timedOff'))}</span>
+        </button>
+        <button class="btn btn-sm" id="focusBtn">
+          <span class="ico">${icon('eye', 14)}</span>
+          <span>${esc(t('focusMode'))}</span>
+        </button>
+        <button class="btn btn-sm" id="shuffleQBtn">
+          <span class="ico">${icon('shuffle', 14)}</span>
+          <span>${esc(t('shuffleQuestions'))}</span>
+        </button>
+      </div>
+      <div class="kbd-hints">
+        <span><kbd>1</kbd>-<kbd>4</kbd> ${esc(t('kbdPick'))}</span>
+        <span><kbd>F</kbd> ${esc(t('kbdFlag'))}</span>
+        <span><kbd>H</kbd> ${esc(t('kbdHint'))}</span>
+        <span><kbd>N</kbd>/<kbd>P</kbd> ${esc(t('kbdNext'))}</span>
+        <span><kbd>Ctrl</kbd>+<kbd>Enter</kbd> ${esc(t('kbdSubmit'))}</span>
       </div>
     </div>
   `;
 
   const modeBanner = session.mode === 'practice'
     ? `<div class="mode-banner practice"><span class="ico">${icon('bookOpen', 14)}</span>${esc(t('practiceHint'))}</div>`
+    : '';
+
+  // the countdown only exists once a limit is set, and it stays a plain
+  // element the interval can poke at - no re-render every second
+  const countdownChip = session.timeLimit
+    ? `<span class="countdown-chip" id="countdownChip"><span class="countdown-dot"></span><span id="countdownText">${formatTime(Math.max(0, Math.round((session.deadline - Date.now()) / 1000)))}</span></span>`
     : '';
 
   const progressBar = `
@@ -3477,16 +5587,19 @@ function renderExam() {
       </div>
       <span style="font-size: 12.5px; color: var(--ink-3); font-weight: 600; white-space: nowrap;">${answeredCount}/${exam.questions.length}</span>
       <div class="q-mini-dots">${miniDots}</div>
+      ${countdownChip}
     </div>
   `;
 
   const questionsHtml = exam.questions.map((q, i) => renderQuestion(q, i, session)).join('');
   $('#examArea').innerHTML = header + modeBanner + progressBar + questionsHtml + renderResultBar(exam, session);
   bindQuestionInteractions();
+  document.getElementById('timedBtn')?.addEventListener('click', cycleTimeLimit);
   updateResultBar();
   bindExamToolbar();
   bindExamKeyboard();
   startExamTimers();
+  persistSession();
 }
 
 function renderQuestion(q, index, session) {
@@ -3494,6 +5607,7 @@ function renderQuestion(q, index, session) {
   const showFeedback = session.mode === 'practice' && session.results?.[q.id];
   const flagged = session.flags[q.id];
   const hintShown = session.hintsShown[q.id];
+  const unsure = session.unsure?.[q.id];
   const result = session.results?.[q.id];
 
   let stateClass = '';
@@ -3503,7 +5617,7 @@ function renderQuestion(q, index, session) {
   if (flagged) stateClass += ' flagged';
 
   let body = '';
-  if (q.type === 'mcq') body = renderMcq(q, answer, showFeedback);
+  if (q.type === 'mcq') body = renderMcq(q, answer, showFeedback, optionOrder(session, q));
   else if (q.type === 'tf') body = renderTf(q, answer, showFeedback);
   else if (q.type === 'fib') body = renderFib(q, answer, showFeedback);
   else if (q.type === 'short') body = renderShort(q, answer, showFeedback);
@@ -3522,11 +5636,13 @@ function renderQuestion(q, index, session) {
       <div class="q-head">
         <div class="q-num">${index + 1}</div>
         <div class="q-content">
-          <div class="q-prompt">${esc(q.prompt)}</div>
+          ${q.type === 'fib' ? '' : `<div class="q-prompt">${esc(q.prompt)}</div>`}
         </div>
         <div class="q-tools">
           ${timerChip}
           ${q.hint ? `<button class="hint-btn ${hintShown ? 'on' : ''}" data-qid="${q.id}" title="${esc(t('showHint'))}">${icon('bulb', 15)}</button>` : ''}
+          <button class="unsure-btn ${unsure ? 'on' : ''}" data-qid="${q.id}" title="${esc(t('notSureHint'))}">${icon('alert', 15)}</button>
+          <button class="speak-btn" data-qid="${q.id}" title="${esc(t('speakQuestion'))}">${icon('speaker', 15)}</button>
           <button class="flag-btn ${flagged ? 'on' : ''}" data-qid="${q.id}" title="${esc(t('flagForReview'))}">${icon('flag', 15)}</button>
         </div>
       </div>
@@ -3537,13 +5653,36 @@ function renderQuestion(q, index, session) {
   `;
 }
 
-function renderMcq(q, answer, showFeedback) {
+// the order a question's options are shown in. shuffled once per attempt and
+// then frozen on the session, so a re-render mid-exam doesn't move answers
+// around under the student's cursor. the radio still carries the original
+// index, which is what grading compares against
+function optionOrder(session, q) {
+  const n = q.options?.length || 0;
+  if (!session) return Array.from({ length: n }, (_, i) => i);
+  if (!session.optionOrder) session.optionOrder = {};
+  let order = session.optionOrder[q.id];
+  if (!order || order.length !== n) {
+    order = Array.from({ length: n }, (_, i) => i);
+    for (let i = n - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    session.optionOrder[q.id] = order;
+  }
+  return order;
+}
+
+function renderMcq(q, answer, showFeedback, order) {
   const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const seq = order && order.length === q.options.length ? order : q.options.map((_, i) => i);
   return `
     <div class="options" data-qid="${q.id}">
-      ${q.options.map((opt, i) => {
-        const picked = answer === i;
+      ${seq.map((origIdx, pos) => {
+        const opt = q.options[origIdx];
+        const picked = answer === origIdx;
         const classes = [];
+        if (picked) classes.push('picked');
         if (showFeedback) {
           classes.push('disabled');
           if (opt.correct) classes.push('correct-option');
@@ -3551,8 +5690,8 @@ function renderMcq(q, answer, showFeedback) {
         }
         return `
           <label class="option ${classes.join(' ')}">
-            <input type="radio" name="q_${q.id}" value="${i}" ${picked ? 'checked' : ''} ${showFeedback ? 'disabled' : ''}>
-            <span class="letter">${letters[i]}</span>
+            <input type="radio" name="q_${q.id}" value="${origIdx}" ${picked ? 'checked' : ''} ${showFeedback ? 'disabled' : ''}>
+            <span class="letter">${letters[pos]}</span>
             <span class="text">${esc(opt.text)}</span>
           </label>
         `;
@@ -3565,6 +5704,7 @@ function renderTf(q, answer, showFeedback) {
   const render = (value, label, ic) => {
     const picked = answer === value;
     const classes = [];
+    if (picked) classes.push('picked');
     if (showFeedback) {
       classes.push('disabled');
       if (q.answer === value) classes.push('correct-option');
@@ -3589,7 +5729,13 @@ function renderTf(q, answer, showFeedback) {
 function renderFib(q, answer, showFeedback) {
   const parts = q.prompt.split(/_{2,}/);
   const given = Array.isArray(answer) ? answer : [];
+
   let html = '<div class="fib-wrap"><span class="fib-line">';
+  
+  if (parts.length === 1) {
+    parts.push(`<span style="display:inline-block; margin-inline-start:12px; font-size:15px; color:var(--ink-3);">${esc(t('answered'))}: </span>`);
+  }
+
   parts.forEach((part, i) => {
     html += esc(part);
     if (i < parts.length - 1) {
@@ -3678,6 +5824,16 @@ function renderResultBar(exam, session) {
   `;
 }
 
+// plain letter grade on top of the percentage. students read "B" faster than
+// "84%" when they're deciding whether to keep studying
+function gradeLetter(pct) {
+  if (pct >= 93) return 'A';
+  if (pct >= 85) return 'B';
+  if (pct >= 75) return 'C';
+  if (pct >= 65) return 'D';
+  return 'F';
+}
+
 function renderResults(exam, session) {
   const results = session.results || {};
   let autoCorrect = 0, autoClose = 0, autoTotal = 0;
@@ -3718,6 +5874,49 @@ function renderResults(exam, session) {
   parts.push(t('missedCount', { n: autoTotal - autoCorrect - autoClose }));
   const subline = parts.join(' · ');
 
+  // confidence split. a right answer the student flagged as a guess counts as
+  // lucky, which is the whole reason the flag exists
+  let solid = 0, shaky = 0, missed = 0;
+  exam.questions.forEach(q => {
+    const r = results[q.id];
+    if (!r || r.correct === undefined) return;
+    const right = r.correct === true || r.correct === 'close';
+    if (!right) { missed++; return; }
+    if (session.unsure?.[q.id]) shaky++; else solid++;
+  });
+  // where the clock went. knowing you spent 90 seconds on question 4 and
+  // still missed it is more useful than the total time alone
+  const timed = exam.questions
+    .map((q, i) => ({ q, i, secs: session.questionTime?.[q.id] || 0 }))
+    .filter(x => x.secs > 0)
+    .sort((a, b) => b.secs - a.secs)
+    .slice(0, 5);
+  const paceCard = timed.length > 1 ? `
+    <div class="pace-card">
+      <h4>${esc(t('paceTitle'))}</h4>
+      <p class="sub">${esc(t('paceSub'))}</p>
+      ${timed.map(x => `
+        <div class="pace-row">
+          <span class="n">${x.i + 1}</span>
+          <span class="p">${esc(x.q.prompt)}</span>
+          <span class="t">${esc(t('paceUnit', { n: x.secs }))}</span>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
+  const flaggedTotal = Object.values(session.unsure || {}).filter(Boolean).length;
+  const confidenceRow = flaggedTotal
+    ? `
+      <div class="confidence-row">
+        <span class="confidence-pill solid"><span class="confidence-dot"></span><b>${solid}</b>${esc(t('solidCount', { n: solid }))}</span>
+        <span class="confidence-pill shaky"><span class="confidence-dot"></span><b>${shaky}</b>${esc(t('shakyCount', { n: shaky }))}</span>
+        <span class="confidence-pill miss"><span class="confidence-dot"></span><b>${missed}</b>${esc(t('missCount2', { n: missed }))}</span>
+      </div>
+      <p style="font-size: 13px; color: var(--ink-3); margin: 10px 0 0;">${esc(t('confidenceLine', { n: flaggedTotal, s: solid }))}</p>
+    `
+    : '';
+
   return `
     <div class="result-hero">
       <div class="score-ring-wrap">
@@ -3732,6 +5931,7 @@ function renderResults(exam, session) {
       </div>
       <h2>${esc(headline)}</h2>
       <p>${esc(subline)}</p>
+      <div class="grade-pill">${gradeLetter(autoPct)}<small>${esc(t('gradeLabel'))}</small></div>
       <div class="result-stats">
         <div class="result-stat">
           <div class="val">${autoCorrect}/${autoTotal}</div>
@@ -3746,7 +5946,12 @@ function renderResults(exam, session) {
           <div class="lbl">${esc(t('timeLabel'))}</div>
         </div>
       </div>
+      ${confidenceRow}
     </div>
+
+    ${paceCard}
+
+    <div data-review-slot></div>
 
     ${renderCoachSection()}
 
@@ -3768,6 +5973,10 @@ function renderResults(exam, session) {
       <button class="btn" id="shareExamBtn">
         <span class="ico">${icon('external', 14)}</span>
         <span>${esc(t('shareExam'))}</span>
+      </button>
+      <button class="btn" id="studyGuideBtn">
+        <span class="ico">${icon('book', 14)}</span>
+        <span>${esc(t('studyGuide'))}</span>
       </button>
       <button class="btn ${hasMissed ? '' : 'btn-primary'}" id="newExamBtn">
         <span class="ico">${icon('sparkle', 15)}</span>
@@ -3891,7 +6100,7 @@ function renderReviewQuestion(q, index, session) {
       <div class="q-head">
         <div class="q-num">${index + 1}</div>
         <div class="q-content">
-          <div class="q-prompt">${esc(q.prompt)}</div>
+          ${q.type === 'fib' ? '' : `<div class="q-prompt">${esc(q.prompt)}</div>`}
         </div>
         ${timeBadge}
       </div>
@@ -3915,6 +6124,27 @@ function bindResults() {
 
   ['retakeBtn', 'retakeBtn2'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('click', retake); });
   ['newExamBtn', 'newExamBtn2'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('click', newExam); });
+
+  // hand the whole exam to the coach and ask for a condensed version of it.
+  // the digest is the same one /analyze builds, so the coach already knows
+  // what was missed without the student having to explain
+  document.getElementById('studyGuideBtn')?.addEventListener('click', () => {
+    const exam = state.exam;
+    if (!exam) return;
+    navigate('coach');
+    const prompt = [
+      `Build me a one page study guide for "${exam.title}".`,
+      'Use the exam material below as the source of truth.',
+      'Structure: the 5-8 things I actually need to know, each in one or two sentences;',
+      'then the terms I must be able to define; then the three mistakes most likely to cost me points.',
+      'Skip anything I clearly already know - look at my attempts before deciding.',
+      'Plain text with short headers. No tables, no markdown fences.',
+      '',
+      buildExamDigest(exam)
+    ].join('\n');
+    sendChatMessage(prompt);
+    toast(t('studyGuideSent'), 'success');
+  });
   const flash = document.getElementById('flashFromResults');
   if (flash) flash.addEventListener('click', toFlash);
 
@@ -4049,6 +6279,7 @@ function updateResultBar() {
   const session = state.session;
   const exam = state.exam;
   if (!session || !exam || session.submitted) return;
+  if (state.view === 'exam') persistSession();
   const total = exam.questions.length;
   const answered = exam.questions.filter(q => {
     const a = session.answers[q.id];
@@ -4103,7 +6334,141 @@ function bindExamToolbar() {
     renderExam();
   });
   const printBtn = document.getElementById('printBtn');
-  if (printBtn) printBtn.addEventListener('click', () => window.print());
+  if (printBtn) printBtn.addEventListener('click', printExam);
+  const focusBtn = document.getElementById('focusBtn');
+  if (focusBtn) focusBtn.addEventListener('click', () => setFocusMode(true));
+  const shuffleBtn = document.getElementById('shuffleQBtn');
+  if (shuffleBtn) shuffleBtn.addEventListener('click', shuffleQuestionOrder);
+}
+
+// reorders the questions without touching the answers - they are keyed by id,
+// so a shuffle can't lose what someone already answered
+function shuffleQuestionOrder() {
+  const exam = state.exam;
+  if (!exam || exam.questions.length < 2) return;
+  const arr = exam.questions;
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  renderExam();
+  persistSession();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ---- print / pdf -------------------------------------------------------
+// the app is a dark glass UI and that prints terribly, so printing builds a
+// separate flat sheet: name and date at the top, the questions with room to
+// answer, then an answer key on its own page. it lives in #printArea and the
+// print stylesheet hides everything else
+function printExam() {
+  const exam = state.exam;
+  if (!exam) return;
+  const letter = i => String.fromCharCode(65 + i);
+  const area = document.getElementById('printArea');
+  if (!area) { window.print(); return; }
+
+  const questions = exam.questions.map((q, i) => {
+    let body = '';
+    if (q.type === 'mcq') {
+      body = q.options.map((o, j) => `<div class="p-opt">${letter(j)}) ${esc(o.text)}</div>`).join('');
+    } else if (q.type === 'tf') {
+      body = `<div class="p-opt">${esc(t('trueLabel'))} &nbsp; / &nbsp; ${esc(t('falseLabel'))}</div>`;
+    } else if (q.type === 'fib') {
+      body = `<div class="p-p">${esc(q.prompt)}</div>`;
+    } else {
+      body = '<span class="p-line"></span><span class="p-line"></span><span class="p-line"></span>';
+    }
+    const promptLine = q.type === 'fib' ? '' : `<div class="p-p">${i + 1}. ${esc(q.prompt)}</div>`;
+    const fibIdx = q.type === 'fib' ? `${i + 1}. ` : '';
+    return `<div class="p-q">${q.type === 'fib' ? `<div class="p-p">${fibIdx}${esc(q.prompt)}</div>` : promptLine}${body}</div>`;
+  }).join('');
+
+  const key = exam.questions.map((q, i) => {
+    let a = '';
+    if (q.type === 'mcq') {
+      const idx = q.options.findIndex(o => o.correct);
+      a = idx >= 0 ? `${letter(idx)}) ${q.options[idx].text}` : '—';
+    } else if (q.type === 'tf') {
+      a = q.answer ? t('trueLabel') : t('falseLabel');
+    } else if (q.type === 'fib') {
+      a = q.blanks.map(b => b.answer).join(' · ');
+    } else {
+      a = q.sampleAnswer || '—';
+    }
+    return `<li><b>${i + 1}.</b> ${esc(a)}</li>`;
+  }).join('');
+
+  area.innerHTML = `
+    <h1>${esc(exam.title)}</h1>
+    <div class="p-meta">${esc(t('questions', { n: exam.questions.length }))} · ${esc(t('passAt', { n: exam.passingScore }))} · ${new Date(exam.createdAt).toLocaleDateString()}</div>
+    <div class="p-field">${esc(t('nameLabel'))} <span></span> ${esc(t('dateLabel'))} <span></span></div>
+    ${exam.instructions ? `<div class="p-meta">${esc(exam.instructions)}</div>` : ''}
+    ${questions}
+    <div class="p-key">
+      <h2>${esc(t('printKey'))}</h2>
+      <ol>${key}</ol>
+    </div>
+  `;
+
+  document.body.classList.add('printing');
+  const cleanup = () => {
+    document.body.classList.remove('printing');
+    setTimeout(() => { area.innerHTML = ''; }, 300);
+  };
+  window.addEventListener('afterprint', cleanup, { once: true });
+  // safari never fires afterprint in some versions, so don't leave the page
+  // stuck in print mode if the dialog was cancelled
+  setTimeout(() => { if (document.body.classList.contains('printing') && !window.matchMedia('print').matches) cleanup(); }, 4000);
+  window.print();
+}
+
+// ---- focus mode --------------------------------------------------------
+// hides the header and the exam blurb so the question is the only thing on
+// screen. escape or the floating pill turns it back off
+function setFocusMode(on) {
+  document.body.classList.toggle('focus-mode', !!on);
+  let pill = document.getElementById('focusExitPill');
+  if (on) {
+    if (!pill) {
+      pill = document.createElement('button');
+      pill.id = 'focusExitPill';
+      pill.className = 'btn btn-sm focus-exit';
+      pill.innerHTML = `<span class="ico">${icon('x', 13)}</span><span>${esc(t('exitFocus'))}</span>`;
+      pill.addEventListener('click', () => setFocusMode(false));
+      document.body.appendChild(pill);
+    }
+  } else if (pill) {
+    pill.remove();
+  }
+}
+
+// ---- mixed review exam -------------------------------------------------
+// pulls every question out of the library, shuffles them and runs the lot as
+// one session. useful the night before something
+function buildMixedExam() {
+  if (!state.library.length) { toast(t('mixedEmpty'), 'warn'); return; }
+  const pool = [];
+  state.library.forEach(exam => (exam.questions || []).forEach(q => pool.push({ ...q })));
+  if (!pool.length) { toast(t('mixedEmpty'), 'warn'); return; }
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const picked = pool.slice(0, Math.min(MAX_QUESTIONS, Math.max(20, Math.min(40, pool.length))))
+    .map(q => ({ ...q, id: uid() }));
+
+  const exam = normalizeExam(
+    { title: t('mixedTitle'), description: t('mixedSub'), instructions: '', topic: 'Mixed', questions: picked },
+    { difficulty: 'mixed', passingScore: 70 }
+  );
+  state.exam = exam;
+  state.session = createSession(exam, { mode: 'test' });
+  state.coachReport = null;
+  saveToLibrary(exam);
+  renderExam();
+  navigate('exam');
+  toast(t('mixedReady'), 'success');
 }
 
 // A/B/C/D picks an mcq option, T/F answers true-false, F flags, H shows the
@@ -4120,8 +6485,23 @@ function bindExamKeyboard() {
   examKeyHandler = e => {
     if (state.view !== 'exam' || !state.session || state.session.submitted) return;
     if (state.session.mode !== 'test' && state.session.mode !== 'practice') return;
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+    // text boxes get the keyboard. a radio button doesn't - picking an option
+    // focuses it, and then the shortcuts would die the moment you answer
+    const tag = e.target.tagName;
+    if (tag === 'TEXTAREA' || e.target.isContentEditable) return;
+    if (tag === 'INPUT') {
+      const type = (e.target.getAttribute('type') || 'text').toLowerCase();
+      if (type !== 'radio' && type !== 'checkbox') return;
+    }
     if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+    // escape leaves focus mode. it has to run before anything else because
+    // otherwise there's no visible way back
+    if (e.key === 'Escape' && document.body.classList.contains('focus-mode')) {
+      e.preventDefault();
+      setFocusMode(false);
+      return;
+    }
 
     const key = e.key.toLowerCase();
     const focused = document.querySelector('.question:focus-within');
@@ -4141,7 +6521,9 @@ function bindExamKeyboard() {
     if (!q) return;
 
     if (q.type === 'mcq') {
-      const idx = 'abcd'.indexOf(key);
+      // A/B/C/D or 1/2/3/4 both work. students who are on a numeric keypad
+      // reach for the numbers, everyone else reaches for the letters
+      const idx = /^[1-9]$/.test(key) ? Number(key) - 1 : 'abcd'.indexOf(key);
       if (idx >= 0 && idx < q.options.length) {
         e.preventDefault();
         recordInteractionStart(qid);
@@ -4176,9 +6558,40 @@ function bindExamKeyboard() {
       e.preventDefault();
       state.session.flags[qid] = !state.session.flags[qid];
       renderExam();
+      return;
+    }
+
+    // jump between questions. scroll is instant-ish and leaves room for the
+    // sticky progress bar so the question never lands under it
+    const idx = state.exam.questions.findIndex(x => x.id === qid);
+    if (key === 'n' || key === 'j') {
+      e.preventDefault();
+      const next = state.exam.questions[idx + 1];
+      if (next) goToQuestion(next.id);
+      return;
+    }
+    if (key === 'p' || key === 'k') {
+      e.preventDefault();
+      const prev = state.exam.questions[idx - 1];
+      if (prev) goToQuestion(prev.id);
+      return;
+    }
+
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      submitExam();
     }
   };
   document.addEventListener('keydown', examKeyHandler);
+}
+
+function goToQuestion(qid) {
+  const el = document.getElementById('q-' + qid);
+  if (!el) return;
+  const top = el.getBoundingClientRect().top + window.scrollY - 96;
+  window.scrollTo({ top, behavior: 'smooth' });
+  const focusable = el.querySelector('input, textarea, button');
+  if (focusable && focusable.tagName !== 'BUTTON') focusable.focus({ preventScroll: true });
 }
 
 function autoSizeFib(input) {
@@ -4249,6 +6662,23 @@ function bindQuestionInteractions() {
     });
   });
 
+  $$('.unsure-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const qid = btn.dataset.qid;
+      if (!state.session.unsure) state.session.unsure = {};
+      state.session.unsure[qid] = !state.session.unsure[qid];
+      btn.classList.toggle('on');
+    });
+  });
+
+  $$('.speak-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      speakQuestion(btn.dataset.qid, btn);
+    });
+  });
+
   $$('.hint-btn').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
@@ -4285,6 +6715,7 @@ function submitExam() {
   session.results = results;
   session.submitted = true;
   session.endTime = now;
+  clearPersistedSession();
   recordHistory(exam, session);
   updateReviewQueue(exam, session);
   renderExam();
@@ -4617,6 +7048,7 @@ function bindFlashcards() {
 }
 
 function renderChat() {
+  saveChat();
   const area = $('#chatMessages');
   if (!state.chat.length) {
     area.innerHTML = `
@@ -4650,12 +7082,27 @@ function renderChat() {
     return;
   }
 
-  area.innerHTML = state.chat.map(msg => `
+  area.innerHTML = state.chat.map((msg, i) => `
     <div class="chat-msg ${msg.role}">
       <div class="avatar">${msg.role === 'user' ? icon('user', 16) : icon('graduation', 18)}</div>
-      <div class="bubble">${formatChatContent(msg.content)}</div>
+      <div class="bubble">
+        ${msg.tag ? `<div class="ocr-tag">${icon('image', 13)}<span>${esc(msg.tag)}</span></div>` : ''}
+        ${msg.image ? `<img class="attach-preview" src="${msg.image}" alt="">` : ''}
+        ${formatChatContent(msg.label || msg.content)}
+        ${msg.role === 'assistant' ? `<button class="bubble-copy" data-copy="${i}" title="${esc(t('copy'))}" aria-label="${esc(t('copy'))}">${icon('clipboard', 14)}<span>${esc(t('copy'))}</span></button>` : ''}
+      </div>
     </div>
   `).join('');
+
+  area.querySelectorAll('.bubble-copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const msg = state.chat[Number(btn.dataset.copy)];
+      const text = String(msg?.content || '');
+      navigator.clipboard?.writeText(text)
+        .then(() => toast(t('copied'), 'success'))
+        .catch(() => toast(t('copyFailed'), 'warn'));
+    });
+  });
 
   window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 }
@@ -4672,14 +7119,135 @@ function formatChatContent(text) {
   return html;
 }
 
+// /analyze is the one slash command. it doesn't send anything, it opens a
+// picker of saved exams; picking one dumps that exam into the transcript as
+// the next user turn and the coach reads it back
+function openExamPicker() {
+  const input = $('#chatInput');
+  if (input) { input.value = ''; input.style.height = 'auto'; }
+
+  state.chat.push({ role: 'user', content: '/analyze' });
+  renderChat();
+
+  const area = $('#chatMessages');
+  if (!area) return;
+
+  if (!state.library.length) {
+    state.chat.push({ role: 'assistant', content: t('analyzeNoExams') });
+    renderChat();
+    return;
+  }
+
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-msg ai';
+  wrap.innerHTML = `
+    <div class="avatar">${icon('graduation', 18)}</div>
+    <div class="bubble">
+      <p>${esc(t('analyzePick'))}</p>
+      <div class="analyze-picker">
+        ${state.library.map((exam, i) => {
+          const last = state.history.find(h => h.examId === exam.id);
+          const meta = last
+            ? `${last.score}% · ${t('correctCount', { n: last.correct })} of ${last.total} · ${new Date(last.completedAt).toLocaleDateString()}`
+            : t('noAttemptsForExam');
+          return `<button class="analyze-item" data-i="${i}">
+            <span class="t">${esc(exam.title || 'Untitled')}</span>
+            <span class="m">${esc(exam.topic || '')} · ${esc(t('questions', { n: (exam.questions || []).length }))}</span>
+            <span class="m">${esc(meta)}</span>
+          </button>`;
+        }).join('')}
+      </div>
+      <button class="analyze-cancel">${esc(t('analyzeCancel'))}</button>
+    </div>
+  `;
+  area.appendChild(wrap);
+  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+
+  wrap.querySelectorAll('.analyze-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      wrap.remove();
+      const exam = state.library[Number(btn.dataset.i)];
+      if (!exam) return;
+      const ask = 'Here is a saved exam of mine. Go through it: what I clearly know, '
+        + 'what I keep missing, the patterns in my mistakes, and what I should study next. '
+        + 'Be specific and point at actual questions.\n\n';
+      state.chat.push({
+        role: 'user',
+        content: ask + buildExamDigest(exam),
+        label: t('analyzeExamLabel', { title: exam.title || 'Untitled' }),
+        tag: t('examTag')
+      });
+      renderChat();
+      requestCoachReply();
+    });
+  });
+  const cancel = wrap.querySelector('.analyze-cancel');
+  if (cancel) cancel.addEventListener('click', () => wrap.remove());
+}
+
+// the whole exam as flat text: every question, the right answer, and every
+// attempt on record. capped so a 60 question exam can't blow the context
+function buildExamDigest(exam) {
+  const lines = [];
+  lines.push(`Exam: ${exam.title || 'Untitled'}`);
+  if (exam.topic) lines.push(`Topic: ${exam.topic}`);
+  if (exam.description) lines.push(`Description: ${exam.description}`);
+  lines.push(`Difficulty: ${exam.difficulty || 'medium'} · Passing score: ${exam.passingScore || 70}%`);
+  lines.push('');
+
+  const attempts = state.history.filter(h => h.examId === exam.id).slice(0, 5);
+  if (attempts.length) {
+    lines.push('My attempts (most recent first):');
+    attempts.forEach(a => {
+      lines.push(`- ${a.score}% - ${a.correct} of ${a.total} correct, ${Math.max(1, Math.round((a.timeSpent || 0) / 60))} min, ${new Date(a.completedAt).toLocaleDateString()}`);
+    });
+  } else {
+    lines.push('No attempts recorded on this exam yet.');
+  }
+
+  lines.push('', 'Questions:');
+  (exam.questions || []).forEach((q, i) => {
+    lines.push(`${i + 1}. [${q.type}] ${q.prompt}`);
+    if (q.type === 'mcq' && q.options) {
+      q.options.forEach((o, oi) => {
+        lines.push(`    ${String.fromCharCode(65 + oi)}) ${o.text}${o.correct ? '  <-- correct' : ''}`);
+      });
+    } else if (q.type === 'tf') {
+      lines.push(`    Correct answer: ${q.answer ? 'True' : 'False'}`);
+    } else if (q.type === 'fib' && q.blanks) {
+      q.blanks.forEach(b => lines.push(`    Blank: ${b.answer}${b.alternatives && b.alternatives.length ? ' (also: ' + b.alternatives.join(', ') + ')' : ''}`));
+    } else if (q.sampleAnswer) {
+      lines.push(`    Model answer: ${q.sampleAnswer}`);
+    }
+    if (q.explanation) lines.push(`    Why: ${q.explanation}`);
+  });
+
+  // close with an instruction rather than leaving the coach to guess what to
+  // do with all this. it should end on an offer the student can take or not
+  lines.push('');
+  lines.push('End your reply by naming the single topic that cost me the most points, and offering to generate a short drill on just that topic. Keep the offer to one sentence - do not generate the drill until I say yes.');
+
+  return lines.join('\n').slice(0, 14000);
+}
+
 async function sendChatMessage(text) {
   if (!text.trim() || state.chatBusy) return;
-  state.chat.push({ role: 'user', content: text.trim() });
+  const trimmed = text.trim();
+  const cmd = trimmed.toLowerCase();
+  if (cmd === '/analyze' || cmd.startsWith('/analyze ')) { openExamPicker(); return; }
+
+  state.chat.push({ role: 'user', content: trimmed });
   renderChat();
 
   const input = $('#chatInput');
   if (input) { input.value = ''; input.style.height = 'auto'; }
 
+  await requestCoachReply();
+}
+
+// split out from sendChatMessage so the exam picker and the photo upload can
+// both push a turn and reuse the same busy/typing/error handling
+async function requestCoachReply() {
   state.chatBusy = true;
   const sendBtn = $('#chatSend');
   if (sendBtn) sendBtn.disabled = true;
@@ -4756,11 +7324,86 @@ if (chatClear) chatClear.addEventListener('click', () => {
 });
 if (chatNewBtn) chatNewBtn.addEventListener('click', () => {
   if (state.chatBusy) { toast(t('holdOnThinking')); return; }
+  // whatever is on screen is already filed as a thread by saveChat, so this
+  // only has to let go of it and start a blank one
   state.chat = [];
+  state.chatId = null;
   renderChat();
+  renderChatHistory();
+  closeChatHistory();
   setTimeout(() => $('#chatInput')?.focus(), 150);
   toast(t('newChatStarted'));
 });
+
+const chatHistoryBtn = $('#chatHistoryBtn');
+const chatHistoryClose = $('#chatHistoryClose');
+const chatSearchInput = $('#chatSearch');
+const chatHistoryClearAll = $('#chatHistoryClearAll');
+
+if (chatHistoryBtn) chatHistoryBtn.addEventListener('click', () => openChatHistory());
+if (chatHistoryClose) chatHistoryClose.addEventListener('click', () => closeChatHistory());
+if ($('#chatScrim')) $('#chatScrim').addEventListener('click', () => closeChatHistory());
+if (chatSearchInput) chatSearchInput.addEventListener('input', () => renderChatHistory());
+if (chatHistoryClearAll) chatHistoryClearAll.addEventListener('click', () => deleteChatData());
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !document.getElementById('chatHistory')?.hidden) closeChatHistory();
+});
+
+// icons that live in markup rather than in the chat renderer
+const chHeadIcon = document.getElementById('chHeadIcon');
+if (chHeadIcon) chHeadIcon.innerHTML = icon('clock', 15);
+const chTrashIcon = document.getElementById('chTrashIcon');
+if (chTrashIcon) chTrashIcon.innerHTML = icon('trash', 14);
+
+// photo into the coach. tesseract reads it in the page, the text is what the
+// model ever sees - the endpoint is text only, there is no vision fallback
+const chatAttachBtn = $('#chatAttach');
+const chatImageInput = $('#chatImageInput');
+if (chatAttachBtn && chatImageInput) {
+  chatAttachBtn.addEventListener('click', () => chatImageInput.click());
+  chatImageInput.addEventListener('change', async e => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    if (state.chatBusy) { toast(t('ocrBusy')); return; }
+
+    chatAttachBtn.disabled = true;
+    const typingId = 'attach-' + Date.now();
+    const msgsArea = $('#chatMessages');
+    const typing = document.createElement('div');
+    typing.className = 'chat-msg ai';
+    typing.id = typingId;
+    typing.innerHTML = `
+      <div class="avatar">${icon('graduation', 18)}</div>
+      <div class="bubble"><span class="ocr-tag">${icon('image', 13)}<span>${esc(t('readingImage'))}</span></span></div>
+    `;
+    if (msgsArea) msgsArea.appendChild(typing);
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+
+    try {
+      const shot = await compressImage(file);
+      const text = await runOcr(shot.dataUrl);
+      document.getElementById(typingId)?.remove();
+      if (!text) { toast(t('ocrNoText'), 'warn'); return; }
+      state.chat.push({
+        role: 'user',
+        content: text,
+        label: t('photoFromLabel'),
+        tag: t('photoTag'),
+        image: shot.dataUrl
+      });
+      renderChat();
+      toast(t('photoAttached', { n: text.length }), 'success');
+      await requestCoachReply();
+    } catch (err) {
+      console.error('[examforge] coach photo failed', err);
+      document.getElementById(typingId)?.remove();
+      toast(t('ocrFailed'), 'error');
+    } finally {
+      chatAttachBtn.disabled = false;
+    }
+  });
+}
 
 // "explain this" hops into the coach with the whole question as context.
 // delegated at document level so it works from both live feedback panels
@@ -4856,7 +7499,20 @@ function renderLibrary() {
     return;
   }
 
-  area.innerHTML = reviewBlock + `
+  const mixedBlock = state.library.length ? `
+    <div class="mixed-card">
+      <div class="txt">
+        <h3>${esc(t('mixedTitle'))}</h3>
+        <p>${esc(t('mixedSub'))}</p>
+      </div>
+      <button class="btn btn-primary btn-sm" id="mixedBtn">
+        <span class="ico">${icon('layers', 14)}</span>
+        <span>${esc(t('mixedBuild'))}</span>
+      </button>
+    </div>
+  ` : '';
+
+  area.innerHTML = reviewBlock + mixedBlock + `
     <div class="library-grid">
       ${state.library.map(exam => `
         <div class="lib-card" data-id="${exam.id}">
@@ -4886,6 +7542,7 @@ function renderLibrary() {
     </div>
   `;
   document.getElementById('startReviewLibBtn')?.addEventListener('click', startReviewSession);
+  document.getElementById('mixedBtn')?.addEventListener('click', buildMixedExam);
   $$('.lib-card').forEach(card => {
     card.addEventListener('click', e => {
       const action = e.target.closest('[data-action]')?.dataset.action;
@@ -4931,6 +7588,364 @@ function exportExam(id) {
   URL.revokeObjectURL(url);
 }
 
+// questions answered in a day to tick the streak card's bar off
+const DAILY_GOAL = 20;
+
+function dataCardHtml() {
+  return `
+    <div class="card">
+      <h3 style="margin: 0 0 6px; font-size: 17px; font-weight: 600;">${esc(t('dataSection'))}</h3>
+      <p class="card-sub" style="margin-bottom: 16px;">${esc(t('dataHint'))}</p>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-sm" id="exportAllBtn">
+          <span class="ico">${icon('download', 14)}</span>
+          <span>${esc(t('exportAll'))}</span>
+        </button>
+        <button class="btn btn-sm" id="importAllBtn">
+          <span class="ico">${icon('file', 14)}</span>
+          <span>${esc(t('importAll'))}</span>
+        </button>
+        <input type="file" id="importAllInput" accept="application/json,.json" hidden>
+      </div>
+
+      <div class="danger-zone">
+        <div class="dz-head">
+          <span class="ico">${icon('trash', 14)}</span>
+          <span>${esc(t('deleteSection'))}</span>
+        </div>
+        <p class="dz-hint">${esc(t('deleteHint'))}</p>
+        <div class="dz-actions">
+          <button class="btn btn-sm dz-btn" id="deleteChatBtn" ${state.chatThreads.length ? '' : 'disabled'}>
+            <span class="ico">${icon('message', 13)}</span>
+            <span>${esc(t('deleteChats'))} (${state.chatThreads.length})</span>
+          </button>
+          <button class="btn btn-sm dz-btn" id="deleteHistoryBtn" ${state.history.length ? '' : 'disabled'}>
+            <span class="ico">${icon('chart', 13)}</span>
+            <span>${esc(t('deleteResults'))} (${state.history.length})</span>
+          </button>
+          <button class="btn btn-sm dz-btn" id="deleteLibraryBtn" ${state.library.length ? '' : 'disabled'}>
+            <span class="ico">${icon('book', 13)}</span>
+            <span>${esc(t('deleteSavedExams'))} (${state.library.length})</span>
+          </button>
+          <button class="btn btn-sm dz-btn" id="deleteKeyBtn" ${getApiKey() ? '' : 'disabled'}>
+            <span class="ico">${icon('globe', 13)}</span>
+            <span>${esc(t('deleteKey'))}</span>
+          </button>
+          <button class="btn btn-sm dz-btn dz-btn-solid" id="deleteAllBtn">
+            <span class="ico">${icon('alert', 13)}</span>
+            <span>${esc(t('deleteEverything'))}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// one click answer to "why won't it generate". the failure modes here are
+// invisible from inside the page - a worker that answers HTML instead of JSON
+// looks exactly like a dead network - so this prints what actually came back
+function connectionCardHtml() {
+  return `
+    <div class="card">
+      <h3 style="margin: 0 0 6px; font-size: 17px; font-weight: 600;">${esc(t('connTitle'))}</h3>
+      <p class="card-sub" style="margin-bottom: 16px;">${esc(t('connHint'))}</p>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-sm" id="connCheckBtn">
+          <span class="ico">${icon('sparkle', 14)}</span>
+          <span>${esc(t('connCheck'))}</span>
+        </button>
+      </div>
+      <pre id="connResult" hidden style="margin: 14px 0 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: rgba(127,127,127,.07); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; line-height: 1.65; white-space: pre-wrap; word-break: break-word;"></pre>
+    </div>
+  `;
+}
+
+async function runConnectionCheck() {
+  const out = $('#connResult');
+  const btn = $('#connCheckBtn');
+  if (!out) return;
+  const lines = [];
+  const say = s => { lines.push(s); out.hidden = false; out.textContent = lines.join('\n'); };
+
+  btn.disabled = true;
+  out.hidden = false;
+  out.textContent = t('connWorking');
+  lines.length = 0;
+  say('endpoint: ' + API.baseUrl);
+
+  const base = String(API.baseUrl || '').replace(/\/+$/, '');
+  const key = getApiKey();
+  const auth = key ? { Authorization: 'Bearer ' + key } : {};
+
+  // ---- 1. is the worker even the right code? -----------------------------
+  try {
+    const res = await fetch(base + '/models', { headers: auth });
+    const txt = await res.text();
+    say('GET  /models            -> HTTP ' + res.status);
+    if (/^\s*<(!doctype|html)/i.test(txt)) {
+      say('!! answered with a web page, not JSON.');
+      say('   the deployed worker still has the old code.');
+      say('   fix: paste worker.js into the dashboard editor (or npx wrangler deploy)');
+      return;
+    }
+    let data = null;
+    try { data = JSON.parse(txt); } catch { /* not json, handled below */ }
+    if (data && data.model) {
+      say('   model pinned upstream: ' + data.model);
+      if (data.upstream) say('   forwards to: ' + data.upstream);
+    } else {
+      say('   body: ' + txt.slice(0, 220));
+    }
+  } catch (err) {
+    say('GET  /models            -> unreachable (' + err.message + ')');
+    say('   the worker url is wrong or the worker is not deployed yet.');
+    return;
+  }
+
+  // ---- 2. does a real question get through? ------------------------------
+  try {
+    const res = await fetch(base + '/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...auth },
+      body: JSON.stringify({
+        model: API.model,
+        messages: [{ role: 'user', content: 'Reply with the single word: ok' }],
+        temperature: 0,
+        max_tokens: 32
+      })
+    });
+    const txt = await res.text();
+    say('POST /chat/completions  -> HTTP ' + res.status);
+    if (/^\s*<(!doctype|html)/i.test(txt)) {
+      say('!! answered with a web page, not JSON. same fix as above.');
+      return;
+    }
+    let data = null;
+    try { data = JSON.parse(txt); } catch { /* handled below */ }
+    const err = data && (data.error?.message || (typeof data.error === 'string' ? data.error : null));
+    if (err) {
+      say('   error: ' + err);
+      if (/TOKENHARBOR_KEY/i.test(err)) {
+        say('   -> the worker has no key. run: npx wrangler secret put TOKENHARBOR_KEY');
+      }
+      return;
+    }
+    const content = data?.choices?.[0]?.message?.content;
+    if (!content) { say('   no reply in the body: ' + txt.slice(0, 220)); return; }
+    say('   the model said: "' + String(content).trim().slice(0, 100) + '"');
+    say('');
+    say('All clear - generation will work.');
+  } catch (err) {
+    say('POST /chat/completions  -> failed (' + err.message + ')');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function bindDataButtons() {
+  document.getElementById('exportAllBtn')?.addEventListener('click', exportAllData);
+  document.getElementById('importAllBtn')?.addEventListener('click', () => document.getElementById('importAllInput')?.click());
+  document.getElementById('importAllInput')?.addEventListener('change', e => {
+    const file = e.target.files?.[0];
+    if (file) importAllData(file);
+    e.target.value = '';
+  });
+  document.getElementById('connCheckBtn')?.addEventListener('click', runConnectionCheck);
+  document.getElementById('deleteChatBtn')?.addEventListener('click', deleteChatData);
+  document.getElementById('deleteHistoryBtn')?.addEventListener('click', deleteHistoryData);
+  document.getElementById('deleteLibraryBtn')?.addEventListener('click', deleteLibraryData);
+  document.getElementById('deleteKeyBtn')?.addEventListener('click', deleteApiKeyData);
+  document.getElementById('deleteAllBtn')?.addEventListener('click', deleteEverything);
+}
+
+// ---- deleting your own data ---------------------------------------------
+// there is no account and no server copy. everything this app knows about you
+// is a handful of localStorage keys, so "delete my info" is literally: drop
+// the keys, drop the in-memory copies, redraw. nothing is sent anywhere
+
+function deleteChatData() {
+  const n = state.chatThreads.length;
+  if (!n && !state.chat.length) { toast(t('nothingToDelete')); return; }
+  if (!confirm(t('confirmDeleteChats', { n }))) return;
+  state.chatThreads = [];
+  state.chat = [];
+  state.chatId = null;
+  store.write(CHAT_THREADS_STORAGE, null);
+  store.write(CHAT_STORAGE, null);
+  renderChat();
+  renderChatHistory();
+  toast(t('chatsDeleted'), 'success');
+}
+
+function deleteHistoryData() {
+  if (!state.history.length && !state.review.length) { toast(t('nothingToDelete')); return; }
+  if (!confirm(t('confirmDeleteResults', { n: state.history.length }))) return;
+  state.history = [];
+  state.review = [];
+  store.write(HISTORY_STORAGE, null);
+  store.write(REVIEW_STORAGE, null);
+  renderStats();
+  renderReviewBanner();
+  toast(t('resultsDeleted'), 'success');
+}
+
+function deleteLibraryData() {
+  if (!state.library.length) { toast(t('nothingToDelete')); return; }
+  if (!confirm(t('confirmDeleteExams', { n: state.library.length }))) return;
+  state.library = [];
+  store.write(LIBRARY_STORAGE, null);
+  renderLibrary();
+  renderStats();
+  toast(t('examsDeleted'), 'success');
+}
+
+function deleteApiKeyData() {
+  if (!getApiKey()) { toast(t('nothingToDelete')); return; }
+  if (!confirm(t('confirmDeleteKey'))) return;
+  store.write(APIKEY_STORAGE, null);
+  renderStats();
+  toast(t('keyDeleted'), 'success');
+}
+
+async function deleteEverything() {
+  const ok = await askConfirm({
+    title: t('confirmWipeTitle'),
+    message: t('confirmWipeText'),
+    confirmText: t('deleteEverything'),
+    danger: true
+  });
+  if (!ok) return;
+  const ok2 = await askConfirm({
+    title: t('confirmWipeTitle2'),
+    message: t('confirmWipeText2'),
+    confirmText: t('yesDeleteAll'),
+    danger: true
+  });
+  if (!ok2) return;
+
+  [
+    LIBRARY_STORAGE, HISTORY_STORAGE, REVIEW_STORAGE, CHAT_STORAGE,
+    CHAT_THREADS_STORAGE, SESSION_STORAGE, DRAFT_STORAGE, APIKEY_STORAGE
+  ].forEach(key => store.write(key, null));
+
+  state.library = [];
+  state.history = [];
+  state.review = [];
+  state.chat = [];
+  state.chatThreads = [];
+  state.chatId = null;
+  state.exam = null;
+  state.session = null;
+  state.coachReport = null;
+
+  renderLibrary();
+  renderStats();
+  renderReviewBanner();
+  renderChat();
+  renderChatHistory();
+  const examArea = document.getElementById('examArea');
+  if (examArea) examArea.innerHTML = '';
+  navigate('create');
+  toast(t('allDataDeleted'), 'success');
+}
+
+// confirm() is fine for small things and ugly for "erase everything", so the
+// destructive wipe gets a real dialog with a second yes
+let confirmResolve = null;
+let confirmHideTimer = null;
+function askConfirm(opts) {
+  const modal = document.getElementById('confirmModal');
+  const fallback = window.confirm(opts.message || opts.title || '');
+  if (!modal) return Promise.resolve(fallback);
+  const yes = document.getElementById('confirmYes');
+  document.getElementById('confirmTitle').textContent = opts.title || '';
+  document.getElementById('confirmText').textContent = opts.message || '';
+  document.getElementById('confirmIcon').innerHTML = icon(opts.danger === false ? 'sparkle' : 'alert', 18);
+  yes.textContent = opts.confirmText || t('confirm');
+  yes.className = 'btn ' + (opts.danger === false ? 'btn-primary' : 'btn-danger-solid');
+  modal.classList.toggle('is-danger', opts.danger !== false);
+  // a chain of two dialogs reopens this within the fade-out window, so the
+  // pending hide has to be cancelled or it closes the new one
+  clearTimeout(confirmHideTimer);
+  modal.hidden = false;
+  requestAnimationFrame(() => modal.classList.add('show'));
+  setTimeout(() => yes.focus(), 90);
+  return new Promise(res => { confirmResolve = res; });
+}
+function closeConfirm(value) {
+  const modal = document.getElementById('confirmModal');
+  if (!modal) return;
+  modal.classList.remove('show');
+  clearTimeout(confirmHideTimer);
+  confirmHideTimer = setTimeout(() => { modal.hidden = true; }, 190);
+  if (confirmResolve) { confirmResolve(value); confirmResolve = null; }
+}
+
+// everything lives in localStorage, and one "clear browsing data" takes the
+// lot with it. one file in, one file out
+function exportAllData() {
+  const payload = {
+    app: 'examforge',
+    version: 1,
+    exportedAt: Date.now(),
+    library: state.library,
+    history: state.history,
+    review: state.review,
+    chat: state.chat,
+    chatThreads: state.chatThreads,
+    settings: {
+      language: currentLang,
+      theme: store.read(THEME_STORAGE, 'dark')
+    }
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `examforge-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast(t('exportAllDone'), 'success');
+}
+
+function importAllData(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    let data;
+    try { data = JSON.parse(String(reader.result)); }
+    catch { toast(t('importAllBad'), 'error'); return; }
+    if (!data || data.app !== 'examforge') { toast(t('importAllBad'), 'error'); return; }
+
+    if (Array.isArray(data.library)) {
+      state.library = data.library;
+      store.write(LIBRARY_STORAGE, state.library);
+    }
+    if (Array.isArray(data.history)) {
+      state.history = data.history;
+      store.write(HISTORY_STORAGE, state.history);
+    }
+    if (Array.isArray(data.review)) {
+      state.review = data.review;
+      store.write(REVIEW_STORAGE, state.review);
+    }
+    if (Array.isArray(data.chat)) {
+      state.chat = data.chat;
+      saveChat();
+    }
+    if (Array.isArray(data.chatThreads)) {
+      state.chatThreads = data.chatThreads;
+      saveChatThreads();
+    }
+    renderChatHistory();
+    renderLibrary();
+    renderStats();
+    renderReviewBanner();
+    toast(t('importAllDone', { n: state.library.length, h: state.history.length }), 'success');
+  };
+  reader.onerror = () => toast(t('importAllBad'), 'error');
+  reader.readAsText(file);
+}
+
 function renderStats() {
   const area = $('#statsArea');
   const history = state.history;
@@ -4941,7 +7956,10 @@ function renderStats() {
         <p class="empty-title">${esc(t('noAttempts'))}</p>
         <p class="empty-text">${esc(t('noAttemptsText'))}</p>
       </div>
+      ${dataCardHtml()}
+      ${connectionCardHtml()}
     `;
+    bindDataButtons();
     return;
   }
 
@@ -4978,13 +7996,62 @@ function renderStats() {
     </div>
   `).join('');
 
+  // streak counts back from today; if nothing has happened yet today the run
+  // is still alive as long as yesterday counted
+  const dayKey = ms => new Date(ms).toDateString();
+  const days = new Set(history.map(h => dayKey(h.completedAt)));
+  let streak = 0;
+  const cursor = new Date();
+  if (!days.has(dayKey(cursor.getTime()))) cursor.setDate(cursor.getDate() - 1);
+  while (days.has(dayKey(cursor.getTime()))) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  const todayKey = dayKey(Date.now());
+  const todayQuestions = history
+    .filter(h => dayKey(h.completedAt) === todayKey)
+    .reduce((sum, h) => sum + (h.total || 0), 0);
+  const goalPct = Math.min(100, Math.round((todayQuestions / DAILY_GOAL) * 100));
+
+  // weakest topics drive the drill button
+  const weakTopics = Object.entries(byTopic)
+    .map(([topic, d]) => ({ topic, avg: Math.round(d.total / d.count) }))
+    .filter(x => x.avg < 70)
+    .sort((a, b) => a.avg - b.avg)
+    .slice(0, 3);
+
   area.innerHTML = `
+    <div class="streak-card">
+      <div class="streak-flame">${icon('flame', 20)}</div>
+      <div>
+        <div class="streak-num">${streak ? esc(t('streakLabel', { n: streak })) : esc(t('streakStart'))}</div>
+        <div class="streak-sub">${streak ? esc(t('streakKeep')) : esc(t('streakWhy'))}</div>
+      </div>
+      <div class="streak-goal">
+        <div class="streak-sub">${esc(t('goalLabel'))}</div>
+        <div class="streak-num" style="font-size: 15px;">${goalPct >= 100 ? esc(t('goalDone')) : esc(t('goalOf', { n: todayQuestions, g: DAILY_GOAL }))}</div>
+        <div class="goal-track"><div class="goal-fill" style="width: ${goalPct}%"></div></div>
+      </div>
+    </div>
+
     <div class="stat-grid">
       <div class="stat-card"><div class="stat-val">${totalAttempts}</div><div class="stat-lbl">${esc(t('attempts'))}</div></div>
       <div class="stat-card"><div class="stat-val">${avgScore}%</div><div class="stat-lbl">${esc(t('avgScore'))}</div></div>
       <div class="stat-card"><div class="stat-val">${bestScore}%</div><div class="stat-lbl">${esc(t('bestScore'))}</div></div>
       <div class="stat-card"><div class="stat-val">${Math.round(totalTime / 60)}m</div><div class="stat-lbl">${esc(t('timeStudied'))}</div></div>
     </div>
+    ${weakTopics.length ? `
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-head">
+          <h3 class="card-title" style="margin: 0;">${esc(t('weakSpots'))}</h3>
+          <p class="card-sub">${esc(weakTopics.map(w => `${w.topic} (${w.avg}%)`).join(' · '))}</p>
+        </div>
+        <button class="btn btn-primary" id="weakDrillBtn" style="width: 100%;">
+          <span class="ico">${icon('sparkle', 15)}</span>
+          <span>${esc(t('weakDrill'))}</span>
+        </button>
+      </div>
+    ` : ''}
     <div class="card">
       <h3 style="margin: 0 0 18px; font-size: 17px; font-weight: 600;">${esc(t('byTopic'))}</h3>
       <div class="bar-list">${topicRows}</div>
@@ -4993,7 +8060,70 @@ function renderStats() {
       <h3 style="margin: 0 0 18px; font-size: 17px; font-weight: 600;">${esc(t('recentAttempts'))}</h3>
       <div class="bar-list">${recentRows}</div>
     </div>
+    ${dataCardHtml()}
+    ${connectionCardHtml()}
   `;
+
+  bindDataButtons();
+
+  document.getElementById('weakDrillBtn')?.addEventListener('click', () => generateWeakDrill(weakTopics));
+}
+
+// a short drill aimed straight at whatever the student keeps missing. same
+// plumbing as a normal generation, just with no source text - the prompt is
+// built from their own history
+async function generateWeakDrill(weakTopics) {
+  if (!weakTopics || !weakTopics.length) { toast(t('weakDrillNone'), 'warn'); return; }
+  const btn = document.getElementById('weakDrillBtn');
+  const orig = btn?.innerHTML;
+  if (btn) { btn.disabled = true; btn.innerHTML = `<span class="ico">${icon('sparkle', 15)}</span><span>${esc(t('weakDrillBusy'))}</span>`; }
+  // the progress ring lives in the create tab, so go there to show it
+  const ticker = showProgress();
+  navigate('create');
+  try {
+    const lang = currentLanguageName();
+    const focus = weakTopics.map(w => `- ${w.topic}: averaging ${w.avg}%`).join('\n');
+    const prompt = [
+      'Write a short practice drill for one student.',
+      '',
+      `Write ALL content in ${lang}.`,
+      '',
+      'Their weakest topics, with the average score they keep getting:',
+      focus,
+      '',
+      `Write 8 questions: 5 multiple choice, 2 true/false, 1 fill in the blank. Weight the mix toward the lowest scoring topic.`,
+      'Every question needs a one sentence explanation and a hint.',
+      'Aim slightly below hard - this is a confidence builder, not a test.',
+      '',
+      'Respond with valid JSON only, no markdown fences:',
+      '{"title": string, "description": string, "instructions": string, "topic": string, "questions": [...]}',
+      'Question shapes: mcq {type,prompt,points,topic,hint,explanation,options:[{text,correct}]},',
+      'tf {type,prompt,points,topic,hint,explanation,answer}, fib {type,prompt,points,topic,hint,explanation,blanks:[{answer,alternatives}]}'
+    ].join('\n');
+
+    const raw = await askAI([
+      { role: 'system', content: 'You are an expert exam author. Respond with valid JSON only - no prose, no markdown fences.' },
+      { role: 'user', content: prompt }
+    ]);
+    const data = parseJsonResponse(raw);
+    const exam = normalizeExam(data, { difficulty: 'medium', passingScore: 70 });
+    if (!exam.questions.length) throw new Error('no questions');
+
+    state.exam = exam;
+    state.session = createSession(exam, { mode: 'test' });
+    state.coachReport = null;
+    saveToLibrary(exam);
+    renderExam();
+    navigate('exam');
+    toast(t('examReady'), 'success');
+  } catch (err) {
+    console.error('[examforge] drill failed', err);
+    toast(t('serviceUnavailable'), 'error');
+    if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+  } finally {
+    clearInterval(ticker);
+    hideProgress();
+  }
 }
 
 // share links. the whole exam gets gzipped and stuffed into the url hash.
@@ -5091,6 +8221,7 @@ async function shareExam(exam) {
     toast(t('shareFailed'), 'error');
   }
 }
+
 async function loadSharedExam() {
   const hash = location.hash;
   
@@ -5156,7 +8287,301 @@ document.addEventListener('input', updateResultBar);
 applyLanguage(currentLang);
 updateTotalBadge();
 renderReviewBanner();
+renderChatHistory();
 loadSharedExam();
+startConstellation();
+
+// if they closed the tab halfway through an exam, put them back in it
+if (!location.hash.startsWith('#id=') && restoreSession()) {
+  navigate('exam');
+  setTimeout(() => toast(t('examResumed'), 'success'), 700);
+}
+
+$('#keySaveBtn')?.addEventListener('click', saveKeyFromModal);
+$('#keyInput')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); saveKeyFromModal(); }
+});
+document.getElementById('confirmYes')?.addEventListener('click', () => closeConfirm(true));
+document.getElementById('confirmNo')?.addEventListener('click', () => closeConfirm(false));
+document.getElementById('confirmModal')?.addEventListener('click', e => {
+  if (e.target.id === 'confirmModal') closeConfirm(false);
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !document.getElementById('confirmModal')?.hidden) closeConfirm(false);
+});
+
+$('#keyModal')?.addEventListener('click', e => {
+  if (e.target.id === 'keyModal') closeKeyModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeKeyModal();
+});
+
+// ---------------------------------------------------------------------------
+// constellation backdrop. slow drifting dots with faint links between the
+// close ones - it sits under the glass so it reads as depth, not decoration.
+// nothing here runs if the visitor asked for reduced motion, beyond painting
+// one still frame
+function startConstellation() {
+  const canvas = document.getElementById('stars');
+  if (!canvas || !canvas.getContext) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let w = 0, h = 0, dpr = 1;
+  let raf = 0, last = 0, clock = 0;
+  let layers = [];
+  let shooters = [];
+  let nebula = null;
+  let nextShooter = 5000;
+  const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
+
+  // the field reads as depth because the three layers move at different
+  // speeds and only the closest one takes part in the constellation links
+  function build() {
+    const area = w * h;
+    const near = Math.max(14, Math.min(52, Math.round(area / 34000)));
+    const mid = Math.max(24, Math.min(90, Math.round(area / 15000)));
+    const far = Math.max(40, Math.min(180, Math.round(area / 6500)));
+    const mk = (n, depth) => Array.from({ length: n }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: depth === 0 ? 0.5 + Math.random() * 0.8 : depth === 1 ? 0.9 + Math.random() * 0.9 : 1.4 + Math.random() * 1.5,
+      a: depth === 0 ? 0.25 + Math.random() * 0.3 : depth === 1 ? 0.35 + Math.random() * 0.4 : 0.55 + Math.random() * 0.45,
+      tw: Math.random() * Math.PI * 2,
+      tws: 0.4 + Math.random() * 1.4,
+      vx: (Math.random() - 0.5) * (0.008 + depth * 0.014),
+      vy: (Math.random() - 0.5) * (0.008 + depth * 0.014),
+      warm: Math.random() < 0.18,
+      depth
+    }));
+    layers = [mk(far, 0), mk(mid, 1), mk(near, 2)];
+  }
+
+  // gas clouds are expensive to paint every frame, so they get rendered once
+  // into an offscreen buffer at quarter scale and then blitted with drift
+  function paintNebula() {
+    const sw = Math.max(2, Math.round(w / 4));
+    const sh = Math.max(2, Math.round(h / 4));
+    const c = nebula && nebula.width === sw && nebula.height === sh
+      ? nebula
+      : Object.assign(document.createElement('canvas'), { width: sw, height: sh });
+    const g = c.getContext('2d');
+    g.clearRect(0, 0, sw, sh);
+
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const clouds = dark
+      ? [[0.16, 0.10, 0.46, [88, 62, 190]], [0.86, 0.24, 0.40, [126, 66, 168]], [0.44, 0.92, 0.44, [22, 116, 170]], [0.68, 0.66, 0.34, [48, 44, 150]]]
+      : [[0.14, 0.06, 0.44, [150, 168, 235]], [0.88, 0.20, 0.38, [198, 178, 226]], [0.42, 0.94, 0.42, [150, 206, 222]], [0.70, 0.60, 0.32, [176, 186, 240]]];
+    const alpha = dark ? 0.20 : 0.12;
+
+    g.globalCompositeOperation = 'lighter';
+    for (const [px, py, pr, rgb] of clouds) {
+      const cx = px * sw, cy = py * sh, r = pr * Math.max(sw, sh);
+      const grad = g.createRadialGradient(cx, cy, 0, cx, cy, r);
+      grad.addColorStop(0, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})`);
+      grad.addColorStop(0.45, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha * 0.35})`);
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = grad;
+      g.beginPath();
+      g.arc(cx, cy, r, 0, Math.PI * 2);
+      g.fill();
+    }
+    nebula = c;
+  }
+
+  function spawnShooter() {
+    const fromLeft = Math.random() < 0.5;
+    shooters.push({
+      x: fromLeft ? -60 : w + 60,
+      y: Math.random() * h * 0.55,
+      vx: (fromLeft ? 1 : -1) * (5.5 + Math.random() * 3.5),
+      vy: 1.6 + Math.random() * 1.8,
+      life: 0,
+      span: 70 + Math.random() * 40
+    });
+  }
+
+  function paint() {
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const starRGB = dark ? '236,242,255' : '38,56,96';
+    const warmRGB = dark ? '255,214,170' : '150,110,60';
+    const linkRGB = dark ? '150,200,255' : '60,90,150';
+
+    ctx.clearRect(0, 0, w, h);
+
+    // gas. drifts on its own sine so the clouds breathe against the stars
+    if (nebula) {
+      const ox = Math.sin(clock / 26000) * 26 + pointer.x * 10;
+      const oy = Math.cos(clock / 31000) * 18 + pointer.y * 8;
+      ctx.save();
+      ctx.globalAlpha = dark ? 1 : 0.85;
+      ctx.drawImage(nebula, -30 + ox, -30 + oy, w + 60, h + 60);
+      ctx.restore();
+    }
+
+    // one distant world, low enough alpha that it reads as atmosphere
+    const px = w * 0.83, py = h * 0.17, pr = Math.max(46, Math.min(w, h) * 0.09);
+    const halo = ctx.createRadialGradient(px, py, pr * 0.55, px, py, pr * 2.6);
+    halo.addColorStop(0, dark ? 'rgba(150,190,255,0.13)' : 'rgba(130,160,215,0.07)');
+    halo.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(px, py, pr * 2.6, 0, Math.PI * 2);
+    ctx.fill();
+    const body = ctx.createRadialGradient(px - pr * 0.35, py - pr * 0.4, pr * 0.1, px, py, pr);
+    body.addColorStop(0, dark ? 'rgba(190,215,255,0.16)' : 'rgba(255,255,255,0.34)');
+    body.addColorStop(0.7, dark ? 'rgba(90,130,200,0.09)' : 'rgba(196,210,240,0.16)');
+    body.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.arc(px, py, pr, 0, Math.PI * 2);
+    ctx.fill();
+
+    // stars, back to front, with a slow twinkle on the near layers
+    for (const layer of layers) {
+      const par = 1 + layer[0].depth * 0.5;
+      for (const s of layer) {
+        const tw = 0.72 + 0.28 * Math.sin(clock / 900 * s.tws + s.tw);
+        const x = s.x + pointer.x * 14 * par;
+        const y = s.y + pointer.y * 10 * par;
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(${s.warm ? warmRGB : starRGB},${(s.a * tw).toFixed(3)})`;
+        ctx.arc(x, y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+        if (s.depth === 2 && s.r > 1.7) {
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(${s.warm ? warmRGB : starRGB},${(s.a * tw * 0.12).toFixed(3)})`;
+          ctx.arc(x, y, s.r * 3.4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    // constellation lines, front layer only
+    const near = layers[2];
+    const linkDist = Math.min(160, Math.max(95, Math.sqrt(w * h) / 8.5));
+    for (let i = 0; i < near.length; i++) {
+      for (let j = i + 1; j < near.length; j++) {
+        const dx = near[i].x - near[j].x;
+        const dy = near[i].y - near[j].y;
+        const d = Math.hypot(dx, dy);
+        if (d > linkDist) continue;
+        const f = 1 - d / linkDist;
+        ctx.strokeStyle = `rgba(${linkRGB},${(0.1 * f).toFixed(3)})`;
+        ctx.lineWidth = 0.6;
+        ctx.beginPath();
+        ctx.moveTo(near[i].x + pointer.x * 28, near[i].y + pointer.y * 20);
+        ctx.lineTo(near[j].x + pointer.x * 28, near[j].y + pointer.y * 20);
+        ctx.stroke();
+      }
+    }
+
+    // shooting stars
+    for (const s of shooters) {
+      const p = s.life / s.span;
+      const fade = Math.sin(Math.PI * Math.min(1, p));
+      const tailX = s.x - s.vx * 14;
+      const tailY = s.y - s.vy * 14;
+      const grad = ctx.createLinearGradient(s.x, s.y, tailX, tailY);
+      grad.addColorStop(0, `rgba(${starRGB},${(0.85 * fade).toFixed(3)})`);
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1.6;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y);
+      ctx.lineTo(tailX, tailY);
+      ctx.stroke();
+    }
+  }
+
+  function step(now) {
+    const dt = Math.min(48, now - last || 16);
+    last = now;
+    clock += dt;
+
+    for (const layer of layers) {
+      for (const s of layer) {
+        s.x += s.vx * (dt / 16);
+        s.y += s.vy * (dt / 16);
+        if (s.x < -30) s.x = w + 30; else if (s.x > w + 30) s.x = -30;
+        if (s.y < -30) s.y = h + 30; else if (s.y > h + 30) s.y = -30;
+      }
+    }
+
+    if (!reduce) {
+      nextShooter -= dt;
+      if (nextShooter <= 0) { spawnShooter(); nextShooter = 7000 + Math.random() * 11000; }
+      shooters = shooters.filter(s => {
+        s.x += s.vx * (dt / 16);
+        s.y += s.vy * (dt / 16);
+        s.life += dt / 16;
+        return s.life < s.span && s.x > -140 && s.x < w + 140 && s.y < h + 140;
+      });
+      // ease the parallax toward the cursor instead of snapping to it
+      pointer.x += (pointer.tx - pointer.x) * 0.045;
+      pointer.y += (pointer.ty - pointer.y) * 0.045;
+    }
+
+    paint();
+    raf = requestAnimationFrame(step);
+  }
+
+  function start() {
+    if (raf) return;
+    last = performance.now();
+    raf = requestAnimationFrame(step);
+  }
+  function stop() {
+    if (!raf) return;
+    cancelAnimationFrame(raf);
+    raf = 0;
+  }
+
+  function resize() {
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    build();
+    paintNebula();
+  }
+
+  resize();
+  if (reduce) { paint(); return; }
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => { resize(); if (!raf) paint(); }, 150);
+  });
+
+  window.addEventListener('pointermove', e => {
+    pointer.tx = (e.clientX / w - 0.5) * 2;
+    pointer.ty = (e.clientY / h - 0.5) * 2;
+  }, { passive: true });
+
+  // a fresh frame on theme flip so the palette swap is instant
+  document.getElementById('themeBtn')?.addEventListener('click', () => {
+    paintNebula();
+    if (!raf) paint();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop();
+    else start();
+  });
+
+  start();
+}
+
 </script>
 </body>
 </html>
