@@ -7,6 +7,11 @@
 <meta name="theme-color" content="#04060f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Exam Forge</title>
+<meta name="description" content="Turn notes, PDFs, images, and videos into custom exams, flashcards, and study guides with AI.">
+<meta property="og:title" content="Exam Forge">
+<meta property="og:description" content="Turn notes, PDFs, images, and videos into custom exams, flashcards, and study guides with AI.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -2593,7 +2598,7 @@
               </svg>
             </div>
             <span data-i18n="dropTitle">Drop photos or a PDF here</span>
-            <small data-i18n="dropSub">or click to browse · PNG · JPG · WEBP · PDF · up to 10</small>
+            <small data-i18n="dropSub">or click to browse · PNG · JPG · WEBP · PDF · up to 30</small>
           </div>
           <input type="file" id="fileInput" accept="image/*,.pdf,application/pdf" multiple hidden>
           <div class="thumbs" id="thumbs"></div>
@@ -2914,6 +2919,8 @@ const $$ = s => [...document.querySelectorAll(s)];
 // past that the model starts repeating itself and the thing takes minutes to
 // build. the inputs clamp to this and generation trims anything above it
 const MAX_QUESTIONS = 60;
+// maximum number of source images allowed
+const MAX_IMAGES = 30;
 // questions per api call. small batches finish inside one response instead of
 // getting cut off, and a shortfall gets topped up rather than dropped
 const BATCH_SIZE = 10;
@@ -2932,7 +2939,7 @@ const T = {
     sourceSub: "Text, images, PDFs, or a YouTube link - anything you want to be tested on.",
     sourcePlaceholder: "Paste a chapter, an article, lecture notes, a Wikipedia page…",
     dropTitle: "Drop photos or a PDF here",
-    dropSub: "or click to browse · PNG · JPG · WEBP · PDF · up to 10",
+    dropSub: "or click to browse · PNG · JPG · WEBP · PDF · up to 30",
     youtubeLink: "Or paste a YouTube link",
     importBtn: "Import",
     questionMix: "Question mix", questionMixSub: "How many of each type do you want?",
@@ -3201,7 +3208,7 @@ const T = {
     sourceSub: "متن، تصویر، پی‌دی‌اف، یا لینک یوتیوب - هر چیزی که می‌خواهید از آن سوال بسازیم.",
     sourcePlaceholder: "یک فصل، مقاله، جزوه، صفحه ویکی‌پدیا را بچسبانید…",
     dropTitle: "عکس یا پی‌دی‌اف را اینجا رها کنید",
-    dropSub: "یا برای مرور کلیک کنید · PNG · JPG · WEBP · PDF · حداکثر ۱۰",
+    dropSub: "یا برای مرور کلیک کنید · PNG · JPG · WEBP · PDF · حداکثر ۳۰",
     youtubeLink: "یا لینک یوتیوب را بچسبانید",
     importBtn: "دریافت",
     questionMix: "ترکیب سوالات", questionMixSub: "از هر نوع چند تا می‌خواهید؟",
@@ -3326,7 +3333,7 @@ const T = {
     sourceSub: "نص أو صور أو PDF أو رابط يوتيوب - أي شيء تريد أن تُختبر فيه.",
     sourcePlaceholder: "الصق فصلًا أو مقالًا أو ملاحظات…",
     dropTitle: "أفلت صورًا أو ملف PDF هنا",
-    dropSub: "أو انقر للتصفح · PNG · JPG · WEBP · PDF · حتى ١٠",
+    dropSub: "أو انقر للتصفح · PNG · JPG · WEBP · PDF · حتى ٣٠",
     youtubeLink: "أو الصق رابط يوتيوب", importBtn: "استيراد",
     questionMix: "مزيج الأسئلة", questionMixSub: "كم من كل نوع تريد؟",
     multipleChoice: "اختيار متعدد", trueFalse: "صح / خطأ", fillInBlank: "املأ الفراغ", shortAnswer: "إجابة قصيرة",
@@ -3447,7 +3454,7 @@ const T = {
     sourceSub: "دەق، وێنە، PDF، یان لینکی یوتیوب - هەر شتێک کە دەتەوێت تاقیت بکەینەوە.",
     sourcePlaceholder: "بەشێک، وتارێک، تێبینی، لاپەڕەی ویکیپیدیا بلکێنە…",
     dropTitle: "وێنە یان PDF لێرە دابنێ",
-    dropSub: "یان کلیک بکە بۆ گەڕان · PNG · JPG · WEBP · PDF · تا ١٠",
+    dropSub: "یان کلیک بکە بۆ گەڕان · PNG · JPG · WEBP · PDF · تا ٣٠",
     youtubeLink: "یان لینکی یوتیوب بلکێنە", importBtn: "هێنان",
     questionMix: "تێکەڵی پرسیارەکان", questionMixSub: "چەند لە هەر جۆرێک دەتەوێت؟",
     multipleChoice: "هەڵبژاردنی زۆر", trueFalse: "ڕاست / هەڵە", fillInBlank: "بۆشایی پڕبکە", shortAnswer: "وەڵامی کورت",
@@ -3568,7 +3575,7 @@ const T = {
     sourceSub: "Tekst, obrazy, PDF lub link do YouTube - cokolwiek chcesz sprawdzić.",
     sourcePlaceholder: "Wklej rozdział, artykuł, notatki, stronę Wikipedii…",
     dropTitle: "Upuść zdjęcia lub PDF tutaj",
-    dropSub: "lub kliknij, aby przeglądać · PNG · JPG · WEBP · PDF · do 10",
+    dropSub: "lub kliknij, aby przeglądać · PNG · JPG · WEBP · PDF · do 30",
     youtubeLink: "Lub wklej link do YouTube", importBtn: "Importuj",
     questionMix: "Mieszanka pytań", questionMixSub: "Ile każdego typu chcesz?",
     multipleChoice: "Wielokrotny wybór", trueFalse: "Prawda / Fałsz", fillInBlank: "Uzupełnij lukę", shortAnswer: "Krótka odpowiedź",
@@ -4296,7 +4303,7 @@ async function processPdf(file) {
     // the vision path like any other photo. this works and you already have it
     if (text.length < 40) {
       setStatus(t('pdfScanned'), '');
-      const room = 10 - state.images.length;
+      const room = MAX_IMAGES - state.images.length;
       const pages = Math.min(doc.numPages, room);
       for (let i = 1; i <= pages; i++) {
         const page = await doc.getPage(i);
@@ -4501,6 +4508,21 @@ async function ocrImageIntoSource(img) {
   }
 }
 
+let ocrQueue = [];
+let ocrRunning = false;
+async function enqueueOcr(img) {
+  ocrQueue.push(img);
+  if (ocrRunning) return;
+  ocrRunning = true;
+  while (ocrQueue.length) {
+    const item = ocrQueue.shift();
+    if (state.images.includes(item)) {
+      await ocrImageIntoSource(item);
+    }
+  }
+  ocrRunning = false;
+}
+
 function handleFiles(files) {
   const list = [...files];
   const pdfs = list.filter(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name || ''));
@@ -4509,33 +4531,51 @@ function handleFiles(files) {
   pdfs.forEach(pdf => processPdf(pdf));
 
   if (images.length) {
-    const room = 10 - state.images.length;
+    const room = MAX_IMAGES - state.images.length;
     const trimmed = images.slice(0, room);
     trimmed.forEach(async file => {
       try {
         const compressed = await compressImage(file);
-        state.images.push(compressed);
-        renderThumbs();
-        ocrImageIntoSource(compressed);
+        if (state.images.length < MAX_IMAGES) {
+          state.images.push(compressed);
+          renderThumbs();
+          enqueueOcr(compressed);
+        }
       } catch (err) {
         console.error(err);
         toast(t('couldNotLoadImage'), 'error');
       }
     });
-    if (images.length > room) toast(t('onlyMoreImages', { n: room }), 'warn');
+    if (images.length > room) toast(t('onlyMoreImages', { n: Math.max(0, room) }), 'warn');
   }
 }
 
 function renderThumbs() {
-  $('#thumbs').innerHTML = state.images.map((img, i) => `
+  const thumbsEl = $('#thumbs');
+  if (!state.images.length) {
+    thumbsEl.innerHTML = '';
+    return;
+  }
+  const headerHtml = `
+    <div style="display:flex; align-items:center; justify-content:space-between; width:100%; margin-bottom:8px; font-size:12.5px; font-weight:600; color:var(--ink-2);">
+      <span>Photos (${state.images.length} / ${MAX_IMAGES})</span>
+      <button type="button" class="btn btn-xs" id="clearAllImagesBtn" style="padding:4px 10px; font-size:12px;">Clear all</button>
+    </div>
+  `;
+  const itemsHtml = state.images.map((img, i) => `
     <div class="thumb">
       <img src="${img.dataUrl}" alt="">
-      <button data-index="${i}" title="Remove">
+      <button data-index="${i}" title="Remove" aria-label="Remove photo ${i + 1}">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
     </div>
   `).join('');
-  $$('#thumbs button').forEach(btn => {
+  thumbsEl.innerHTML = headerHtml + itemsHtml;
+  document.getElementById('clearAllImagesBtn')?.addEventListener('click', () => {
+    state.images = [];
+    renderThumbs();
+  });
+  thumbsEl.querySelectorAll('.thumb button').forEach(btn => {
     btn.addEventListener('click', () => {
       state.images.splice(Number(btn.dataset.index), 1);
       renderThumbs();
